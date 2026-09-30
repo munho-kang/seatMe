@@ -38,9 +38,9 @@ function LandingPage() {
             처음이라면 회원가입
           </Link>
           {'  ·  '}
-          <button type="button" className="text-link">
+          <Link className="text-link" to="/home">
             로그인 없이 둘러보기
-          </button>
+          </Link>
         </p>
       </footer>
     </main>

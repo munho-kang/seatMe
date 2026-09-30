@@ -10,7 +10,10 @@
   --color-text-sub: #6b7385;
   --color-text-faint: rgba(0, 0, 0, 0.5);
   --color-text-muted: rgba(0, 0, 0, 0.6);
+  --color-text-dim: rgba(0, 0, 0, 0.8);
+  --color-text-soft: rgba(23, 28, 41, 0.8);
   --color-border: #dbdfeb;
+  --color-border-light: #edeff5;
   --color-border-strong: #d6dbe8;
   --color-progress-inactive: #dee3f0;
   --color-track: #e5e8f0;
@@ -24,6 +27,7 @@
   --radius-progress: 3px;
 
   --gutter: 31.5px;
+  --tab-bar-height: 75px;
 }
 
 *,
@@ -42,6 +46,7 @@ body {
 
 p,
 h1,
+h2,
 ul,
 ol {
   margin: 0;
@@ -132,4 +137,53 @@ a {
 
 .text-link:active {
   opacity: 0.5;
+}
+
+/* 헤더 아래 콘텐츠가 153px(홈·항공편 찾기) / 149px(경로 제목 화면)에서 시작하는 화면 */
+.screen-header--compact {
+  min-height: 114px;
+}
+
+.screen-header--route {
+  min-height: 110px;
+}
+
+.screen-title--route {
+  font-size: 21px;
+  color: var(--color-text);
+}
+
+/* 하단 탭바가 있는 화면: 탭바 높이 + CTA와 탭바 사이 42px */
+.screen--tab-bar {
+  padding-bottom: calc(var(--tab-bar-height) + 42px);
+}
+
+/* 요약 카드: 제목 + 한 줄 요약 + 링크 (홈 Seat Profile, 항공편 찾기 자동 적용) */
+.summary-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 131px;
+  padding: 20px;
+  border-radius: var(--radius-default);
+}
+
+.summary-card-title {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-text-strong);
+}
+
+.summary-card-text {
+  margin-top: 15px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.summary-card-link {
+  margin-top: 28px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
 }

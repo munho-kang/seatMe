@@ -1,0 +1,20 @@
+.selectable-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-default);
+  background: var(--color-surface);
+  text-align: left;
+  cursor: pointer;
+}
+
+/* 1→3px 테두리 변화로 내용이 밀리지 않도록 안쪽 outline으로 그린다 */
+.selectable-card--selected {
+  border-color: transparent;
+  outline: 3px solid var(--color-primary);
+  outline-offset: -3px;
+  background: var(--color-tint-blue);
+}

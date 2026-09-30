@@ -87,9 +87,10 @@ index.html        # lang="ko", title SeatMe
 src/main.tsx      # React 루트
 src/App.tsx       # 최상위 컴포넌트
 src/index.css     # 디자인 토큰(CSS 변수), reset, 공통 화면 레이아웃(.screen, .info-card 등)
-src/components/   # Global 컴포넌트 (Button, ScaleSelector) — 컴포넌트별 .css를 옆에 둔다
-src/pages/        # 라우트별 Page (Landing, Login, NaverConsent, Signup, Onboarding) + 페이지 CSS
-src/assets/       # 이미지 asset (소셜 로그인 아이콘)
+src/components/   # Global 컴포넌트 (Button, ScaleSelector, SelectableCard, TabBar) — 컴포넌트별 .css를 옆에 둔다
+src/pages/        # 라우트별 Page (Landing, Login, NaverConsent, Signup, Onboarding, Home, FlightSearch, FlightResults, TripSetting) + 페이지 CSS
+src/mocks/        # 여러 화면이 함께 쓰는 mock 데이터 (공항, 항공편)
+src/assets/       # 이미지 asset (소셜 로그인 아이콘, 탭바 아이콘)
 ```
 폴더(`components/`, `pages/`, `assets/` 등)는 필요할 때 만들고 여기에 기록한다.
 

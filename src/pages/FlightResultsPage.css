@@ -1,0 +1,37 @@
+.flight-list {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.flight-card {
+  min-height: 180px;
+  padding: 36px 25px 0;
+}
+
+.flight-card-badge {
+  position: absolute;
+  top: 24px;
+  right: 31px;
+  font-size: 10px;
+  color: var(--color-primary);
+}
+
+.flight-card-airline {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text-strong);
+}
+
+.flight-card-time {
+  margin-top: 39px;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.flight-card-meta {
+  margin-top: 10px;
+  font-size: 10px;
+  color: var(--color-text-sub);
+}

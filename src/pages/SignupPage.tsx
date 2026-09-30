@@ -1,5 +1,5 @@
 import { useState, type ChangeEvent, type FormEvent } from 'react'
-import { useNavigate } from 'react-router'
+import { Link, useNavigate } from 'react-router'
 import Button from '../components/Button'
 import './auth.css'
 
@@ -61,9 +61,9 @@ function SignupPage() {
         </Button>
       </form>
 
-      <button type="button" className="text-link signup-browse">
+      <Link className="text-link signup-browse" to="/home">
         로그인 없이 둘러보기
-      </button>
+      </Link>
     </main>
   )
 }

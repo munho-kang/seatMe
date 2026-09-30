@@ -1,0 +1,23 @@
+.trip-options {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.trip-option {
+  min-height: 80px;
+  padding: 23px 15px 0;
+}
+
+.trip-option-title {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text-strong);
+}
+
+.trip-option-desc {
+  margin-top: 5px;
+  font-size: 10px;
+  color: var(--color-text-sub);
+}

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router'
 import Button from '../components/Button'
 import ScaleSelector from '../components/ScaleSelector'
 import './OnboardingPage.css'
@@ -40,6 +41,7 @@ function ProgressStepper({ step }: { step: number }) {
 }
 
 function OnboardingPage() {
+  const navigate = useNavigate()
   const [step, setStep] = useState(0)
   const [seatPosition, setSeatPosition] = useState<SeatPosition>()
   const [sensitivity, setSensitivity] = useState<Partial<Record<SensitivityKey, number>>>({})
@@ -52,7 +54,7 @@ function OnboardingPage() {
         <header className="screen-header">
           <div className="onboarding-topbar">
             <p>Seat Profile 만들기</p>
-            <button type="button" className="text-link onboarding-later">
+            <button type="button" className="text-link onboarding-later" onClick={() => navigate('/home')}>
               나중에
             </button>
           </div>
@@ -166,7 +168,7 @@ function OnboardingPage() {
       </ol>
 
       <footer className="screen-footer">
-        <Button>이 조건으로 추천받기</Button>
+        <Button onClick={() => navigate('/home')}>이 조건으로 추천받기</Button>
         <button type="button" className="text-link onboarding-back" onClick={() => setStep(2)}>
           이전
         </button>
