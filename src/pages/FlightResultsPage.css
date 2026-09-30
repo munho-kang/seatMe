@@ -35,3 +35,9 @@
   font-size: 10px;
   color: var(--color-text-sub);
 }
+
+/* 카드 3개가 한 화면보다 길어서, 다음 버튼을 이번 여행 설정 CTA와 같은 위치(탭바 위 42px)에 띄워 둔다 */
+.flight-list-footer {
+  position: sticky;
+  bottom: calc(var(--tab-bar-height) + 42px);
+}

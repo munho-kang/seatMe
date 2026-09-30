@@ -8,6 +8,9 @@ import HomePage from './pages/HomePage'
 import FlightSearchPage from './pages/FlightSearchPage'
 import FlightResultsPage from './pages/FlightResultsPage'
 import TripSettingPage from './pages/TripSettingPage'
+import RecommendPage from './pages/RecommendPage'
+import ComparePage from './pages/ComparePage'
+import SeatDetailPage from './pages/SeatDetailPage'
 
 function App() {
   return (
@@ -22,6 +25,9 @@ function App() {
         <Route path="/flight" element={<FlightSearchPage />} />
         <Route path="/flight/results" element={<FlightResultsPage />} />
         <Route path="/flight/trip" element={<TripSettingPage />} />
+        <Route path="/recommend" element={<RecommendPage />} />
+        <Route path="/recommend/compare" element={<ComparePage />} />
+        <Route path="/recommend/seat" element={<SeatDetailPage />} />
       </Routes>
     </BrowserRouter>
   )

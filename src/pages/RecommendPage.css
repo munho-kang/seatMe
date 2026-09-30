@@ -1,0 +1,59 @@
+/* 추천 카드 3개 + 40px 버튼 2개가 탭바 위 12px까지 채운다 */
+.recommend-screen {
+  padding-bottom: calc(var(--tab-bar-height) + 12px);
+}
+
+.recommend-caption {
+  color: var(--color-primary);
+}
+
+.recommend-list {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.recommend-card {
+  min-height: 150px;
+  padding: 32px 34px 0 24px;
+}
+
+.recommend-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-self: stretch;
+}
+
+.recommend-card-rank {
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-text-strong);
+}
+
+.recommend-card-score {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.recommend-card-features {
+  margin-top: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text-sub);
+}
+
+.recommend-card-tradeoff {
+  margin-top: 25px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text-tradeoff);
+}
+
+/* 항공편 목록처럼 버튼을 탭바 위에 띄워 둔다 */
+.recommend-footer {
+  position: sticky;
+  bottom: calc(var(--tab-bar-height) + 12px);
+  padding-top: 15px;
+}

@@ -5,6 +5,7 @@
   --color-surface-muted: #f2f5fa;
   --color-tint-blue: #edf2ff;
   --color-tint-green: #e5f7ed;
+  --color-tint-yellow: #fcf5e0;
   --color-text: #171c29;
   --color-text-strong: #000000;
   --color-text-sub: #6b7385;
@@ -12,6 +13,8 @@
   --color-text-muted: rgba(0, 0, 0, 0.6);
   --color-text-dim: rgba(0, 0, 0, 0.8);
   --color-text-soft: rgba(23, 28, 41, 0.8);
+  --color-text-caption: #989dab;
+  --color-text-tradeoff: #b59f7a;
   --color-border: #dbdfeb;
   --color-border-light: #edeff5;
   --color-border-strong: #d6dbe8;
@@ -23,6 +26,7 @@
   --line-height-tight: 100.525%;
 
   --radius-default: 20px;
+  --radius-box: 15px;
   --radius-bar: 4px;
   --radius-progress: 3px;
 
@@ -186,4 +190,16 @@ a {
   font-size: 12px;
   font-weight: 600;
   color: var(--color-primary);
+}
+
+/* 제목 아래 한 줄 캡션이 있는 화면 (추천·비교·좌석 상세). 콘텐츠는 171px에서 시작 */
+.screen-header--caption {
+  min-height: 132px;
+}
+
+.screen-caption {
+  margin-top: 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-text-caption);
 }

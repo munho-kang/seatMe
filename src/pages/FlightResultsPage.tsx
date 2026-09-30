@@ -1,4 +1,5 @@
 import { useNavigate, useSearchParams } from 'react-router'
+import Button from '../components/Button'
 import SelectableCard from '../components/SelectableCard'
 import TabBar from '../components/TabBar'
 import { FLIGHTS, getRouteTitle } from '../mocks/flights'
@@ -9,12 +10,11 @@ function FlightResultsPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const selectedFlight = searchParams.get('flight')
 
+  // 뒤로 돌아왔을 때 선택한 카드가 보이도록 선택값을 목록 URL에 남긴다
   function handleSelect(flightNumber: string) {
     const params = new URLSearchParams(searchParams)
     params.set('flight', flightNumber)
-    // 뒤로 돌아왔을 때 선택한 카드가 보이도록 현재 목록 URL에도 선택값을 남긴다
     setSearchParams(params, { replace: true })
-    navigate(`/flight/trip?${params}`)
   }
 
   return (
@@ -45,6 +45,12 @@ function FlightResultsPage() {
           </SelectableCard>
         ))}
       </div>
+
+      {selectedFlight && (
+        <footer className="screen-footer flight-list-footer">
+          <Button onClick={() => navigate(`/flight/trip?${searchParams}`)}>다음</Button>
+        </footer>
+      )}
 
       <TabBar />
     </main>
