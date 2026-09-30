@@ -1,0 +1,135 @@
+:root {
+  --color-primary: #3357e0;
+  --color-bg: #fbfcfe;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f2f5fa;
+  --color-tint-blue: #edf2ff;
+  --color-tint-green: #e5f7ed;
+  --color-text: #171c29;
+  --color-text-strong: #000000;
+  --color-text-sub: #6b7385;
+  --color-text-faint: rgba(0, 0, 0, 0.5);
+  --color-text-muted: rgba(0, 0, 0, 0.6);
+  --color-border: #dbdfeb;
+  --color-border-strong: #d6dbe8;
+  --color-progress-inactive: #dee3f0;
+  --color-track: #e5e8f0;
+  --color-weight-bar: #3361e0;
+
+  --font-base: 'Pretendard', sans-serif;
+  --line-height-tight: 100.525%;
+
+  --radius-default: 20px;
+  --radius-bar: 4px;
+  --radius-progress: 3px;
+
+  --gutter: 31.5px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  font-family: var(--font-base);
+  color: var(--color-text);
+  word-break: keep-all;
+}
+
+p,
+h1,
+ul,
+ol {
+  margin: 0;
+  padding: 0;
+}
+
+button,
+input {
+  font: inherit;
+  color: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* 화면 공통 레이아웃: 헤더 영역(0–203px) → 콘텐츠 → 하단 영역 */
+.screen {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding: 39px var(--gutter) 37px;
+}
+
+.screen-header {
+  min-height: 164px;
+}
+
+.logo {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.screen-title {
+  margin-top: 28px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--color-text-strong);
+}
+
+.screen-desc {
+  margin-top: 15px;
+  font-size: 13px;
+  line-height: var(--line-height-tight);
+  color: var(--color-text-sub);
+}
+
+.screen-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-top: auto;
+  padding-top: 24px;
+}
+
+.info-card {
+  display: flex;
+  flex-direction: column;
+  gap: 17.5px;
+  padding: 25px 16px 24px;
+  border-radius: var(--radius-default);
+  list-style: none;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.info-card--blue {
+  background: var(--color-tint-blue);
+}
+
+.info-card--green {
+  background: var(--color-tint-green);
+}
+
+.info-card--outline {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.text-link {
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.text-link:active {
+  opacity: 0.5;
+}

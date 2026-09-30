@@ -1,0 +1,121 @@
+/* 랜딩 */
+.landing-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 31px;
+}
+
+.landing-cards .info-card {
+  min-height: 131px;
+}
+
+.info-card-note {
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-primary);
+}
+
+.landing-links {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-align: center;
+  white-space: pre;
+}
+
+/* 로그인 / 회원가입 폼 */
+.auth-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.auth-form--login {
+  gap: 15px;
+}
+
+.auth-form--login .auth-submit {
+  margin-top: 13px;
+}
+
+.auth-form--signup {
+  gap: 28px;
+}
+
+.text-field {
+  height: 52px;
+  padding: 0 21px;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-default);
+  background: var(--color-surface);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+  color: var(--color-text-faint);
+}
+
+.text-field::placeholder {
+  color: var(--color-text-faint);
+}
+
+.login-forgot {
+  align-self: center;
+  margin-top: 15px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+  color: var(--color-text-muted);
+}
+
+.login-divider {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 37px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-text-faint);
+}
+
+.login-divider::before,
+.login-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--color-text-faint);
+}
+
+.login-social {
+  display: flex;
+  justify-content: center;
+  gap: 42px;
+  margin-top: 29px;
+}
+
+.login-social-button {
+  display: flex;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  cursor: pointer;
+}
+
+.login-signup {
+  margin-top: 135px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+  color: var(--color-text-faint);
+  text-align: center;
+  white-space: pre;
+}
+
+.signup-browse {
+  align-self: center;
+  margin-top: 15px;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--color-text-faint);
+}
