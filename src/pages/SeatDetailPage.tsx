@@ -1,4 +1,4 @@
-import { useSearchParams } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import Button from '../components/Button'
 import TabBar from '../components/TabBar'
 import './SeatDetailPage.css'
@@ -14,6 +14,7 @@ const SEAT_DETAILS = {
 }
 
 function SeatDetailPage() {
+  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const seat = searchParams.get('seat') ?? '12A'
   const detail = SEAT_DETAILS[seat as keyof typeof SEAT_DETAILS] ?? SEAT_DETAILS['12A']
@@ -52,7 +53,7 @@ function SeatDetailPage() {
       </div>
 
       <footer className="screen-footer">
-        <Button>예매하기</Button>
+        <Button onClick={() => navigate('/booking/complete')}>예매하기</Button>
       </footer>
 
       <TabBar />

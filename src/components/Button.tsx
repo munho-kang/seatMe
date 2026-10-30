@@ -2,7 +2,7 @@ import type { ButtonHTMLAttributes } from 'react'
 import './Button.css'
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
-  variant?: 'primary' | 'outline' | 'tonal'
+  variant?: 'primary' | 'outline' | 'tonal' | 'danger'
   size?: 'lg' | 'md' | 'sm'
 }
 

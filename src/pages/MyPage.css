@@ -1,0 +1,130 @@
+.account-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 26px;
+  padding: 18px 18px 18px 14px;
+  border-radius: var(--radius-default);
+  background: var(--color-tint-blue);
+}
+
+.account-header p {
+  height: 24px;
+}
+
+.account-name {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.account-provider {
+  margin-top: 4px;
+  font-size: 10px;
+  color: var(--color-text-sub);
+}
+
+.account-manage {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.menu-section-label {
+  margin-top: 20px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.menu-list--service {
+  margin-top: 25px;
+}
+
+/* MenuRow (DESIGN.md §3) */
+.menu-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 54px;
+  padding: 0 14px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-default);
+  background: var(--color-surface);
+  white-space: nowrap;
+}
+
+button.menu-row {
+  cursor: pointer;
+}
+
+.menu-row-label {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.menu-row-value {
+  font-size: 10px;
+  color: var(--color-text-sub);
+}
+
+.menu-row--danger,
+.menu-row--danger .menu-row-value {
+  color: var(--color-danger);
+}
+
+/* 로그아웃 확인 Modal (DESIGN.md §3 Modal) */
+.logout-modal {
+  width: calc(100% - var(--gutter) * 2);
+  max-width: none;
+  padding: 20px 18px 18px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-default);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.logout-modal[open] {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.logout-modal::backdrop {
+  background: var(--color-overlay);
+}
+
+.logout-modal-title {
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.logout-modal-desc {
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--color-text-sub);
+}
+
+.logout-modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.logout-modal-button {
+  width: 100%;
+  height: 48px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.logout-modal-cancel {
+  border-color: var(--color-border-strong);
+  color: var(--color-text);
+}

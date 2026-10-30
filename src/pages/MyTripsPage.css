@@ -1,0 +1,68 @@
+.trip-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.trip-section--past {
+  margin-top: 44px;
+}
+
+.trip-section-label {
+  font-size: 11px;
+  font-weight: 700;
+}
+
+/* 여행 카드 (DESIGN.md §5.7) */
+.trip-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 13px 14px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-default);
+  background: var(--color-surface);
+}
+
+.trip-card--upcoming {
+  background: var(--color-tint-blue);
+}
+
+.trip-card > * {
+  height: 24px;
+  margin: 0;
+}
+
+.trip-card-title {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.trip-card-date {
+  font-size: 10px;
+  color: var(--color-text-sub);
+}
+
+.trip-card-seat {
+  font-size: 11px;
+  font-weight: 700;
+  white-space: pre;
+}
+
+.trip-card-action {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--color-primary);
+  text-align: left;
+}
+
+.trip-new-link {
+  align-self: center;
+  margin-top: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--color-primary);
+  white-space: pre;
+}
