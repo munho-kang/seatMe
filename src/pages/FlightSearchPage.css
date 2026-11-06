@@ -1,19 +1,71 @@
+/* 탭바 위 27px에 검색 버튼이 온다 (Figma 2079:1784) */
+.search-screen {
+  padding-bottom: calc(var(--tab-bar-height) + 27px);
+}
+
+.search-header {
+  min-height: 112px;
+}
+
+.trip-types {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 11px;
+}
+
+.trip-type {
+  width: 80px;
+  height: 36px;
+  border: 1px solid var(--color-border-light);
+  border-radius: var(--radius-default);
+  background: var(--color-surface);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.trip-type--selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
 .search-fields {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 15px 18px;
 }
 
+.search-field-cell {
+  min-width: 0;
+}
+
+.search-field-cell--wide {
+  grid-column: 1 / -1;
+}
+
 .search-field {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
   min-height: 75px;
-  padding: 13px 25px 0;
+  padding: 13px 25px 12px;
   border: 1px solid var(--color-border-light);
   border-radius: var(--radius-default);
   background: var(--color-surface);
+  text-align: left;
+  cursor: pointer;
 }
 
-.search-field--wide {
-  grid-column: 1 / -1;
+.search-field--active {
+  border-color: var(--color-primary);
+  box-shadow: inset 0 0 0 1px var(--color-primary);
+}
+
+.search-field--error {
+  border-color: var(--color-error);
+  box-shadow: inset 0 0 0 1px var(--color-error);
 }
 
 .search-field-label {
@@ -29,8 +81,13 @@
   font-weight: 700;
 }
 
+.search-field--error .search-field-value {
+  font-weight: 400;
+  color: var(--color-label);
+}
+
 .recent-routes-title {
-  margin-top: 29px;
+  margin-top: 24px;
   font-size: 14px;
   font-weight: 700;
   color: var(--color-text-soft);
@@ -55,6 +112,10 @@
 }
 
 .search-profile {
-  margin-top: 29px;
+  margin-top: 23px;
   padding-inline: 25px;
+}
+
+.search-footer {
+  padding-top: 23px;
 }

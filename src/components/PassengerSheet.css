@@ -1,0 +1,81 @@
+/* Figma: 인원 시트만 위 197, 높이 480 */
+.passenger-sheet {
+  top: 197px;
+  bottom: auto;
+  height: 480px;
+  max-height: calc(100dvh - 197px - var(--tab-bar-height));
+}
+
+.passenger-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--field-gap);
+  min-height: 0;
+  overflow-y: auto;
+  padding: 8px var(--sheet-margin) 0;
+}
+
+.passenger-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 76px;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.passenger-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+
+.passenger-row-text strong {
+  line-height: 20px;
+}
+
+.passenger-row-text span {
+  line-height: 18px;
+  color: var(--color-label);
+}
+
+.passenger-stepper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.passenger-stepper-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-button);
+  background: var(--color-surface);
+  cursor: pointer;
+}
+
+.passenger-stepper-button:disabled {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.passenger-count {
+  width: 32px;
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 20px;
+  text-align: center;
+}
+
+.passenger-summary {
+  padding: 12px 20px;
+  border-radius: var(--radius-chip);
+  background: var(--color-tint-blue);
+  font-size: 13px;
+  line-height: 20px;
+}

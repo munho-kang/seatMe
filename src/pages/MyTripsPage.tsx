@@ -1,4 +1,7 @@
-import { Link } from 'react-router'
+import { Link, useNavigate, useSearchParams } from 'react-router'
+import planeIcon from '../assets/icon-plane-large.svg'
+import Button from '../components/Button'
+import StatusMessage from '../components/StatusMessage'
 import TabBar from '../components/TabBar'
 import './MyTripsPage.css'
 
@@ -54,6 +57,33 @@ function TripCard({ trip, isUpcoming = false }: { trip: Trip; isUpcoming?: boole
 }
 
 function MyTripsPage() {
+  const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+
+  // 여행 기록 API 연결 전까지 ?status=empty로 빈 화면을 확인한다
+  if (searchParams.get('status') === 'empty') {
+    return (
+      <main className="screen screen--status">
+        <header className="status-header">
+          <p className="logo">SeatME</p>
+          <h1 className="status-heading">지난 여행</h1>
+        </header>
+
+        <StatusMessage
+          icon={planeIcon}
+          title="아직 지난 여행이 없어요"
+          description="항공편을 찾고 좌석을 고르면 여기에 기록돼요"
+        >
+          <Button size="pill" onClick={() => navigate('/flight')}>
+            항공편 찾기
+          </Button>
+        </StatusMessage>
+
+        <TabBar />
+      </main>
+    )
+  }
+
   return (
     <main className="screen screen--tab-bar">
       <header>

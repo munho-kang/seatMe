@@ -1,0 +1,107 @@
+.analysis-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-height: 100dvh;
+  padding: 34px 30px;
+}
+
+.analysis-logo {
+  line-height: 34px;
+}
+
+.analysis-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+}
+
+.analysis-seats {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.analysis-row {
+  display: flex;
+  gap: 8px;
+}
+
+.analysis-seat,
+.analysis-aisle {
+  width: 36px;
+  height: 36px;
+}
+
+.analysis-seat {
+  border-radius: 12px;
+  background: var(--color-tint-blue);
+  transition: background 240ms ease;
+}
+
+.analysis-seat--active {
+  background: var(--color-primary);
+}
+
+.analysis-message {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 20px;
+  color: var(--color-label);
+  text-align: center;
+}
+
+.analysis-title {
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.analysis-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%;
+  padding: 20px 24px;
+  border-radius: var(--radius-card);
+  background: var(--color-tint-blue);
+  list-style: none;
+}
+
+.analysis-step {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 24px;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.analysis-step--active {
+  font-weight: 700;
+}
+
+.analysis-step--pending {
+  color: var(--color-label);
+}
+
+.analysis-step-progress {
+  font-weight: 400;
+  color: var(--color-primary);
+}
+
+/* 줄 이동을 멈추고 Figma의 3번째 줄만 강조한다. 단계 표시는 그대로 진행된다 */
+@media (prefers-reduced-motion: reduce) {
+  .analysis-seat {
+    background: var(--color-tint-blue);
+    transition: none;
+  }
+
+  .analysis-row:nth-child(3) .analysis-seat {
+    background: var(--color-primary);
+  }
+}

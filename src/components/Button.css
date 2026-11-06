@@ -56,3 +56,36 @@
 .button--sm:active {
   box-shadow: inset 0 0 0 3px var(--color-primary);
 }
+
+/* 시트 · 상태 화면의 버튼. 높이 50, 완전 라운드 */
+.button--pill {
+  width: 100%;
+  height: 50px;
+  border-radius: var(--radius-button);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.button--pill.button--outline {
+  border-color: var(--color-line);
+  color: var(--color-text);
+}
+
+.button--pill.button--primary:active {
+  background: var(--color-primary);
+  color: #ffffff;
+  opacity: 0.85;
+}
+
+.button--pill.button--outline:active {
+  background: var(--color-tint-blue);
+  color: var(--color-text);
+}
+
+.button--pill.button--primary:disabled {
+  background: var(--color-surface-muted);
+  color: var(--color-primary);
+  cursor: default;
+  opacity: 1;
+}
