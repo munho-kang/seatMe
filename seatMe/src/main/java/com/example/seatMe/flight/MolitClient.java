@@ -113,7 +113,7 @@ public class MolitClient {
         LocalDateTime dep = LocalDateTime.parse(node.path("depPlandTime").asString(), MOLIT_TIME);
         LocalDateTime arr = LocalDateTime.parse(node.path("arrPlandTime").asString(), MOLIT_TIME);
         return new Flight(
-                node.path("airlineNm").asString(),
+                node.path("airlineNm").asString().replace(" ", ""), // 국토부는 "제주 항공"처럼 띄어 보낸다. 화면에는 붙여서 나간다
                 node.path("vihicleId").asString(), // 국토부 칸 이름이 원래 이렇게(vehicle 오타) 적혀 있다
                 dep.toLocalTime().toString(),      // "14:10"
                 arr.toLocalTime().toString(),
