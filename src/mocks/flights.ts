@@ -1,11 +1,33 @@
 // 실제 API 연결 전까지 쓰는 mock 데이터. 실제 운항 정보가 아니다.
 
-export type AirportCode = 'GMP' | 'CJU' | 'PUS'
+export const AIRPORTS = [
+  { code: 'GMP', name: '김포', fullName: '김포국제공항' },
+  { code: 'CJU', name: '제주', fullName: '제주국제공항' },
+  { code: 'PUS', name: '부산', fullName: '김해국제공항' },
+  { code: 'ICN', name: '인천', fullName: '인천국제공항' },
+  { code: 'TAE', name: '대구', fullName: '대구국제공항' },
+  { code: 'CJJ', name: '청주', fullName: '청주국제공항' },
+  { code: 'KWJ', name: '광주', fullName: '광주공항' },
+  { code: 'RSU', name: '여수', fullName: '여수공항' },
+  { code: 'USN', name: '울산', fullName: '울산공항' },
+  { code: 'YNY', name: '양양', fullName: '양양국제공항' },
+  { code: 'KPO', name: '포항경주', fullName: '포항경주공항' },
+  { code: 'HIN', name: '사천', fullName: '사천공항' },
+  { code: 'KUV', name: '군산', fullName: '군산공항' },
+  { code: 'WJU', name: '원주', fullName: '원주공항' },
+] as const
 
-export const AIRPORT_NAMES: Record<AirportCode, string> = {
-  GMP: '김포',
-  CJU: '제주',
-  PUS: '부산',
+export type AirportCode = (typeof AIRPORTS)[number]['code']
+
+export const AIRPORT_NAMES = Object.fromEntries(AIRPORTS.map(({ code, name }) => [code, name])) as Record<AirportCode, string>
+
+export type Passengers = { adult: number; child: number; infant: number }
+
+export function formatPassengers({ adult, child, infant }: Passengers) {
+  const parts = [`성인 ${adult}명`]
+  if (child > 0) parts.push(`소아 ${child}명`)
+  if (infant > 0) parts.push(`유아 ${infant}명`)
+  return parts.join(', ')
 }
 
 export type Flight = {

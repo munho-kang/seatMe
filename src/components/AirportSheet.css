@@ -1,0 +1,139 @@
+.airport-search {
+  flex-shrink: 0;
+  padding: 16px var(--sheet-margin) 0;
+}
+
+.airport-search-field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  height: 50px;
+  padding: 0 20px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-button);
+  background: var(--color-surface);
+}
+
+.airport-search-field input {
+  flex: 1;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  outline: 0;
+  background: none;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.airport-search-field input::placeholder {
+  color: var(--color-label);
+}
+
+.airport-search-field:focus-within {
+  border-color: var(--color-primary);
+  box-shadow: inset 0 0 0 1px var(--color-primary);
+}
+
+.airport-search-field--error,
+.airport-search-field--error:focus-within {
+  border-color: var(--color-error);
+  box-shadow: inset 0 0 0 1px var(--color-error);
+}
+
+.airport-recent {
+  display: flex;
+  flex-shrink: 0;
+  flex-direction: column;
+  gap: 8px;
+  padding: 16px var(--sheet-margin) 0;
+}
+
+.airport-section-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--color-section);
+}
+
+.airport-list-title {
+  flex-shrink: 0;
+  padding: 20px var(--sheet-margin) 4px;
+}
+
+.airport-chips {
+  display: flex;
+  gap: var(--field-gap);
+}
+
+.airport-chip {
+  flex: 1 0 0;
+  height: 38px;
+  border: 1px solid var(--color-line);
+  border-radius: var(--radius-chip);
+  background: var(--color-surface);
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  cursor: pointer;
+}
+
+.airport-chip--selected {
+  background: var(--color-tint-blue);
+  color: var(--color-primary);
+}
+
+.airport-chip:disabled {
+  color: var(--color-past);
+  cursor: default;
+}
+
+.airport-list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 0 var(--sheet-margin) var(--sheet-margin);
+}
+
+.airport-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  height: 62px;
+  padding: 0;
+  border: 0;
+  border-bottom: 1px solid var(--color-line);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.airport-row:disabled {
+  cursor: default;
+}
+
+.airport-row-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 13px;
+}
+
+.airport-row-title {
+  font-weight: 700;
+  line-height: 20px;
+}
+
+.airport-row-sub {
+  line-height: 18px;
+  color: var(--color-label);
+}
+
+.airport-row--selected .airport-row-title {
+  color: var(--color-primary);
+}
+
+.airport-row:disabled .airport-row-title {
+  color: var(--color-past);
+}

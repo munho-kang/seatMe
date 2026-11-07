@@ -3,7 +3,7 @@ import './Button.css'
 
 type ButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'primary' | 'outline' | 'tonal' | 'danger'
-  size?: 'lg' | 'md' | 'sm'
+  size?: 'lg' | 'md' | 'sm' | 'pill'
 }
 
 function Button({ variant = 'primary', size = 'lg', type = 'button', className, ...props }: ButtonProps) {

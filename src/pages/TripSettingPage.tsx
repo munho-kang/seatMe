@@ -23,7 +23,7 @@ function TripSettingPage() {
     if (!profileMode) return
     const params = new URLSearchParams(searchParams)
     params.set('profile', profileMode)
-    navigate(`/recommend?${params}`)
+    navigate(`/recommend/analyzing?${params}`)
   }
 
   return (
