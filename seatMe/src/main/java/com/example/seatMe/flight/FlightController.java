@@ -5,6 +5,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
+import com.example.seatMe.aircraft.AircraftTypeService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -30,9 +31,11 @@ public class FlightController {
     private static final Logger log = LoggerFactory.getLogger(FlightController.class);
 
     private final MolitClient molit;
+    private final AircraftTypeService aircraftTypes;
 
-    FlightController(MolitClient molit) {
+    FlightController(MolitClient molit, AircraftTypeService aircraftTypes) {
         this.molit = molit;
+        this.aircraftTypes = aircraftTypes;
     }
 
     @GetMapping("/api/flights")
@@ -47,8 +50,10 @@ public class FlightController {
         }
         try {
             List<Flight> flights = molit.search(MOLIT_AIRPORT_ID.get(from), MOLIT_AIRPORT_ID.get(to), day);
-            // 백엔드②: 여기서 공항공사 기종을 편명으로 합쳐 aircraft · aircraftCode · seatMapReady 를 채운다
-            return ResponseEntity.ok(Map.of("flights", flights));
+            // 항공편이 있을 때만 공항공사에 묻고, 편명으로 합친다 (명세서 6번). 답이 없으면 기종만 빈 채로 나간다.
+            Map<String, String> codes = flights.isEmpty() ? Map.of() : aircraftTypes.findByRoute(from, to, day);
+            return ResponseEntity.ok(Map.of("flights",
+                    flights.stream().map(flight -> flight.withAircraftCode(codes.get(flight.flightNumber()))).toList()));
         } catch (MolitClient.UpstreamException e) {
             log.warn("국토부 응답 실패 → 502: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of("error", "UPSTREAM_UNAVAILABLE"));

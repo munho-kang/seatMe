@@ -7,6 +7,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 // 편명을 받으면 기종을 찾아주는 서비스 (팀원이 사용할 기능)
 @Service
@@ -64,6 +66,22 @@ public class AircraftTypeService {
                         "O".equals(item.io()) ? item.city() : item.airport(),
                         item.icaoApmCd()))
                 .orElse(null);
+    }
+
+    /**
+     * 그날 그 노선의 기종을 한꺼번에 찾아요.
+     * @param from 출발 공항 (예: GMP)
+     * @param to   도착 공항 (예: CJU)
+     * @return 편명 → 기종 코드. 공항공사가 답이 없으면 빈 Map
+     */
+    public Map<String, String> findByRoute(String from, String to, LocalDate date) {
+        return aircraftTypeClient.searchAirportDay(from, date).stream()
+                .filter(item -> "O".equals(item.io()) && from.equals(item.airport()) && to.equals(item.city()))
+                .filter(item -> item.airFln() != null && item.icaoApmCd() != null && !item.icaoApmCd().isBlank())
+                .collect(Collectors.toMap(
+                        KacAircraftResponse.Item::airFln,
+                        KacAircraftResponse.Item::icaoApmCd,
+                        (first, second) -> first)); // 같은 편명이 또 나오면 먼저 나온 값을 써요
     }
 
     // "202611110600" → "2026-11-11 06:00"
