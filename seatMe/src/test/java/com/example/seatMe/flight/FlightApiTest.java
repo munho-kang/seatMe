@@ -124,7 +124,7 @@ class FlightApiTest {
         molitBody.set(molitJson("""
                 [
                   {"airlineNm":"진에어","arrAirportNm":"제주","arrPlandTime":%1$s1545,"depAirportNm":"서울/김포","depPlandTime":%1$s1435,"economyCharge":100000,"prestigeCharge":0,"vihicleId":"LJ569"},
-                  {"airlineNm":"제주항공","arrAirportNm":"제주","arrPlandTime":%1$s1520,"depAirportNm":"서울/김포","depPlandTime":%1$s1410,"economyCharge":0,"prestigeCharge":0,"vihicleId":"7C115"}
+                  {"airlineNm":"제주 항공","arrAirportNm":"제주","arrPlandTime":%1$s1520,"depAirportNm":"서울/김포","depPlandTime":%1$s1410,"economyCharge":0,"prestigeCharge":0,"vihicleId":"7C115"}
                 ]""".formatted(VALID_DATE_MOLIT)));
 
         var result = search("GMP", "CJU", VALID_DATE);
@@ -132,7 +132,7 @@ class FlightApiTest {
         assertThat(result).hasStatusOk();
         assertThat(result).bodyJson().extractingPath("$.flights").asArray().hasSize(2);
         assertThat(result).bodyJson().extractingPath("$.flights[0].flightNumber").isEqualTo("7C115");
-        assertThat(result).bodyJson().extractingPath("$.flights[0].airline").isEqualTo("제주항공");
+        assertThat(result).bodyJson().extractingPath("$.flights[0].airline").isEqualTo("제주항공"); // 국토부의 "제주 항공" 띄어쓰기를 지운다
         assertThat(result).bodyJson().extractingPath("$.flights[0].departureTime").isEqualTo("14:10");
         assertThat(result).bodyJson().extractingPath("$.flights[0].arrivalTime").isEqualTo("15:20");
         assertThat(result).bodyJson().extractingPath("$.flights[0].duration").isEqualTo("1시간 10분");

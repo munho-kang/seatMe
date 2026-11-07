@@ -17,7 +17,7 @@ public class AircraftTypeService {
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
     private static final DateTimeFormatter API_TIME = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
     private static final DateTimeFormatter SHOW_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private static final int SEARCH_DAYS = 6; // API가 기종을 알려주는 범위: 오늘 ~ 6일 뒤
+    private static final int SEARCH_DAYS = 7; // API가 기종을 알려주는 범위: 오늘 ~ 7일 뒤 (2026-11-07 실제 확인, 8일 뒤부터 0건)
 
     private final AircraftTypeClient aircraftTypeClient;
 
@@ -37,7 +37,7 @@ public class AircraftTypeService {
     /**
      * 편명으로 항공편과 기종을 찾아요.
      * @param flightNo 편명 (예: "RS6347", 소문자도 가능)
-     * @param date     운항 날짜. null이면 오늘 ~ 6일 뒤 중 가장 가까운 출발편
+     * @param date     운항 날짜. null이면 오늘 ~ 7일 뒤 중 가장 가까운 출발편
      * @return 조회 결과. 못 찾으면 null
      */
     public AircraftTypeResult find(String flightNo, LocalDate date) {

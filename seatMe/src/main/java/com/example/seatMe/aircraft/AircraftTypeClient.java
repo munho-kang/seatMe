@@ -3,6 +3,8 @@ package com.example.seatMe.aircraft;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.client.JdkClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.web.client.RestClient;
 
 import java.net.http.HttpClient;
@@ -16,6 +18,7 @@ import java.util.List;
 @Component
 public class AircraftTypeClient {
 
+    private static final Logger log = LoggerFactory.getLogger(AircraftTypeClient.class);
     private final RestClient restClient;
     private final String baseUrl;
     private final String serviceKey;
@@ -53,7 +56,7 @@ public class AircraftTypeClient {
 
         } catch (Exception e) {
             // API 오류가 나도 서버 전체가 멈추지 않게, 빈 목록을 돌려줘요
-            System.out.println("[기종 API 오류] " + e.getMessage());
+            log.warn("공항공사 기종 API 오류 → 기종만 비운다: {}", e.getMessage());
             return List.of();
         }
     }
@@ -84,7 +87,7 @@ public class AircraftTypeClient {
                 }
             }
         } catch (Exception e) {
-            System.out.println("[기종 API 오류] " + e.getMessage());
+            log.warn("공항공사 기종 API 오류 → 기종만 비운다: {}", e.getMessage());
             return all;
         }
     }
