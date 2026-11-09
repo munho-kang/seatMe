@@ -6,6 +6,7 @@ import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Map;
 import com.example.seatMe.aircraft.AircraftTypeService;
+import com.example.seatMe.aircraft.KacAircraftResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -50,10 +51,13 @@ public class FlightController {
         }
         try {
             List<Flight> flights = molit.search(MOLIT_AIRPORT_ID.get(from), MOLIT_AIRPORT_ID.get(to), day);
-            // 항공편이 있을 때만 공항공사에 묻고, 편명으로 합친다 (명세서 6번). 답이 없으면 기종만 빈 채로 나간다.
-            Map<String, String> codes = flights.isEmpty() ? Map.of() : aircraftTypes.findByRoute(from, to, day);
-            return ResponseEntity.ok(Map.of("flights",
-                    flights.stream().map(flight -> flight.withAircraftCode(codes.get(flight.flightNumber()))).toList()));
+            // 항공편이 있을 때만 공항공사에 묻고, 편명 + 가장 가까운 출발 시각으로 합친다 (명세서 6번). 답이 없으면 기종만 빈 채로 나간다.
+            Map<String, List<KacAircraftResponse.Item>> records =
+                    flights.isEmpty() ? Map.of() : aircraftTypes.findByRoute(from, to, day);
+            return ResponseEntity.ok(Map.of("flights", flights.stream()
+                    .map(flight -> flight.withAircraftCode(AircraftTypeService.nearestAircraftType(
+                            records.get(flight.flightNumber()), flight.departureTime())))
+                    .toList()));
         } catch (MolitClient.UpstreamException e) {
             log.warn("국토부 응답 실패 → 502: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of("error", "UPSTREAM_UNAVAILABLE"));

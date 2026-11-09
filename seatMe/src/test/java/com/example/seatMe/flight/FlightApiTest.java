@@ -269,6 +269,23 @@ class FlightApiTest {
     }
 
     @Test
+    void 같은_편명이_하루_두_번이면_출발_시각이_가장_가까운_기록의_기종을_쓴다() {
+        molitBody.set(molitJson("""
+                [
+                  {"airlineNm":"대한항공","arrPlandTime":%1$s0910,"depPlandTime":%1$s0800,"vihicleId":"KE1505"},
+                  {"airlineNm":"대한항공","arrPlandTime":%1$s2010,"depPlandTime":%1$s1900,"vihicleId":"KE1505"}
+                ]""".formatted(VALID_DATE_MOLIT)));
+        kacPages.set(List.of(kacPage(2,
+                kacItem("KE1505", "1830", "O", "GMP", "CJU", "A321"),    // 저녁 편 (30분 차이)
+                kacItem("KE1505", "0745", "O", "GMP", "CJU", "B738")))); // 아침 편 (15분 차이)
+
+        var result = search("GMP", "CJU", VALID_DATE).exchange();
+
+        assertThat(result).bodyJson().extractingPath("$.flights[0].aircraftCode").isEqualTo("B738");
+        assertThat(result).bodyJson().extractingPath("$.flights[1].aircraftCode").isEqualTo("A321");
+    }
+
+    @Test
     void 공항공사_기록이_여러_쪽이면_끝까지_읽고_더_묻지_않는다() {
         twoMolitFlights();
         kacPages.set(List.of(
