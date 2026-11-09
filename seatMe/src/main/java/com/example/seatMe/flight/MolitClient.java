@@ -22,7 +22,7 @@ import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
 /**
- * 국토교통부(TAGO) 국내항공운항정보에 인증키를 붙여 묻고, 답을 명세서 모양 {@link Flight}으로 바꾼다.
+ * 국토교통부(TAGO) 국내항공운항정보에 인증키를 붙여 묻고, 답을 화면용 {@link Flight}으로 바꾼다.
  * 문서: https://www.data.go.kr/data/15098526/openapi.do
  */
 @Component
