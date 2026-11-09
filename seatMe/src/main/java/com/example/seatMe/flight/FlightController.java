@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * 화면이 부르는 창구 — GET /api/flights?from=GMP&to=CJU&date=2026-11-13 (명세서 2 · 4 · 5번).
+ * 화면이 부르는 창구 — GET /api/flights?from=GMP&to=CJU&date=2026-11-13.
  * 요청을 먼저 확인해 틀리면 400, 국토부가 답하지 않으면 502, 아니면 {"flights":[...]}.
  */
 @RestController
@@ -47,7 +47,7 @@ public class FlightController {
                               @RequestParam(required = false) String date) {
         LocalDate day = parseDate(date);
         LocalDate today = LocalDate.now(KST);
-        // 날짜는 오늘 ~ 1년 뒤. 더 먼 날짜(+12345-01-01 같은 것)는 국토부에 묻지 않는다 (명세서 2번)
+        // 날짜는 오늘 ~ 1년 뒤. 더 먼 날짜(+12345-01-01 같은 것)는 국토부에 묻지 않는다
         boolean valid = isAirport(from) && isAirport(to) && !from.equals(to)
                 && day != null && !day.isBefore(today) && !day.isAfter(today.plusYears(1));
         if (!valid) {
@@ -56,7 +56,7 @@ public class FlightController {
         try {
             List<Flight> flights = notDeparted(
                     molit.search(MOLIT_AIRPORT_ID.get(from), MOLIT_AIRPORT_ID.get(to), day), day, LocalDateTime.now(KST));
-            // 항공편이 있을 때만 공항공사에 묻고, 편명 + 가장 가까운 출발 시각으로 합친다 (명세서 6번). 답이 없으면 기종만 빈 채로 나간다.
+            // 항공편이 있을 때만 공항공사에 묻고, 편명 + 가장 가까운 출발 시각으로 합친다. 답이 없으면 기종만 빈 채로 나간다.
             Map<String, List<KacAircraftResponse.Item>> records =
                     flights.isEmpty() ? Map.of() : aircraftTypes.findByRoute(from, to, day);
             return ResponseEntity.ok(Map.of("flights", flights.stream()
@@ -69,7 +69,7 @@ public class FlightController {
         }
     }
 
-    /** 오늘 검색이면 이미 떠난 편(출발 시각이 지금이거나 그 전)을 뺀다. 다 빠지면 빈 목록 → 상황 ① (명세서 2 · 4번). */
+    /** 오늘 검색이면 이미 떠난 편(출발 시각이 지금이거나 그 전)을 뺀다. 다 빠지면 빈 목록 → 상황 ①. */
     static List<Flight> notDeparted(List<Flight> flights, LocalDate day, LocalDateTime now) {
         if (!day.equals(now.toLocalDate())) {
             return flights;

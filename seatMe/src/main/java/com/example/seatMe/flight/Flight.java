@@ -3,7 +3,7 @@ package com.example.seatMe.flight;
 import java.util.Map;
 
 /**
- * 화면에 돌려주는 항공편 한 개 — 명세서(docs/API_명세서.html) 3번 "응답"의 8칸.
+ * 화면에 돌려주는 항공편 한 개 (8칸).
  * 앞 5칸은 국토부 답으로, 뒤 3칸(기종)은 공항공사 답으로 채운다.
  */
 public record Flight(
@@ -17,7 +17,7 @@ public record Flight(
         boolean seatMapReady    // 좌석 배치도가 있는 기종이면 true
 ) {
 
-    /** 좌석 배치도가 있는 기종: 공항공사 코드 → 화면 이름 (명세서 6번 표). 배치도가 늘면 여기에 한 줄 추가한다. */
+    /** 좌석 배치도가 있는 기종: 공항공사 코드 → 화면 이름. 배치도가 늘면 여기에 한 줄 추가한다. */
     private static final Map<String, String> SEAT_MAP_AIRCRAFT = Map.of("B738", "B737-8");
 
     /** 공항공사 코드로 기종 3칸을 채운다. 코드가 null(짝 없음)이면 비워 둔 채 그대로 돌려준다. */

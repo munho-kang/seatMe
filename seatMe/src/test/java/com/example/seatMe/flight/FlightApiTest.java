@@ -31,7 +31,8 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester.MockMvcRequest
 
 /**
  * 창구 GET /api/flights 확인. 국토부·공항공사 자리에는 이 테스트가 띄운 가짜 서버가 앉아 있다.
- * 명세서(docs/API_명세서.html) 2·4·5·6번: 요청 확인 규칙, 상황 4가지, 공항 코드 바꾸기, 편명 합치기.
+ * 요청 확인 규칙, 공항 코드 바꾸기, 편명 합치기, 그리고 상황 4가지:
+ * ① 항공편 0개 → 200 빈 목록 · ② 국토부 실패 → 502 · ③ 잘못된 요청 → 400 · ④ 기종 모름 → 기종 칸만 비움.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -130,10 +131,10 @@ class FlightApiTest {
         assertThat(molitCalls.get()).isZero();
     }
 
-    // ── 정상 → 200, 명세서 모양으로 바꿔서 출발 시각 순으로 ──
+    // ── 정상 → 200, 화면 모양으로 바꿔서 출발 시각 순으로 ──
 
     @Test
-    void 국토부_응답을_명세서_모양으로_바꿔_출발_시각_순으로_돌려준다() {
+    void 국토부_응답을_화면_모양으로_바꿔_출발_시각_순으로_돌려준다() {
         molitBody.set(molitJson("""
                 [
                   {"airlineNm":"진에어","arrAirportNm":"제주","arrPlandTime":%1$s1545,"depAirportNm":"서울/김포","depPlandTime":%1$s1435,"economyCharge":100000,"prestigeCharge":0,"vihicleId":"LJ569"},
@@ -221,7 +222,7 @@ class FlightApiTest {
         assertThat(search("GMP", "CJU", VALID_DATE)).hasStatus(502).bodyJson().extractingPath("$.error").isEqualTo("UPSTREAM_UNAVAILABLE");
     }
 
-    // ── 편명 합치기 (명세서 6번) ──
+    // ── 편명 합치기 ──
 
     @Test
     void 배치도가_있는_기종은_화면_이름을_붙이고_추천_가능으로_표시한다() {
@@ -332,7 +333,7 @@ class FlightApiTest {
         assertThat(kacCalls.get()).isZero();
     }
 
-    // ── 공항공사만 답이 없어도 오류로 끝내지 않는다 (명세서 4번) ──
+    // ── 공항공사만 답이 없어도 오류로 끝내지 않는다 ──
 
     @Test
     void 공항공사가_오류를_돌려주면_시각은_보여주고_기종만_비운다() {
