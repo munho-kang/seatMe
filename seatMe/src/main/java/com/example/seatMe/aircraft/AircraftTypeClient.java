@@ -52,6 +52,11 @@ public class AircraftTypeClient {
                             serviceKey, flightNo, from, to)
                     .retrieve()
                     .body(KacAircraftResponse.class);
+            String error = errorOf(result);
+            if (error != null) {
+                log.warn("공항공사 기종 API 오류 응답 → 기종만 비운다: {}", error);
+                return List.of();
+            }
             return itemsOf(result);
 
         } catch (Exception e) {
@@ -79,6 +84,11 @@ public class AircraftTypeClient {
                                 serviceKey, page, airport, day + "0000", day + "2359")
                         .retrieve()
                         .body(KacAircraftResponse.class);
+                String error = errorOf(result);
+                if (error != null) {
+                    log.warn("공항공사 기종 API 오류 응답 → 기종만 비운다: {}", error);
+                    return all;
+                }
 
                 List<KacAircraftResponse.Item> items = itemsOf(result);
                 all.addAll(items);
@@ -90,6 +100,22 @@ public class AircraftTypeClient {
             log.warn("공항공사 기종 API 오류 → 기종만 비운다: {}", e.getMessage());
             return all;
         }
+    }
+
+    /** 정상 답(resultCode "00")이면 null, 아니면 오류 이름과 코드. 주소·인증키는 넣지 않는다. */
+    private static String errorOf(KacAircraftResponse result) {
+        if (result == null) {
+            return "빈 응답";
+        }
+        if (result.serviceError() != null && result.serviceError().cmmMsgHeader() != null) {
+            var header = result.serviceError().cmmMsgHeader();
+            return header.errMsg() + " (코드 " + header.returnReasonCode() + ")";
+        }
+        if (result.response() == null || result.response().header() == null) {
+            return "모르는 응답 모양";
+        }
+        var header = result.response().header();
+        return "00".equals(header.resultCode()) ? null : header.resultMsg() + " (코드 " + header.resultCode() + ")";
     }
 
     // 응답이 비어 있으면 빈 목록

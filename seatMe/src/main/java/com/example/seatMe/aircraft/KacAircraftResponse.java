@@ -1,10 +1,18 @@
 package com.example.seatMe.aircraft;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.List;
 
 // 한국공항공사 기종 API 응답(JSON)을 그대로 담는 그릇
 // JSON 구조: response → header / body → items → item[]
-public record KacAircraftResponse(Response response) {
+// 오류일 때는 HTTP 200이어도 OpenAPI_ServiceResponse → cmmMsgHeader 모양으로 온다 (2026-11-09 실제 확인)
+public record KacAircraftResponse(
+        Response response,
+        @JsonProperty("OpenAPI_ServiceResponse") ServiceError serviceError) {
+
+    public record ServiceError(CmmMsgHeader cmmMsgHeader) {}
+
+    public record CmmMsgHeader(String errMsg, String returnReasonCode) {}
 
     public record Response(Header header, Body body) {}
 

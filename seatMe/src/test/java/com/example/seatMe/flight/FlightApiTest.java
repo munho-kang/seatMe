@@ -372,6 +372,20 @@ class FlightApiTest {
         assertThat(output).doesNotContain("kac-test-key");
     }
 
+    @Test
+    void 공항공사가_HTTP_200으로_오류를_주면_기록에_오류_이름을_남긴다(CapturedOutput output) {
+        twoMolitFlights();
+        kacPages.set(List.of("""
+                {"OpenAPI_ServiceResponse":{"cmmMsgHeader":{"errMsg":"LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR","returnReasonCode":"22"}}}"""));
+
+        var result = search("GMP", "CJU", VALID_DATE).exchange();
+
+        assertThat(result).hasStatusOk();
+        assertThat(result).bodyJson().extractingPath("$.flights").asArray().hasSize(2);
+        assertThat(result).bodyJson().extractingPath("$.flights[0].aircraftCode").isEqualTo("");
+        assertThat(output).contains("LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR").doesNotContain("kac-test-key");
+    }
+
     // ── 도우미 ──
 
     /** 국토부 정상 응답: 14:10 7C115, 14:35 LJ569 */
