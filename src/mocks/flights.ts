@@ -1,20 +1,8 @@
-// 실제 API 연결 전까지 쓰는 mock 데이터. 실제 운항 정보가 아니다.
-
+// 서버(GET /api/flights)가 받는 공항은 GMP·CJU·PUS뿐이라 이 3개만 고를 수 있게 한다
 export const AIRPORTS = [
   { code: 'GMP', name: '김포', fullName: '김포국제공항' },
   { code: 'CJU', name: '제주', fullName: '제주국제공항' },
   { code: 'PUS', name: '부산', fullName: '김해국제공항' },
-  { code: 'ICN', name: '인천', fullName: '인천국제공항' },
-  { code: 'TAE', name: '대구', fullName: '대구국제공항' },
-  { code: 'CJJ', name: '청주', fullName: '청주국제공항' },
-  { code: 'KWJ', name: '광주', fullName: '광주공항' },
-  { code: 'RSU', name: '여수', fullName: '여수공항' },
-  { code: 'USN', name: '울산', fullName: '울산공항' },
-  { code: 'YNY', name: '양양', fullName: '양양국제공항' },
-  { code: 'KPO', name: '포항경주', fullName: '포항경주공항' },
-  { code: 'HIN', name: '사천', fullName: '사천공항' },
-  { code: 'KUV', name: '군산', fullName: '군산공항' },
-  { code: 'WJU', name: '원주', fullName: '원주공항' },
 ] as const
 
 export type AirportCode = (typeof AIRPORTS)[number]['code']
@@ -36,14 +24,10 @@ export type Flight = {
   departureTime: string
   arrivalTime: string
   aircraft: string
+  aircraftCode: string
+  seatMapReady: boolean
   duration: string
 }
-
-export const FLIGHTS: Flight[] = [
-  { airline: '제주항공', flightNumber: '7C115', departureTime: '14:10', arrivalTime: '15:20', aircraft: 'B737-8', duration: '1시간 10분' },
-  { airline: '진에어', flightNumber: 'LJ569', departureTime: '14:35', arrivalTime: '15:45', aircraft: 'B737-8', duration: '1시간 10분' },
-  { airline: '티웨이', flightNumber: 'TW731', departureTime: '15:05', arrivalTime: '16:15', aircraft: 'B737-8', duration: '1시간 10분' },
-]
 
 function isAirportCode(value: string | null): value is AirportCode {
   return value !== null && value in AIRPORT_NAMES
