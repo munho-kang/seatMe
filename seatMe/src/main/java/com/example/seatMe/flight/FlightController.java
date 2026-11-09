@@ -44,8 +44,10 @@ public class FlightController {
                               @RequestParam(required = false) String to,
                               @RequestParam(required = false) String date) {
         LocalDate day = parseDate(date);
+        LocalDate today = LocalDate.now(KST);
+        // 날짜는 오늘 ~ 1년 뒤. 더 먼 날짜(+12345-01-01 같은 것)는 국토부에 묻지 않는다 (명세서 2번)
         boolean valid = isAirport(from) && isAirport(to) && !from.equals(to)
-                && day != null && !day.isBefore(LocalDate.now(KST));
+                && day != null && !day.isBefore(today) && !day.isAfter(today.plusYears(1));
         if (!valid) {
             return ResponseEntity.badRequest().body(Map.of("error", "INVALID_QUERY"));
         }

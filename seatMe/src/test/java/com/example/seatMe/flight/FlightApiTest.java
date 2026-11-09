@@ -105,6 +105,18 @@ class FlightApiTest {
     }
 
     @Test
+    void 일년_넘게_먼_날짜면_400() {
+        assertThat(search("GMP", "CJU", LocalDate.now().plusYears(2).toString())).hasStatus(400).bodyJson().extractingPath("$.error").isEqualTo("INVALID_QUERY");
+        assertThat(molitCalls.get()).isZero();
+    }
+
+    @Test
+    void 연도가_다섯_자리여도_400() {
+        assertThat(search("GMP", "CJU", "+12345-01-01")).hasStatus(400).bodyJson().extractingPath("$.error").isEqualTo("INVALID_QUERY");
+        assertThat(molitCalls.get()).isZero();
+    }
+
+    @Test
     void 날짜_모양이_틀리면_400() {
         assertThat(search("GMP", "CJU", "2026.11.13")).hasStatus(400).bodyJson().extractingPath("$.error").isEqualTo("INVALID_QUERY");
         assertThat(molitCalls.get()).isZero();
