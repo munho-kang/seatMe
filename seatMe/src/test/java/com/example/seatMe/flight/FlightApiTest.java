@@ -9,6 +9,7 @@ import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -396,6 +397,31 @@ class FlightApiTest {
         assertThat(result).bodyJson().extractingPath("$.flights").asArray().hasSize(2);
         assertThat(result).bodyJson().extractingPath("$.flights[0].aircraftCode").isEqualTo("");
         assertThat(output).contains("LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR").doesNotContain("kac-test-key");
+    }
+
+    // ── 오늘 검색이면 이미 떠난 편은 뺀다 ──
+
+    static final LocalDateTime TODAY_2PM = LocalDateTime.of(2026, 11, 9, 14, 0);
+    static final List<Flight> ONE_PM_AND_THREE_PM = List.of(
+            new Flight("제주항공", "7C101", "13:00", "14:10", "1시간 10분", "", "", false),
+            new Flight("진에어", "LJ303", "15:00", "16:10", "1시간 10분", "", "", false));
+
+    @Test
+    void 오늘_14시면_13시_편은_빠지고_15시_편은_남는다() {
+        assertThat(FlightController.notDeparted(ONE_PM_AND_THREE_PM, TODAY_2PM.toLocalDate(), TODAY_2PM))
+                .extracting(Flight::flightNumber).containsExactly("LJ303");
+    }
+
+    @Test
+    void 내일_날짜면_아무것도_빼지_않는다() {
+        assertThat(FlightController.notDeparted(ONE_PM_AND_THREE_PM, TODAY_2PM.toLocalDate().plusDays(1), TODAY_2PM))
+                .hasSize(2);
+    }
+
+    @Test
+    void 오늘_편이_전부_떠났으면_빈_목록() {
+        LocalDateTime night = TODAY_2PM.withHour(23);
+        assertThat(FlightController.notDeparted(ONE_PM_AND_THREE_PM, night.toLocalDate(), night)).isEmpty();
     }
 
     // ── 도우미 ──
