@@ -38,35 +38,6 @@ public class AircraftTypeClient {
     }
 
     /**
-     * 편명과 시간 범위로 항공편을 조회해요.
-     * @param flightNo 편명 (예: RS6347)
-     * @param from     조회 시작 시간 yyyyMMddHHmm (예: 202611110000)
-     * @param to       조회 끝 시간   yyyyMMddHHmm (예: 202611112359)
-     * @return 찾은 항공편 목록. 없거나 오류가 나면 빈 목록
-     */
-    public List<KacAircraftResponse.Item> search(String flightNo, String from, String to) {
-        try {
-            KacAircraftResponse result = restClient.get()
-                    .uri(baseUrl + "?serviceKey={key}&type=json&numOfRows=50&pageNo=1"
-                                    + "&schFln={fln}&schStTime={from}&schEdTime={to}",
-                            serviceKey, flightNo, from, to)
-                    .retrieve()
-                    .body(KacAircraftResponse.class);
-            String error = errorOf(result);
-            if (error != null) {
-                log.warn("공항공사 기종 API 오류 응답 → 기종만 비운다: {}", error);
-                return List.of();
-            }
-            return itemsOf(result);
-
-        } catch (Exception e) {
-            // API 오류가 나도 서버 전체가 멈추지 않게, 빈 목록을 돌려줘요
-            log.warn("공항공사 기종 API 오류 → 기종만 비운다: {}", e.getMessage());
-            return List.of();
-        }
-    }
-
-    /**
      * 한 공항의 하루치 기록을 끝까지 받아요. 편명마다 따로 묻지 않고 한꺼번에 받으려고 만들었어요.
      * @param airport 공항 코드 (예: GMP)
      * @param date    날짜
