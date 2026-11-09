@@ -9,6 +9,7 @@ import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -101,6 +102,18 @@ class FlightApiTest {
     @Test
     void 지난_날짜면_400() {
         assertThat(search("GMP", "CJU", PAST_DATE)).hasStatus(400).bodyJson().extractingPath("$.error").isEqualTo("INVALID_QUERY");
+        assertThat(molitCalls.get()).isZero();
+    }
+
+    @Test
+    void 일년_넘게_먼_날짜면_400() {
+        assertThat(search("GMP", "CJU", LocalDate.now().plusYears(2).toString())).hasStatus(400).bodyJson().extractingPath("$.error").isEqualTo("INVALID_QUERY");
+        assertThat(molitCalls.get()).isZero();
+    }
+
+    @Test
+    void 연도가_다섯_자리여도_400() {
+        assertThat(search("GMP", "CJU", "+12345-01-01")).hasStatus(400).bodyJson().extractingPath("$.error").isEqualTo("INVALID_QUERY");
         assertThat(molitCalls.get()).isZero();
     }
 
@@ -370,6 +383,45 @@ class FlightApiTest {
 
         assertThat(search("GMP", "CJU", VALID_DATE)).hasStatusOk().bodyText().doesNotContain("kac-test-key");
         assertThat(output).doesNotContain("kac-test-key");
+    }
+
+    @Test
+    void 공항공사가_HTTP_200으로_오류를_주면_기록에_오류_이름을_남긴다(CapturedOutput output) {
+        twoMolitFlights();
+        kacPages.set(List.of("""
+                {"OpenAPI_ServiceResponse":{"cmmMsgHeader":{"errMsg":"LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR","returnReasonCode":"22"}}}"""));
+
+        var result = search("GMP", "CJU", VALID_DATE).exchange();
+
+        assertThat(result).hasStatusOk();
+        assertThat(result).bodyJson().extractingPath("$.flights").asArray().hasSize(2);
+        assertThat(result).bodyJson().extractingPath("$.flights[0].aircraftCode").isEqualTo("");
+        assertThat(output).contains("LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR").doesNotContain("kac-test-key");
+    }
+
+    // ── 오늘 검색이면 이미 떠난 편은 뺀다 ──
+
+    static final LocalDateTime TODAY_2PM = LocalDateTime.of(2026, 11, 9, 14, 0);
+    static final List<Flight> ONE_PM_AND_THREE_PM = List.of(
+            new Flight("제주항공", "7C101", "13:00", "14:10", "1시간 10분", "", "", false),
+            new Flight("진에어", "LJ303", "15:00", "16:10", "1시간 10분", "", "", false));
+
+    @Test
+    void 오늘_14시면_13시_편은_빠지고_15시_편은_남는다() {
+        assertThat(FlightController.notDeparted(ONE_PM_AND_THREE_PM, TODAY_2PM.toLocalDate(), TODAY_2PM))
+                .extracting(Flight::flightNumber).containsExactly("LJ303");
+    }
+
+    @Test
+    void 내일_날짜면_아무것도_빼지_않는다() {
+        assertThat(FlightController.notDeparted(ONE_PM_AND_THREE_PM, TODAY_2PM.toLocalDate().plusDays(1), TODAY_2PM))
+                .hasSize(2);
+    }
+
+    @Test
+    void 오늘_편이_전부_떠났으면_빈_목록() {
+        LocalDateTime night = TODAY_2PM.withHour(23);
+        assertThat(FlightController.notDeparted(ONE_PM_AND_THREE_PM, night.toLocalDate(), night)).isEmpty();
     }
 
     // ── 도우미 ──

@@ -1,6 +1,8 @@
 package com.example.seatMe.flight;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeParseException;
 import java.util.List;
@@ -44,13 +46,16 @@ public class FlightController {
                               @RequestParam(required = false) String to,
                               @RequestParam(required = false) String date) {
         LocalDate day = parseDate(date);
+        LocalDate today = LocalDate.now(KST);
+        // 날짜는 오늘 ~ 1년 뒤. 더 먼 날짜(+12345-01-01 같은 것)는 국토부에 묻지 않는다 (명세서 2번)
         boolean valid = isAirport(from) && isAirport(to) && !from.equals(to)
-                && day != null && !day.isBefore(LocalDate.now(KST));
+                && day != null && !day.isBefore(today) && !day.isAfter(today.plusYears(1));
         if (!valid) {
             return ResponseEntity.badRequest().body(Map.of("error", "INVALID_QUERY"));
         }
         try {
-            List<Flight> flights = molit.search(MOLIT_AIRPORT_ID.get(from), MOLIT_AIRPORT_ID.get(to), day);
+            List<Flight> flights = notDeparted(
+                    molit.search(MOLIT_AIRPORT_ID.get(from), MOLIT_AIRPORT_ID.get(to), day), day, LocalDateTime.now(KST));
             // 항공편이 있을 때만 공항공사에 묻고, 편명 + 가장 가까운 출발 시각으로 합친다 (명세서 6번). 답이 없으면 기종만 빈 채로 나간다.
             Map<String, List<KacAircraftResponse.Item>> records =
                     flights.isEmpty() ? Map.of() : aircraftTypes.findByRoute(from, to, day);
@@ -62,6 +67,16 @@ public class FlightController {
             log.warn("국토부 응답 실패 → 502: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of("error", "UPSTREAM_UNAVAILABLE"));
         }
+    }
+
+    /** 오늘 검색이면 이미 떠난 편(출발 시각이 지금이거나 그 전)을 뺀다. 다 빠지면 빈 목록 → 상황 ① (명세서 2 · 4번). */
+    static List<Flight> notDeparted(List<Flight> flights, LocalDate day, LocalDateTime now) {
+        if (!day.equals(now.toLocalDate())) {
+            return flights;
+        }
+        return flights.stream()
+                .filter(flight -> LocalTime.parse(flight.departureTime()).isAfter(now.toLocalTime()))
+                .toList();
     }
 
     private static boolean isAirport(String code) {

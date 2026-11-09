@@ -6,69 +6,22 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-// 편명을 받으면 기종을 찾아주는 서비스 (팀원이 사용할 기능)
+// 노선 하루치 기종 기록을 모아 국토부 항공편과 짝짓는 서비스
 @Service
 public class AircraftTypeService {
 
-    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
     private static final DateTimeFormatter API_TIME = DateTimeFormatter.ofPattern("yyyyMMddHHmm");
-    private static final DateTimeFormatter SHOW_TIME = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private static final int SEARCH_DAYS = 7; // API가 기종을 알려주는 범위: 오늘 ~ 7일 뒤 (2026-11-07 실제 확인, 8일 뒤부터 0건)
 
     private final AircraftTypeClient aircraftTypeClient;
 
     public AircraftTypeService(AircraftTypeClient aircraftTypeClient) {
         this.aircraftTypeClient = aircraftTypeClient;
-    }
-
-    /**
-     * 팀원용: 편명 + 날짜 → 기종 코드
-     * @return 기종 코드 (예: "A321"). 못 찾으면 null
-     */
-    public String findAircraftType(String flightNo, LocalDate date) {
-        AircraftTypeResult result = find(flightNo, date);
-        return result == null ? null : result.aircraftType();
-    }
-
-    /**
-     * 편명으로 항공편과 기종을 찾아요.
-     * @param flightNo 편명 (예: "RS6347", 소문자도 가능)
-     * @param date     운항 날짜. null이면 오늘 ~ 7일 뒤 중 가장 가까운 출발편
-     * @return 조회 결과. 못 찾으면 null
-     */
-    public AircraftTypeResult find(String flightNo, LocalDate date) {
-        String fln = flightNo.trim().toUpperCase();
-
-        LocalDate start = (date != null) ? date : LocalDate.now(KST);
-        LocalDate end = (date != null) ? date : start.plusDays(SEARCH_DAYS);
-        String from = start.format(DateTimeFormatter.BASIC_ISO_DATE) + "0000";
-        String to = end.format(DateTimeFormatter.BASIC_ISO_DATE) + "2359";
-        String now = LocalDateTime.now(KST).format(API_TIME);
-
-        return aircraftTypeClient.search(fln, from, to).stream()
-                // 1) 편명이 정확히 같고, 시각과 기종 정보가 있는 것만
-                .filter(item -> fln.equalsIgnoreCase(item.airFln()))
-                .filter(item -> item.std() != null)
-                .filter(item -> item.icaoApmCd() != null && !item.icaoApmCd().isBlank())
-                // 2) 날짜를 안 줬으면 아직 출발 전인 편만
-                .filter(item -> date != null || item.std().compareTo(now) >= 0)
-                // 3) 출발 기록(O) 먼저, 그다음 빠른 시각 순
-                .min(Comparator.comparing((KacAircraftResponse.Item item) -> !"O".equals(item.io()))
-                        .thenComparing(KacAircraftResponse.Item::std))
-                .map(item -> new AircraftTypeResult(
-                        item.airFln(),
-                        toShowTime(item.std()),
-                        "O".equals(item.io()) ? item.airport() : item.city(),
-                        "O".equals(item.io()) ? item.city() : item.airport(),
-                        item.icaoApmCd()))
-                .orElse(null);
     }
 
     /**
@@ -103,14 +56,5 @@ public class AircraftTypeService {
                         Duration.between(dep, LocalDateTime.parse(item.std(), API_TIME).toLocalTime()).abs()))
                 .map(KacAircraftResponse.Item::icaoApmCd)
                 .orElse(null);
-    }
-
-    // "202611110600" → "2026-11-11 06:00"
-    private String toShowTime(String std) {
-        try {
-            return LocalDateTime.parse(std, API_TIME).format(SHOW_TIME);
-        } catch (Exception e) {
-            return std;
-        }
     }
 }
