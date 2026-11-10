@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import com.example.seatMe.aircraft.AircraftTypeService;
 import com.example.seatMe.aircraft.KacAircraftResponse;
+import com.example.seatMe.seatmap.SeatMapRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -36,9 +37,12 @@ public class FlightController {
     private final MolitClient molit;
     private final AircraftTypeService aircraftTypes;
 
-    FlightController(MolitClient molit, AircraftTypeService aircraftTypes) {
+    private final SeatMapRepository seatMaps;
+
+    FlightController(MolitClient molit, AircraftTypeService aircraftTypes, SeatMapRepository seatMaps) {
         this.molit = molit;
         this.aircraftTypes = aircraftTypes;
+        this.seatMaps = seatMaps;
     }
 
     @GetMapping("/api/flights")
@@ -60,13 +64,24 @@ public class FlightController {
             Map<String, List<KacAircraftResponse.Item>> records =
                     flights.isEmpty() ? Map.of() : aircraftTypes.findByRoute(from, to, day);
             return ResponseEntity.ok(Map.of("flights", flights.stream()
-                    .map(flight -> flight.withAircraftCode(AircraftTypeService.nearestAircraftType(
+                    .map(flight -> withSeatMaps(flight, AircraftTypeService.nearestRecord(
                             records.get(flight.flightNumber()), flight.departureTime())))
                     .toList()));
         } catch (MolitClient.UpstreamException e) {
             log.warn("국토부 응답 실패 → 502: {}", e.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body(Map.of("error", "UPSTREAM_UNAVAILABLE"));
         }
+    }
+
+    /** 기록이 없으면 항공편 그대로. 있으면 편명 앞 두 글자(항공사) + 기종 + 등록번호로 배치도 후보를 붙인다. */
+    private Flight withSeatMaps(Flight flight, KacAircraftResponse.Item record) {
+        if (record == null) {
+            return flight;
+        }
+        String number = flight.flightNumber();
+        String airline = number.length() < 2 ? null : number.substring(0, 2);
+        var candidates = seatMaps.candidatesFor(airline, record.icaoApmCd(), record.aplRegNo());
+        return flight.withAircraft(record.icaoApmCd(), candidates.ids(), candidates.confirmed());
     }
 
     /** 오늘 검색이면 이미 떠난 편(출발 시각이 지금이거나 그 전)을 뺀다. 다 빠지면 빈 목록 → 상황 ①. */
