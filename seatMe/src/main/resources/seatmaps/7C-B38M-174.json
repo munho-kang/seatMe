@@ -1,0 +1,84 @@
+{
+  "id": "7C-B38M-174",
+  "airline": "7C",
+  "aircraftCodes": [
+    "B38M"
+  ],
+  "name": "B737-8 (174석)",
+  "order": 2,
+  "officialSeats": [
+    174
+  ],
+  "registrations": [],
+  "source": "https://www.jejuair.net/ko/about/corp/page.do",
+  "checkedOn": "2026-11-10",
+  "cabins": [
+    {
+      "class": "business",
+      "fromRow": 1,
+      "toRow": 3,
+      "seats": "AC DF"
+    },
+    {
+      "class": "economy",
+      "fromRow": 6,
+      "toRow": 32,
+      "seats": "ABC DEF"
+    }
+  ],
+  "exitRows": [
+    15,
+    16
+  ],
+  "extraLegroom": [],
+  "overWing": null,
+  "noWindow": [
+    "10A",
+    "11A",
+    "10F",
+    "11F"
+  ],
+  "noRecline": null,
+  "facilities": [
+    {
+      "type": "lavatory",
+      "afterRow": 0,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 0,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 14,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 15,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 32,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 32,
+      "side": "both"
+    },
+    {
+      "type": "galley",
+      "afterRow": 32,
+      "side": "center"
+    }
+  ]
+}

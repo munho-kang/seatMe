@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatIllegalStateException;
 import com.example.seatMe.seatmap.SeatMapRepository.Candidates;
 import java.util.List;
 import org.junit.jupiter.api.Test;
-import tools.jackson.databind.json.JsonMapper;
 
 class SeatMapRepositoryTest {
 
@@ -83,7 +82,7 @@ class SeatMapRepositoryTest {
                 .withMessageContaining("XX-A320-1").withCauseInstanceOf(IllegalArgumentException.class);
     }
     @Test void 파일이_하나도_없어도_시작한다() {
-        SeatMapRepository empty = new SeatMapRepository(JsonMapper.builder().build());
+        SeatMapRepository empty = new SeatMapRepository(List.of()); // 실제 seatmaps 폴더에는 이제 파일이 있다
         assertThat(empty.all()).isEmpty();
         assertThat(empty.candidatesFor("KE", "A333", null)).isEqualTo(new Candidates(List.of(), false));
     }
