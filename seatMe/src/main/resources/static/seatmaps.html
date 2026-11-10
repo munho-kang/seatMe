@@ -31,7 +31,10 @@
   .seat b { font-size:13px; }
   .gap { border:1px dotted var(--line); opacity:.6; }
   .seat.exit { border:3px solid var(--exit); padding:0; }
+  .seat { position:relative; }
   .seat.leg { background:var(--leg); }
+  .lg { position:absolute; top:1px; right:2px; font-size:9px; font-weight:bold; color:var(--fg); }
+  .lgk { font-weight:bold; background:var(--leg); border:1px solid var(--line); padding:0 3px; font-size:11px; }
   .marks { display:flex; justify-content:center; gap:1px; }
   .marks i, i.k { font-style:normal; font-size:9px; width:10px; height:11px; line-height:11px; border-radius:2px; }
   .marks i.on, i.k.on { background:var(--fg); color:var(--bg); font-weight:bold; }
@@ -53,7 +56,7 @@
   <span>빈 칸 사이 = 통로</span>
   <span>점선 빈 네모 = 없는 좌석</span>
   <span><b style="border:3px solid var(--exit);padding:0 4px">□</b> 비상구열 (열 번호 밑에 "비상구")</span>
-  <span><b style="background:var(--leg);padding:0 4px;border:1px solid var(--line)">□</b> 다리 공간 넓음</span>
+  <span><b class="lgk">넓</b> 다리 공간 넓음 (파란 바탕 + 오른쪽 위 "넓")</span>
   <span>작은 칸 순서: <b>창</b> · <b>날</b> · <b>등</b></span>
   <span><i class="k on">창</i> 창가인데 창문 없음</span>
   <span><i class="k on">날</i> 날개 위</span>
@@ -165,6 +168,7 @@ function triText(v, yes, no) { return v === null ? '모름' : v ? yes : no; }
 function seatBox(s) {
   const box = el('div', 'seat' + (s.exitRow ? ' exit' : '') + (s.extraLegroom ? ' leg' : ''));
   box.appendChild(el('b', '', s.column));
+  if (s.extraLegroom) { const g = el('span', 'lg', '넓'); g.setAttribute('title', '다리 공간 넓음'); box.appendChild(g); }
   const noWin = s.position === 'window' && s.hasWindow === false;
   const winUnk = s.position === 'window' && s.hasWindow === null;
   const marks = el('div', 'marks');
@@ -206,13 +210,17 @@ function draw(map) {
     if (!after.has(f.afterRow)) after.set(f.afterRow, []);
     after.get(f.afterRow).push(f);
   }
-  const band = n => { if (after.has(n)) plan.appendChild(facilityBand(after.get(n))); };
+  const band = n => {                         // 한 번 그린 시설은 지운다 -> 두 번 그려지지도, 빠지지도 않는다
+    if (!after.has(n)) return;
+    plan.appendChild(facilityBand(after.get(n)));
+    after.delete(n);
+  };
   band(0);
   for (const cabin of map.cabins) {
     plan.appendChild(el('div', 'cabin', (CLASS_NAME[cabin.class] || cabin.class) + ' · ' + cabin.fromRow + '~' + cabin.toRow + '열 · ' + cabin.seats));
     for (let r = cabin.fromRow; r <= cabin.toRow; r++) {
       const present = [...cabin.seats].some(c => c !== ' ' && bySeat.has(r + c));
-      if (!present) continue;                 // 열 전체가 없으면 줄도 없다
+      if (!present) { band(r); continue; }    // 열 전체가 없으면 줄은 없지만 그 뒤 시설 띠는 그린다
       const row = el('div', 'row');
       const num = el('div', 'num', String(r));
       if ([...cabin.seats].some(c => bySeat.get(r + c)?.exitRow)) num.appendChild(el('small', '', '비상구'));
@@ -225,6 +233,15 @@ function draw(map) {
       }
       plan.appendChild(row);
       band(r);
+    }
+  }
+  if (after.size) {                           // 어느 열에도 안 맞는 afterRow
+    plan.appendChild(el('div', 'cabin', '위치를 못 찾은 시설 (afterRow가 그려진 열이 아님)'));
+    for (const n of [...after.keys()]) {
+      const note = el('div', '', 'afterRow ' + n + ':');
+      note.style.cssText = 'font-size:12px;margin-left:48px';
+      plan.appendChild(note);
+      band(n);
     }
   }
 }
