@@ -30,7 +30,10 @@
     16
   ],
   "extraLegroom": [],
-  "overWing": null,
+  "overWing": {
+    "fromRow": 12,
+    "toRow": 18
+  },
   "noWindow": [
     "10A",
     "11A",
