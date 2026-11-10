@@ -44,8 +44,8 @@ public record SeatMap(
     private static final Set<String> SIDES = Set.of("left", "right", "center", "both");
     private static final Pattern REF = Pattern.compile("(\\d+)([A-Z]?)");
 
-    /** 열 하나: 열 번호, 어느 객실인지, 그 열의 글자 묶음. */
-    private record Row(int number, SeatMapFile.Cabin cabin, List<String> letters) {}
+    /** 열 하나: 열 번호, 어느 객실인지, 선언된 글자 묶음, 그 열에서 빠진 좌석 번호. */
+    private record Row(int number, SeatMapFile.Cabin cabin, List<String> letters, Set<String> missing) {}
 
     /** 틀린 파일이면 "<id>: …" 메시지의 IllegalArgumentException으로 멈춘다. */
     public static SeatMap from(SeatMapFile f) {
@@ -85,6 +85,7 @@ public record SeatMap(
                     String position = window ? "window"
                             : (c == 0 || c == group.length() - 1) ? "aisle" : "middle";
                     String seatId = r.number() + group.substring(c, c + 1);
+                    if (r.missing().contains(seatId)) continue;
                     if (ids.contains(seatId)) throw bad(id, "좌석 번호가 겹친다: " + seatId);
                     ids.add(seatId);
                     seats.add(new Seat(seatId, r.number(), group.substring(c, c + 1), r.cabin().cabinClass(), side,
@@ -146,13 +147,7 @@ public record SeatMap(
             for (int n = c.fromRow(); n <= c.toRow(); n++) {
                 if (missingRows.contains(n)) continue;
                 final int row = n;
-                List<String> kept = new ArrayList<>();
-                for (String g : groups) {
-                    String left = g.chars().mapToObj(ch -> String.valueOf((char) ch))
-                            .filter(l -> !missingSeats.contains(row + l)).reduce("", String::concat);
-                    kept.add(left);
-                }
-                rows.add(new Row(n, c, kept));
+                rows.add(new Row(n, c, List.of(groups), missingSeats));
             }
         }
         return rows;

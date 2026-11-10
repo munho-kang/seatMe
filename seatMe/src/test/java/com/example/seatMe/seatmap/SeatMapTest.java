@@ -101,6 +101,18 @@ class SeatMapTest {
                 .containsExactly("1:false", "7:true", "8:true", "28:true", "29:true", "30:false");
     }
 
+    @Test void 빠진_좌석이_있어도_옆_좌석의_자리는_그대로다() {
+        String json = with(WIDE, "cabins", """
+                [{ "class": "economy", "fromRow": 7, "toRow": 8, "seats": "ABC DEF", "missing": ["7A", "7C", "7F"] }]""");
+        SeatMap m = SeatMap.from(JSON.readValue(json, SeatMapFile.class));
+        assertThat(List.of("7B", "7D", "7E"))
+                .extracting(id -> seat(m, id).side() + "/" + seat(m, id).position() + "/" + seat(m, id).hasWindow())
+                .containsExactly("left/middle/false", "right/aisle/false", "right/middle/false");
+        assertThat(m.seats()).extracting(SeatMap.Seat::seat).doesNotContain("7A", "7C", "7F");
+        assertThatIllegalArgumentException().isThrownBy(() -> map(with(json, "noWindow", "[\"7B\"]")))
+                .withMessageContaining("XX-");
+    }
+
     @Test void 공개한_특징은_참_거짓으로_나간다() {
         SeatMap m = map(BASE);
         assertThat(List.of("8A", "8F", "29A", "29F", "7A", "7B")).extracting(id -> seat(m, id).hasWindow())
