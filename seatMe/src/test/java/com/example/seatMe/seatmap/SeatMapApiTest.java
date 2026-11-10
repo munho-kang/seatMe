@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
  *   항공사가 공개하지 않은 특징("모름")은 null로 나가고, 칸 이름(키)은 그대로 남는다.
  * - 없는 id · 소문자 id · 아주 긴 id → 404 {"error": "SEAT_MAP_NOT_FOUND"} (500이 아니다).
  * - GET /api/seatmaps: 200 {"seatMaps": [{id, airline, aircraft, name, seatCount}]} — 요약만, 항공사 → 순서 → id 차례.
+ * - /seatmaps.html: 확인용 미리보기 화면. 위 두 창구로 어떤 배치도든 그려서 항공사 공식 그림과 눈으로 비교한다 (#<id>로 바로 열림).
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -37,6 +38,10 @@ class SeatMapApiTest {
                 "seat", "row", "column", "cabin", "side", "position", "hasWindow", "overWing",
                 "exitRow", "zone", "nearLavatory", "noRecline", "extraLegroom");
         assertThat(result).bodyJson().extractingPath("$.cabins[0]").asMap().containsOnlyKeys("class", "fromRow", "toRow", "seats");
+    }
+
+    @Test void 미리보기_화면이_열린다() {
+        assertThat(mvc.get().uri("/seatmaps.html")).hasStatusOk().bodyText().contains("/api/seatmaps");
     }
 
     @Test void 없는_id면_404() {

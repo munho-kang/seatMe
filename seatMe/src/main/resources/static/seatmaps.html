@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>좌석 배치도 확인용 미리보기</title>
+<style>
+  :root { --bg:#fff; --fg:#1a1a1a; --muted:#595959; --line:#c8c8c8; --seat:#eef1f5;
+          --exit:#d9480f; --link:#0b5cad; --leg:#dbeafe; --unk:#8a8a8a; --band:#fff4d6; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#16181c; --fg:#ececec; --muted:#a8a8a8; --line:#4a4d54; --seat:#2a2e36;
+            --exit:#ff8f5a; --link:#7cb7ff; --leg:#1e3a5f; --unk:#9a9a9a; --band:#4a3d12; }
+  }
+  body { margin:0; padding:16px; background:var(--bg); color:var(--fg); font:14px/1.5 system-ui, sans-serif; }
+  h1 { font-size:18px; margin:0 0 8px; }
+  select { font:inherit; max-width:100%; padding:4px; }
+  a { color:var(--link); }
+  #msg { margin:12px 0; font-weight:bold; }
+  #head p { margin:2px 0; }
+  .legend { margin:12px 0; padding:8px; border:1px solid var(--line); display:flex; flex-wrap:wrap; gap:6px 16px; }
+
+  #wrap { overflow-x:auto; padding-bottom:8px; }
+  #plan { width:fit-content; min-width:0; }
+  .row { display:flex; align-items:center; gap:2px; margin:2px 0; }
+  .num { width:46px; text-align:right; padding-right:6px; font-weight:bold; flex:none; font-size:13px; }
+  .num small { display:block; color:var(--exit); font-size:10px; line-height:1; }
+  .aisle { width:18px; flex:none; }
+  .seat, .gap { width:42px; height:40px; flex:none; box-sizing:border-box; border-radius:4px; }
+  .seat { background:var(--seat); border:1px solid var(--line); text-align:center; line-height:1;
+          display:flex; flex-direction:column; justify-content:space-between; padding:2px 0; }
+  .seat b { font-size:13px; }
+  .gap { border:1px dotted var(--line); opacity:.6; }
+  .seat.exit { border:3px solid var(--exit); padding:0; }
+  .seat.leg { background:var(--leg); }
+  .marks { display:flex; justify-content:center; gap:1px; }
+  .marks i, i.k { font-style:normal; font-size:9px; width:10px; height:11px; line-height:11px; border-radius:2px; }
+  .marks i.on, i.k.on { background:var(--fg); color:var(--bg); font-weight:bold; }
+  .marks i.unk, i.k.unk { border:1px dashed var(--unk); color:var(--unk); background:repeating-linear-gradient(45deg, transparent 0 2px, var(--line) 2px 3px); line-height:9px; }
+  .band { display:flex; justify-content:space-between; margin:3px 0 3px 48px; padding:2px 8px; min-height:22px;
+          background:var(--band); border:1px solid var(--line); border-radius:4px; font-size:12px; }
+  .band span { flex:1; } .band .c { text-align:center; } .band .r { text-align:right; }
+  .cabin { margin:12px 0 6px; padding-top:4px; border-top:3px double var(--fg); font-weight:bold; }
+</style>
+</head>
+<body>
+<h1>좌석 배치도 확인용 미리보기</h1>
+<p>개발용 화면이에요. <code>/api/seatmaps</code>의 데이터를 그대로 그려서 항공사 공식 그림과 눈으로 비교해요.</p>
+<label>배치 고르기: <select id="pick"></select></label>
+<div id="msg" role="status"></div>
+<div id="head"></div>
+<div class="legend" id="legend" hidden>
+  <span>줄 앞 숫자 = 열 번호</span>
+  <span>빈 칸 사이 = 통로</span>
+  <span>점선 빈 네모 = 없는 좌석</span>
+  <span><b style="border:3px solid var(--exit);padding:0 4px">□</b> 비상구열 (열 번호 밑에 "비상구")</span>
+  <span><b style="background:var(--leg);padding:0 4px;border:1px solid var(--line)">□</b> 다리 공간 넓음</span>
+  <span>작은 칸 순서: <b>창</b> · <b>날</b> · <b>등</b></span>
+  <span><i class="k on">창</i> 창가인데 창문 없음</span>
+  <span><i class="k on">날</i> 날개 위</span>
+  <span><i class="k on">등</i> 등받이 고정</span>
+  <span><i class="k unk">?</i> 모름 (항공사가 공개 안 함)</span>
+  <span>빈 작은 칸 = 해당 없음 (공개됨)</span>
+  <span>노란 띠 = 화장실 · 갤리 · 비상구 (왼쪽 / 가운데 / 오른쪽), 띠는 위 열 바로 뒤</span>
+  <span>굵은 이중선 = 객실 등급 바뀜</span>
+</div>
+<div id="wrap"><div id="plan"></div></div>
+<script>
+// 데이터는 전부 textContent / setAttribute로만 넣는다 (innerHTML 안 씀).
+const $ = id => document.getElementById(id);
+const CLASS_NAME = { first: '일등석', business: '비즈니스석', premium: '프리미엄 이코노미', economy: '일반석' };
+const TYPE_NAME = { lavatory: '화장실', galley: '갤리', exit: '비상구' };
+const SIDE_NAME = { left: '왼쪽', right: '오른쪽', center: '가운데', both: '양쪽' };
+let ticket = 0;   // 늦게 도착한 옛 응답이 새 화면을 덮지 않게
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function say(text) { $('msg').textContent = text; }
+
+async function getJson(url) {
+  const res = await fetch(url);
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error('서버 응답 ' + res.status);
+  return res.json();
+}
+
+async function loadList() {
+  const data = await getJson('/api/seatmaps');
+  const pick = $('pick');
+  pick.appendChild(el('option', '', '-- 고르세요 --')).value = '';
+  let group = null;
+  for (const m of data.seatMaps) {
+    if (!group || group.label !== m.airline) {
+      group = el('optgroup');
+      group.label = m.airline;
+      pick.appendChild(group);
+    }
+    const o = el('option', '', m.name + ' · ' + m.aircraft + ' · ' + m.id);
+    o.value = m.id;
+    group.appendChild(o);
+  }
+}
+
+async function loadOne() {
+  const id = decodeURIComponent(location.hash.slice(1));
+  const mine = ++ticket;
+  $('pick').value = id;                       // 목록에 없는 id면 선택이 비워진다
+  $('head').replaceChildren(); $('plan').replaceChildren(); $('legend').hidden = true;
+  if (!id) { say('위에서 배치를 고르세요.'); return; }
+  say('불러오는 중...');
+  try {
+    const map = await getJson('/api/seatmaps/' + encodeURIComponent(id));
+    if (mine !== ticket) return;
+    if (!map) { say('없는 배치도예요: ' + id); return; }
+    say('');
+    draw(map);
+  } catch (e) {
+    if (mine === ticket) say('불러오지 못했어요: ' + e.message);
+  }
+}
+
+// 한 특징(창문/날개/등받이)이 공개인지: 대상 좌석 값이 하나라도 null이 아니면 공개
+function featureLine(label, values, trueText) {
+  const known = values.filter(v => v !== null);
+  if (values.length && !known.length) return label + ': 모름 (공개 안 함)';
+  return label + ': 공개 (' + trueText + ' ' + known.filter(v => v === true).length + '개)';
+}
+
+function drawHead(map) {
+  const h = $('head');
+  h.appendChild(el('h2', '', map.name)).style.cssText = 'font-size:16px;margin:12px 0 4px';
+  h.appendChild(el('p', '', map.aircraft + ' · ' + map.seatCount + '석 · 확인한 날 ' + map.checkedOn + ' · id ' + map.id));
+  const p = el('p', '', '출처: ');
+  if (typeof map.source === 'string' && map.source.startsWith('https://')) {
+    const a = el('a', '', map.source);
+    a.setAttribute('href', map.source);
+    a.setAttribute('target', '_blank');
+    a.setAttribute('rel', 'noopener noreferrer');
+    p.appendChild(a);
+  } else {
+    p.appendChild(document.createTextNode(String(map.source)));
+  }
+  h.appendChild(p);
+  const s = map.seats;
+  const windows = s.filter(x => x.position === 'window').map(x => x.hasWindow);
+  h.appendChild(el('p', '', [
+    featureLine('창문', windows.map(v => v === null ? null : !v), '창문 없는 좌석'),
+    featureLine('날개', s.map(x => x.overWing), '날개 위 좌석'),
+    featureLine('등받이', s.map(x => x.noRecline), '등받이 고정 좌석'),
+  ].join(' · ')));
+}
+
+function mark(on, unk, glyph, why) {
+  const i = el('i', unk ? 'unk' : on ? 'on' : '', unk ? '?' : on ? glyph : '');
+  i.setAttribute('title', why);
+  return i;
+}
+
+function triText(v, yes, no) { return v === null ? '모름' : v ? yes : no; }
+
+function seatBox(s) {
+  const box = el('div', 'seat' + (s.exitRow ? ' exit' : '') + (s.extraLegroom ? ' leg' : ''));
+  box.appendChild(el('b', '', s.column));
+  const noWin = s.position === 'window' && s.hasWindow === false;
+  const winUnk = s.position === 'window' && s.hasWindow === null;
+  const marks = el('div', 'marks');
+  marks.appendChild(mark(noWin, winUnk, '창', '창문: ' + (s.position !== 'window' ? '창가 아님' : triText(s.hasWindow, '있음', '없음'))));
+  marks.appendChild(mark(s.overWing === true, s.overWing === null, '날', '날개 위: ' + triText(s.overWing, '예', '아니오')));
+  marks.appendChild(mark(s.noRecline === true, s.noRecline === null, '등', '등받이 고정: ' + triText(s.noRecline, '예', '아니오')));
+  box.appendChild(marks);
+  box.setAttribute('title', [s.seat, s.position, s.zone,
+    s.exitRow ? '비상구열' : '', s.extraLegroom ? '다리 공간 넓음' : '', s.nearLavatory ? '화장실 근처' : '',
+    '창문 ' + (s.position !== 'window' ? '-' : triText(s.hasWindow, '있음', '없음')),
+    '날개 위 ' + triText(s.overWing, '예', '아니오'),
+    '등받이 고정 ' + triText(s.noRecline, '예', '아니오')].filter(Boolean).join(' · '));
+  return box;
+}
+
+function facilityBand(list) {
+  const band = el('div', 'band');
+  const cells = { left: el('span', 'l'), center: el('span', 'c'), right: el('span', 'r') };
+  for (const f of list) {
+    const text = TYPE_NAME[f.type] + '(' + SIDE_NAME[f.side] + ')';
+    const sides = f.side === 'both' ? ['left', 'right'] : [f.side];
+    for (const side of sides) {
+      const c = cells[side];
+      c.textContent += (c.textContent ? ', ' : '') + TYPE_NAME[f.type];
+    }
+    band.setAttribute('title', (band.getAttribute('title') || '') + text + ' ');
+  }
+  band.append(cells.left, cells.center, cells.right);
+  return band;
+}
+
+function draw(map) {
+  drawHead(map);
+  $('legend').hidden = false;
+  const plan = $('plan');
+  const bySeat = new Map(map.seats.map(s => [s.row + s.column, s]));
+  const after = new Map();                    // afterRow -> 시설들
+  for (const f of map.facilities) {
+    if (!after.has(f.afterRow)) after.set(f.afterRow, []);
+    after.get(f.afterRow).push(f);
+  }
+  const band = n => { if (after.has(n)) plan.appendChild(facilityBand(after.get(n))); };
+  band(0);
+  for (const cabin of map.cabins) {
+    plan.appendChild(el('div', 'cabin', (CLASS_NAME[cabin.class] || cabin.class) + ' · ' + cabin.fromRow + '~' + cabin.toRow + '열 · ' + cabin.seats));
+    for (let r = cabin.fromRow; r <= cabin.toRow; r++) {
+      const present = [...cabin.seats].some(c => c !== ' ' && bySeat.has(r + c));
+      if (!present) continue;                 // 열 전체가 없으면 줄도 없다
+      const row = el('div', 'row');
+      const num = el('div', 'num', String(r));
+      if ([...cabin.seats].some(c => bySeat.get(r + c)?.exitRow)) num.appendChild(el('small', '', '비상구'));
+      row.appendChild(num);
+      for (const c of cabin.seats) {
+        if (c === ' ') { row.appendChild(el('div', 'aisle')); continue; }
+        const s = bySeat.get(r + c);
+        if (s) row.appendChild(seatBox(s));
+        else { const g = el('div', 'gap'); g.setAttribute('title', r + c + ' 없는 좌석'); row.appendChild(g); }
+      }
+      plan.appendChild(row);
+      band(r);
+    }
+  }
+}
+
+$('pick').addEventListener('change', e => { location.hash = '#' + encodeURIComponent(e.target.value); });
+window.addEventListener('hashchange', loadOne);
+loadList().then(loadOne).catch(e => say('목록을 불러오지 못했어요: ' + e.message));
+</script>
+</body>
+</html>
