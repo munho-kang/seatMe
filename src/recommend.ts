@@ -22,6 +22,9 @@ export type Recommendation = {
   seatMapId: string
   sun: { left: number; right: number }
   seats: RecommendedSeat[]
+  // 출발 · 도착 공항의 기상청 예보로 만든 설명 한 줄. 이것만 서버가 문장으로 준다.
+  // 예보가 없거나(4~5일 넘는 비행 · 밤 비행 · 기상청 응답 없음) 붙일 말이 없으면 null
+  weatherNote: string | null
 }
 
 // 항공편을 고를 때 목록 화면이 주소에 실어 둔 값 (FlightResultsPage.handleSelect)

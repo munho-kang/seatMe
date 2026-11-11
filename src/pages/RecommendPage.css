@@ -7,6 +7,12 @@
   color: var(--color-primary);
 }
 
+/* 날씨 한 줄은 두 줄로 넘어갈 수 있다. 첫 카드에 붙지 않게 아래를 띄운다 */
+.recommend-weather {
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+
 .recommend-list {
   display: flex;
   flex-direction: column;
