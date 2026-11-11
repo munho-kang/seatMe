@@ -304,6 +304,16 @@ class FlightApiTest {
         assertThat(result).bodyJson().extractingPath("$.flights[1].aircraft").isEqualTo("B789"); // 표에 없으면 코드 그대로
         assertThat(result).bodyJson().extractingPath("$.flights[1].seatMapReady").isEqualTo(false);
     }
+    @Test void 배치가_여럿인_기종은_후보를_전부_주고_확정하지_않는다() {
+        molitBody.set(molitJson("""
+                {"airlineNm":"대한항공","arrPlandTime":%1$s1520,"depPlandTime":%1$s1410,"vihicleId":"KE1203"}""".formatted(VALID_DATE_MOLIT)));
+        kacPages.set(List.of(kacPage(1, kacItem("KE1203", "1410", "O", "GMP", "CJU", "A333"))));
+        var result = search("GMP", "CJU", VALID_DATE).exchange();
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMaps").asArray()
+                .containsExactly("KE-A333-272", "KE-A333-284", "KE-A333-276");
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMapConfirmed").isEqualTo(false);
+        assertThat(result).bodyJson().extractingPath("$.flights[0].aircraft").isEqualTo("A330-300");
+    }
     @Test void 가장_가까운_기록의_등록번호도_함께_넘긴다() {
         var morning = new KacAircraftResponse.Item("BX8111", "202611100745", "O", "GMP", "CJU", "A321", "HL8099");
         var evening = new KacAircraftResponse.Item("BX8111", "202611101830", "O", "GMP", "CJU", "A321", "HL7729");
