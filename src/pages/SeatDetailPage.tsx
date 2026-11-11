@@ -1,5 +1,5 @@
-import { useNavigate, useSearchParams } from 'react-router'
-import Button from '../components/Button'
+import { useSearchParams } from 'react-router'
+import '../components/Button.css'
 import RecommendStatus from '../components/RecommendStatus'
 import TabBar from '../components/TabBar'
 import { getSeatProfile } from '../mocks/seatProfile'
@@ -24,8 +24,21 @@ const TRADEOFFS: Record<Exclude<ScoreItem, 'position'>, string> = {
   quickExit: '앞쪽 출입문과 거리가 있어 빠른 하차는 보통이에요.',
 }
 
+// 항공사 공식 사이트 (편명 앞 두 글자 → 주소). SeatMe는 예매를 받지 않고 여기로 연결만 한다.
+// 좌석 배치도가 있는 9개 항공사이고, 2026-11-11에 모두 열리는 것을 확인했다
+const AIRLINE_SITES: Record<string, string | undefined> = {
+  '7C': 'https://www.jejuair.net',
+  BX: 'https://www.airbusan.com',
+  KE: 'https://www.koreanair.com',
+  LJ: 'https://www.jinair.com',
+  OZ: 'https://flyasiana.com',
+  RS: 'https://flyairseoul.com',
+  TW: 'https://www.trinityairways.com',
+  WE: 'https://www.parataair.com',
+  ZE: 'https://www.eastarjet.com',
+}
+
 function SeatDetailPage() {
-  const navigate = useNavigate()
   const [searchParams] = useSearchParams()
   const recommendation = useRecommendation(searchParams)
   // 주소의 seat이 추천 좌석이 아니면(주소를 직접 고친 경우 등) 1위 좌석을 보여 준다
@@ -45,6 +58,7 @@ function SeatDetailPage() {
 
   const seat = detail.seat
   const wantedSide = getSeatProfile().seatPosition.endsWith('window') ? '창가' : '통로'
+  const airlineSite = AIRLINE_SITES[searchParams.get('flight')?.slice(0, 2) ?? '']
 
   return (
     <main className="screen screen--tab-bar">
@@ -85,7 +99,12 @@ function SeatDetailPage() {
       </div>
 
       <footer className="screen-footer">
-        <Button onClick={() => navigate('/booking/complete')}>예매하기</Button>
+        {/* 새 탭으로 연다 (추천 좌석 번호를 보면서 예매할 수 있게). 문구는 임시다 (디자인 확인) */}
+        {airlineSite && (
+          <a className="button button--primary button--lg" href={airlineSite} target="_blank" rel="noreferrer">
+            항공사 사이트에서 예매하기
+          </a>
+        )}
       </footer>
 
       <TabBar />

@@ -13,7 +13,6 @@ import RecommendPage from './pages/RecommendPage'
 import ComparePage from './pages/ComparePage'
 import SeatDetailPage from './pages/SeatDetailPage'
 import SeatMapPage from './pages/SeatMapPage'
-import BookingCompletePage from './pages/BookingCompletePage'
 import MyTripsPage from './pages/MyTripsPage'
 import MyPage from './pages/MyPage'
 import SeatProfileEditPage from './pages/SeatProfileEditPage'
@@ -36,7 +35,6 @@ function App() {
         <Route path="/recommend/compare" element={<ComparePage />} />
         <Route path="/recommend/map" element={<SeatMapPage />} />
         <Route path="/recommend/seat" element={<SeatDetailPage />} />
-        <Route path="/booking/complete" element={<BookingCompletePage />} />
         <Route path="/trips" element={<MyTripsPage />} />
         <Route path="/my" element={<MyPage />} />
         <Route path="/my/profile" element={<SeatProfileEditPage />} />
