@@ -327,6 +327,14 @@ class FlightApiTest {
         assertThat(unknown).bodyJson().extractingPath("$.flights[0].seatMaps").asArray().hasSizeGreaterThan(1);
         assertThat(unknown).bodyJson().extractingPath("$.flights[0].seatMapConfirmed").isEqualTo(false);
     }
+    @Test void 배치가_하나뿐인_기종은_확정이다() {
+        molitBody.set(molitJson("""
+                {"airlineNm":"티웨이항공","arrPlandTime":%1$s1520,"depPlandTime":%1$s1410,"vihicleId":"TW701"}""".formatted(VALID_DATE_MOLIT)));
+        kacPages.set(List.of(kacPage(1, kacItem("TW701", "1410", "O", "GMP", "CJU", "B738"))));
+        var result = search("GMP", "CJU", VALID_DATE).exchange();
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMaps").asArray().containsExactly("TW-B738-189");
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMapConfirmed").isEqualTo(true);
+    }
     @Test void 가장_가까운_기록의_등록번호도_함께_넘긴다() {
         var morning = new KacAircraftResponse.Item("BX8111", "202611100745", "O", "GMP", "CJU", "A321", "HL8099");
         var evening = new KacAircraftResponse.Item("BX8111", "202611101830", "O", "GMP", "CJU", "A321", "HL7729");

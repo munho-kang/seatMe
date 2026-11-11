@@ -1,0 +1,81 @@
+{
+  "id": "TW-B38M-189",
+  "airline": "TW",
+  "aircraftCodes": [
+    "B38M"
+  ],
+  "name": "B737-8 (189)",
+  "order": 2,
+  "officialSeats": [
+    189
+  ],
+  "registrations": [],
+  "source": "https://www.trinityairways.com/app/serviceInfo/contents/1322",
+  "checkedOn": "2026-11-11",
+  "cabins": [
+    {
+      "class": "economy",
+      "fromRow": 1,
+      "toRow": 32,
+      "seats": "ABC DEF",
+      "missing": [
+        "1D",
+        "1E",
+        "1F"
+      ]
+    }
+  ],
+  "exitRows": [
+    15,
+    16
+  ],
+  "extraLegroom": null,
+  "overWing": {
+    "fromRow": 12,
+    "toRow": 19
+  },
+  "noWindow": null,
+  "noRecline": null,
+  "facilities": [
+    {
+      "type": "lavatory",
+      "afterRow": 0,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 0,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 14,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 15,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 32,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 32,
+      "side": "both"
+    },
+    {
+      "type": "galley",
+      "afterRow": 32,
+      "side": "center"
+    }
+  ]
+}
