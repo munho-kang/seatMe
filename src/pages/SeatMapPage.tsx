@@ -5,13 +5,10 @@ import planeIcon from '../assets/icon-plane-large.svg'
 import Button from '../components/Button'
 import StatusMessage from '../components/StatusMessage'
 import TabBar from '../components/TabBar'
+import { useRecommendation } from '../recommend'
 import { CABIN_NAMES, describeSeat, getWingCaption, type Seat, type SeatMap } from '../seatMap'
 import { useJson } from '../useJson'
 import './SeatMapPage.css'
-
-// 추천 계산(할일 04번) 전까지 쓰는 Figma(2014:1096) 가짜 추천 좌석. 비교표와 같은 12A/11A/14A이고,
-// 실제 배치도에 있는 좌석만 표시한다 (대한항공처럼 28열부터 시작하는 배치에는 추천 표시가 없다)
-const RECOMMENDED_SEATS = ['12A', '11A', '14A']
 
 const FACILITY_NAMES = { lavatory: '화장실', galley: '갤리', exit: '비상구' }
 
@@ -23,7 +20,10 @@ function SeatPlan({ seatMap }: { seatMap: SeatMap }) {
   const [viewedSeat, setViewedSeat] = useState<string>()
 
   const seats = new Map(seatMap.seats.map((seat) => [seat.seat, seat]))
-  const recommendedSeats = RECOMMENDED_SEATS.filter((seat) => seats.has(seat))
+  // 추천 TOP 3. 주소의 seatMap으로 계산하니 다른 배치를 고르면 그 배치로 다시 계산된다.
+  // 추천을 못 받았으면(불러오는 중 · 실패) 추천 표시 없이 배치도만 보여 준다
+  const recommendation = useRecommendation(searchParams)
+  const recommendedSeats = (recommendation?.seats ?? []).map((item) => item.seat).filter((seat) => seats.has(seat))
   const seatParam = searchParams.get('seat')
   const selectedSeat = seatParam && recommendedSeats.includes(seatParam) ? seatParam : recommendedSeats.at(0)
   const viewed = seats.get(viewedSeat ?? '') ?? seats.get(selectedSeat ?? '')
@@ -221,7 +221,7 @@ function SeatMapPage() {
           </Button>
         </StatusMessage>
       ) : seatMap === undefined ? (
-        <p className="seat-map-loading" aria-busy="true">
+        <p className="loading-text" aria-busy="true">
           좌석 배치도를 불러오고 있어요
         </p>
       ) : seatMap === null ? (

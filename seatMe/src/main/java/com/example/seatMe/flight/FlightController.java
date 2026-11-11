@@ -49,12 +49,8 @@ public class FlightController {
     ResponseEntity<?> flights(@RequestParam(required = false) String from,
                               @RequestParam(required = false) String to,
                               @RequestParam(required = false) String date) {
-        LocalDate day = parseDate(date);
-        LocalDate today = LocalDate.now(KST);
-        // 날짜는 오늘 ~ 1년 뒤. 더 먼 날짜(+12345-01-01 같은 것)는 국토부에 묻지 않는다
-        boolean valid = isAirport(from) && isAirport(to) && !from.equals(to)
-                && day != null && !day.isBefore(today) && !day.isAfter(today.plusYears(1));
-        if (!valid) {
+        LocalDate day = validDay(from, to, date);
+        if (day == null) {
             return ResponseEntity.badRequest().body(Map.of("error", "INVALID_QUERY"));
         }
         try {
@@ -92,6 +88,16 @@ public class FlightController {
         return flights.stream()
                 .filter(flight -> LocalTime.parse(flight.departureTime()).isAfter(now.toLocalTime()))
                 .toList();
+    }
+
+    /** from · to · date가 규칙에 맞으면 그 날짜, 아니면 null. /api/recommend도 같은 규칙을 쓴다. */
+    public static LocalDate validDay(String from, String to, String date) {
+        LocalDate day = parseDate(date);
+        LocalDate today = LocalDate.now(KST);
+        // 날짜는 오늘 ~ 1년 뒤. 더 먼 날짜(+12345-01-01 같은 것)는 국토부에 묻지 않는다
+        boolean valid = isAirport(from) && isAirport(to) && !from.equals(to)
+                && day != null && !day.isBefore(today) && !day.isAfter(today.plusYears(1));
+        return valid ? day : null;
     }
 
     private static boolean isAirport(String code) {

@@ -146,7 +146,12 @@ function FlightResultsPage() {
 
       {selectedFlight && selectedDeparture && (
         <footer className="screen-footer flight-list-footer">
-          <Button onClick={() => navigate(`/flight/trip?${searchParams}`)}>다음</Button>
+          {/* 좌석 배치도가 없는 편("추천 준비 중")은 추천을 계산할 수 없어 넘어가지 못한다. 문구는 임시다 (디자인 확인) */}
+          {searchParams.get('seatMap') ? (
+            <Button onClick={() => navigate(`/flight/trip?${searchParams}`)}>다음</Button>
+          ) : (
+            <Button disabled>이 항공편은 아직 추천을 준비 중이에요</Button>
+          )}
         </footer>
       )}
 

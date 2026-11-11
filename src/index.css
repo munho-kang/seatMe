@@ -243,6 +243,14 @@ a {
 }
 
 /* 항공편 결과 · 내 여행의 Empty / Error / Loading 화면 */
+/* 불러오는 중 한 줄 (좌석 배치도 · 추천 결과) */
+.loading-text {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--color-section);
+}
+
 .screen--status {
   padding-bottom: var(--tab-bar-height);
 }

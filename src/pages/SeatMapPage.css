@@ -38,13 +38,6 @@
   color: inherit;
 }
 
-.seat-map-loading {
-  font-size: 13px;
-  font-weight: 500;
-  line-height: 20px;
-  color: var(--color-section);
-}
-
 .seat-map {
   display: flex;
   flex-direction: column;

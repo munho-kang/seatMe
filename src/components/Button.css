@@ -83,7 +83,8 @@
   color: var(--color-text);
 }
 
-.button--pill.button--primary:disabled {
+.button--pill.button--primary:disabled,
+.button--lg.button--primary:disabled {
   background: var(--color-surface-muted);
   color: var(--color-primary);
   cursor: default;
