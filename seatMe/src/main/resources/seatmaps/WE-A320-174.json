@@ -1,0 +1,68 @@
+{
+  "id": "WE-A320-174",
+  "airline": "WE",
+  "aircraftCodes": [
+    "A320"
+  ],
+  "name": "A320 (컴포트 174석)",
+  "order": 1,
+  "officialSeats": [
+    174
+  ],
+  "registrations": [],
+  "source": "https://www.parataair.com/ko/contents/information/showAircraftSeatInfomation.do?tab=1",
+  "checkedOn": "2026-11-11",
+  "cabins": [
+    {
+      "class": "economy",
+      "fromRow": 21,
+      "toRow": 49,
+      "seats": "ABC HJK"
+    }
+  ],
+  "exitRows": [
+    31,
+    32
+  ],
+  "extraLegroom": null,
+  "overWing": null,
+  "noWindow": null,
+  "noRecline": null,
+  "facilities": [
+    {
+      "type": "lavatory",
+      "afterRow": 0,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 30,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 31,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 49,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 49,
+      "side": "right"
+    },
+    {
+      "type": "galley",
+      "afterRow": 49,
+      "side": "center"
+    }
+  ]
+}

@@ -29,6 +29,7 @@ public record KacAircraftResponse(
             String io,         // O = 출발, I = 도착
             String airport,    // 기준공항 (예: GMP)
             String city,       // 상대공항 (예: CJU)
-            String icaoApmCd   // 기종 코드 (예: A321) ← 우리가 필요한 값
+            String icaoApmCd,  // 기종 코드 (예: A321) ← 우리가 필요한 값
+            String aplRegNo    // 등록번호 (예: HL8099). 당일 편에만 채워짐
     ) {}
 }

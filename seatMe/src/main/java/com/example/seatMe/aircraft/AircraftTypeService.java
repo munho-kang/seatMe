@@ -39,14 +39,14 @@ public class AircraftTypeService {
     }
 
     /**
-     * 같은 편명의 기록 중 출발 시각이 가장 가까운 것의 기종 코드.
+     * 같은 편명의 기록 중 출발 시각이 가장 가까운 것의 기록 자체.
      * 두 기관의 시각은 1시간쯤 어긋날 수 있어서, 딱 맞는 시각 대신 가장 가까운 시각으로 짝지어요.
      * @param records       findByRoute가 준 그 편명의 기록들 (null이면 짝 없음)
      * @param departureTime 국토부 출발 시각 "14:10"
-     * @return 기종 코드. 기록이 없으면 null
+     * @return 가장 가까운 기록. 기록이 없으면 null
      */
-    // ponytail: 기록이 하나뿐이면 시각 차이와 상관없이 그 기종을 써요. 엉뚱하게 붙는 일이 생기면 "2시간 이내만" 같은 한도를 추가.
-    public static String nearestAircraftType(List<KacAircraftResponse.Item> records, String departureTime) {
+    // ponytail: 기록이 하나뿐이면 시각 차이와 상관없이 그 기록을 써요. 엉뚱하게 붙는 일이 생기면 "2시간 이내만" 같은 한도를 추가.
+    public static KacAircraftResponse.Item nearestRecord(List<KacAircraftResponse.Item> records, String departureTime) {
         if (records == null) {
             return null;
         }
@@ -54,7 +54,6 @@ public class AircraftTypeService {
         return records.stream()
                 .min(Comparator.comparing((KacAircraftResponse.Item item) ->
                         Duration.between(dep, LocalDateTime.parse(item.std(), API_TIME).toLocalTime()).abs()))
-                .map(KacAircraftResponse.Item::icaoApmCd)
                 .orElse(null);
     }
 }

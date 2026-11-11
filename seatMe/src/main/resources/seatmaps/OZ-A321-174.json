@@ -1,0 +1,123 @@
+{
+  "id": "OZ-A321-174",
+  "airline": "OZ",
+  "aircraftCodes": [
+    "A321"
+  ],
+  "name": "A321-200 (174석)",
+  "order": 1,
+  "officialSeats": [
+    174
+  ],
+  "registrations": [],
+  "source": "https://flyasiana.com/C/KR/KO/contents/a321-100-200",
+  "checkedOn": "2026-11-11",
+  "cabins": [
+    {
+      "class": "business",
+      "fromRow": 7,
+      "toRow": 9,
+      "seats": "AB DE"
+    },
+    {
+      "class": "economy",
+      "fromRow": 28,
+      "toRow": 55,
+      "seats": "ABC DEF",
+      "missing": [
+        "31A",
+        "31F",
+        "43F",
+        "55D",
+        "55E",
+        "55F"
+      ]
+    }
+  ],
+  "exitRows": [
+    32,
+    "43B",
+    "43C",
+    "43D",
+    "43E",
+    "44F"
+  ],
+  "extraLegroom": [
+    "28",
+    "32",
+    "43A",
+    "43B",
+    "43C",
+    "43D",
+    "43E",
+    "44F"
+  ],
+  "overWing": {
+    "fromRow": 35,
+    "toRow": 42
+  },
+  "noWindow": null,
+  "noRecline": null,
+  "facilities": [
+    {
+      "type": "lavatory",
+      "afterRow": 0,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 0,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 31,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 42,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 42,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 42,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 55,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 55,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 55,
+      "side": "both"
+    },
+    {
+      "type": "galley",
+      "afterRow": 55,
+      "side": "center"
+    }
+  ]
+}

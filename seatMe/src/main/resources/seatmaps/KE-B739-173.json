@@ -1,0 +1,122 @@
+{
+  "id": "KE-B739-173",
+  "airline": "KE",
+  "aircraftCodes": [
+    "B739"
+  ],
+  "name": "737-900ER (173석)",
+  "order": 2,
+  "officialSeats": [
+    173
+  ],
+  "registrations": [],
+  "source": "https://www.koreanair.com/contents/plan-your-travel/in-flight-experience/fleet/b737/900er-173/seat-map",
+  "checkedOn": "2026-11-11",
+  "cabins": [
+    {
+      "class": "business",
+      "fromRow": 7,
+      "toRow": 8,
+      "seats": "AB DE"
+    },
+    {
+      "class": "economy",
+      "fromRow": 28,
+      "toRow": 55,
+      "seats": "ABC DEF",
+      "missing": [
+        "55A",
+        "55B",
+        "55C"
+      ]
+    }
+  ],
+  "exitRows": [
+    38,
+    39
+  ],
+  "extraLegroom": [
+    "28D",
+    "28E",
+    "28F",
+    "39"
+  ],
+  "overWing": {
+    "fromRow": 36,
+    "toRow": 43
+  },
+  "noWindow": null,
+  "noRecline": null,
+  "facilities": [
+    {
+      "type": "lavatory",
+      "afterRow": 0,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 0,
+      "side": "both"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 37,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 38,
+      "side": "both"
+    },
+    {
+      "type": "galley",
+      "afterRow": 55,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 55,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 55,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 55,
+      "side": "right"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 55,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 55,
+      "side": "both"
+    },
+    {
+      "type": "galley",
+      "afterRow": 55,
+      "side": "center"
+    }
+  ]
+}

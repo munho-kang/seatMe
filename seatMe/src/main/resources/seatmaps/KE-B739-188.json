@@ -1,0 +1,102 @@
+{
+  "id": "KE-B739-188",
+  "airline": "KE",
+  "aircraftCodes": [
+    "B739"
+  ],
+  "name": "737-900 (188석)",
+  "order": 3,
+  "officialSeats": [
+    188
+  ],
+  "registrations": [],
+  "source": "https://www.koreanair.com/contents/plan-your-travel/in-flight-experience/fleet/b737/900-188/seat-map",
+  "checkedOn": "2026-11-11",
+  "cabins": [
+    {
+      "class": "business",
+      "fromRow": 7,
+      "toRow": 8,
+      "seats": "AB DE"
+    },
+    {
+      "class": "economy",
+      "fromRow": 28,
+      "toRow": 57,
+      "seats": "ABC DEF"
+    }
+  ],
+  "exitRows": [
+    39,
+    40
+  ],
+  "extraLegroom": [
+    "28D",
+    "28E",
+    "28F",
+    "40"
+  ],
+  "overWing": {
+    "fromRow": 37,
+    "toRow": 44
+  },
+  "noWindow": null,
+  "noRecline": null,
+  "facilities": [
+    {
+      "type": "lavatory",
+      "afterRow": 0,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 0,
+      "side": "both"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 38,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 39,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 57,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 57,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 57,
+      "side": "both"
+    },
+    {
+      "type": "galley",
+      "afterRow": 57,
+      "side": "center"
+    }
+  ]
+}

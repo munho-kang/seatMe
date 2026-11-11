@@ -1,0 +1,79 @@
+{
+  "id": "RS-A321-195",
+  "airline": "RS",
+  "aircraftCodes": [
+    "A321"
+  ],
+  "name": "A321-200 (195석)",
+  "order": 1,
+  "officialSeats": [
+    195
+  ],
+  "registrations": [],
+  "source": "https://flyairseoul.com/CW/ko/advance_seat_selection.do",
+  "checkedOn": "2026-11-11",
+  "cabins": [
+    {
+      "class": "economy",
+      "fromRow": 28,
+      "toRow": 60,
+      "seats": "ABC DEF",
+      "missing": [
+        "36A",
+        "36F",
+        "48F"
+      ]
+    }
+  ],
+  "exitRows": [
+    37,
+    48,
+    "49F"
+  ],
+  "extraLegroom": null,
+  "overWing": null,
+  "noWindow": null,
+  "noRecline": null,
+  "facilities": [
+    {
+      "type": "lavatory",
+      "afterRow": 0,
+      "side": "left"
+    },
+    {
+      "type": "exit",
+      "afterRow": 0,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 36,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 47,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 47,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 47,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 60,
+      "side": "left"
+    },
+    {
+      "type": "exit",
+      "afterRow": 60,
+      "side": "both"
+    }
+  ]
+}

@@ -118,7 +118,7 @@ public class MolitClient {
                 dep.toLocalTime().toString(),      // "14:10"
                 arr.toLocalTime().toString(),
                 formatDuration(Duration.between(dep, arr)),
-                "", "", false);                    // 기종 3칸은 창구에서 공항공사 답으로 채운다 — 비어 있으면 상황 ④ "추천 준비 중"
+                "", "", false, List.of(), false); // 기종 · 배치도 5칸은 창구에서 채운다 — 비어 있으면 상황 ④ "추천 준비 중"
     }
 
     static String formatDuration(Duration d) {

@@ -1,10 +1,11 @@
 package com.example.seatMe.flight;
 
-import java.util.Map;
+import com.example.seatMe.aircraft.AircraftNames;
+import java.util.List;
 
 /**
- * 화면에 돌려주는 항공편 한 개 (8칸).
- * 앞 5칸은 국토부 답으로, 뒤 3칸(기종)은 공항공사 답으로 채운다.
+ * 화면에 돌려주는 항공편 한 개 (10칸).
+ * 앞 5칸은 국토부 답으로, 뒤 5칸(기종 · 배치도)은 공항공사 답과 좌석 배치도 파일로 채운다.
  */
 public record Flight(
         String airline,         // 항공사 이름 · "제주항공"
@@ -12,20 +13,16 @@ public record Flight(
         String departureTime,   // 출발 "14:10" (24시간, 한국 시각)
         String arrivalTime,     // 도착 "15:20"
         String duration,        // "1시간 10분"
-        String aircraft,        // 화면 이름 "B737-8", 모르면 ""
+        String aircraft,        // 화면 이름 "B737-800", 모르면 ""
         String aircraftCode,    // 공항공사 코드 "B738", 모르면 ""
-        boolean seatMapReady    // 좌석 배치도가 있는 기종이면 true
+        boolean seatMapReady,   // 그 항공사 + 기종의 배치도가 하나라도 있으면 true
+        List<String> seatMaps,  // 후보 배치도 id (대표가 맨 앞), 없으면 []
+        boolean seatMapConfirmed // 후보가 정확히 하나로 정해졌으면 true
 ) {
 
-    /** 좌석 배치도가 있는 기종: 공항공사 코드 → 화면 이름. 배치도가 늘면 여기에 한 줄 추가한다. */
-    private static final Map<String, String> SEAT_MAP_AIRCRAFT = Map.of("B738", "B737-8");
-
-    /** 공항공사 코드로 기종 3칸을 채운다. 코드가 null(짝 없음)이면 비워 둔 채 그대로 돌려준다. */
-    Flight withAircraftCode(String code) {
-        if (code == null) {
-            return this;
-        }
+    /** 공항공사 코드와 배치도 후보로 기종 5칸을 채운다. */
+    Flight withAircraft(String code, List<String> seatMaps, boolean confirmed) {
         return new Flight(airline, flightNumber, departureTime, arrivalTime, duration,
-                SEAT_MAP_AIRCRAFT.getOrDefault(code, code), code, SEAT_MAP_AIRCRAFT.containsKey(code));
+                AircraftNames.of(code), code, !seatMaps.isEmpty(), seatMaps, confirmed);
     }
 }

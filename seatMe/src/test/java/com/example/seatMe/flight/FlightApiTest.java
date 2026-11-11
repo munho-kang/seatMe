@@ -2,6 +2,8 @@ package com.example.seatMe.flight;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.example.seatMe.aircraft.AircraftTypeService;
+import com.example.seatMe.aircraft.KacAircraftResponse;
 import com.sun.net.httpserver.HttpServer;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -33,6 +35,17 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester.MockMvcRequest
  * 창구 GET /api/flights 확인. 국토부·공항공사 자리에는 이 테스트가 띄운 가짜 서버가 앉아 있다.
  * 요청 확인 규칙, 공항 코드 바꾸기, 편명 합치기, 그리고 상황 4가지:
  * ① 항공편 0개 → 200 빈 목록 · ② 국토부 실패 → 502 · ③ 잘못된 요청 → 400 · ④ 기종 모름 → 기종 칸만 비움.
+ *
+ * 항공편 한 개는 10칸이다 (이 창구의 약속은 이 주석이 전부다).
+ * 앞 5칸은 국토부 답: airline(항공사 이름) · flightNumber · departureTime "14:10" · arrivalTime · duration.
+ * 뒤 5칸은 공항공사 답과 좌석 배치도:
+ *  - aircraft: 화면 이름 ("B738" → "B737-800"). 표에 없는 코드는 코드 그대로, 짝이 없으면 "".
+ *  - aircraftCode: 공항공사 코드 ("B738"), 짝이 없으면 "".
+ *  - seatMapReady: 편명 앞 두 글자(항공사) + 기종 코드의 배치도가 하나라도 있으면 true.
+ *  - seatMaps: 후보 배치도 id 목록. 대표가 맨 앞이고, 없으면 [].
+ *  - seatMapConfirmed: 후보가 정확히 하나로 정해졌으면 true (당일 편의 등록번호로 정해질 때 등).
+ *    단, 항공사에 배치가 더 있는데 일부만 옮겨 적은 조합(파라타 A320, 대한항공 A333)은 후보가 하나여도 false (등록번호로 정해질 때만 true).
+ * 편명이 두 글자보다 짧거나 표에 없는 기종이어도 오류 없이 "배치도 없음"으로 나간다.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -231,9 +244,13 @@ class FlightApiTest {
 
         var result = search("GMP", "CJU", VALID_DATE).exchange();
 
-        assertThat(result).bodyJson().extractingPath("$.flights[0].aircraft").isEqualTo("B737-8");
+        assertThat(result).bodyJson().extractingPath("$.flights[0].aircraft").isEqualTo("B737-800");
         assertThat(result).bodyJson().extractingPath("$.flights[0].aircraftCode").isEqualTo("B738");
         assertThat(result).bodyJson().extractingPath("$.flights[0].seatMapReady").isEqualTo(true);
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMaps").asArray()
+                .containsExactlyInAnyOrder("7C-B738-189", "7C-B738-174");
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMapConfirmed").isEqualTo(false);
+        assertThat(result).bodyJson().extractingPath("$.flights[0]").asMap().hasSize(10);
     }
 
     @Test
@@ -246,6 +263,8 @@ class FlightApiTest {
         assertThat(result).bodyJson().extractingPath("$.flights[0].aircraft").isEqualTo("A321");
         assertThat(result).bodyJson().extractingPath("$.flights[0].aircraftCode").isEqualTo("A321");
         assertThat(result).bodyJson().extractingPath("$.flights[0].seatMapReady").isEqualTo(false);
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMaps").asArray().isEmpty();
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMapConfirmed").isEqualTo(false);
     }
 
     @Test
@@ -259,6 +278,77 @@ class FlightApiTest {
         assertThat(result).bodyJson().extractingPath("$.flights[1].aircraft").isEqualTo("");
         assertThat(result).bodyJson().extractingPath("$.flights[1].aircraftCode").isEqualTo("");
         assertThat(result).bodyJson().extractingPath("$.flights[1].seatMapReady").isEqualTo(false);
+        assertThat(result).bodyJson().extractingPath("$.flights[1].seatMaps").asArray().isEmpty();
+        assertThat(result).bodyJson().extractingPath("$.flights[1].seatMapConfirmed").isEqualTo(false);
+    }
+
+    @Test void 같은_기종이어도_배치도가_없는_항공사는_준비_중이다() {
+        molitBody.set(molitJson("""
+                {"airlineNm":"없는항공","arrPlandTime":%1$s1520,"depPlandTime":%1$s1410,"vihicleId":"XX101"}""".formatted(VALID_DATE_MOLIT)));
+        kacPages.set(List.of(kacPage(1, kacItem("XX101", "1410", "O", "GMP", "CJU", "B738"))));
+        var result = search("GMP", "CJU", VALID_DATE).exchange();
+        assertThat(result).bodyJson().extractingPath("$.flights[0].aircraft").isEqualTo("B737-800");
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMapReady").isEqualTo(false);
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMaps").asArray().isEmpty();
+    }
+    @Test void 편명이_이상하거나_모르는_기종이어도_오류_없이_배치도_없음() {
+        molitBody.set(molitJson("""
+                [
+                  {"airlineNm":"제주항공","arrPlandTime":%1$s1520,"depPlandTime":%1$s1410,"vihicleId":"7"},
+                  {"airlineNm":"제주항공","arrPlandTime":%1$s1545,"depPlandTime":%1$s1435,"vihicleId":"7C117"}
+                ]""".formatted(VALID_DATE_MOLIT)));
+        kacPages.set(List.of(kacPage(2,
+                kacItem("7", "1410", "O", "GMP", "CJU", "B738"), kacItem("7C117", "1435", "O", "GMP", "CJU", "B789"))));
+        var result = search("GMP", "CJU", VALID_DATE).exchange();
+        assertThat(result).hasStatusOk();
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMaps").asArray().isEmpty();
+        assertThat(result).bodyJson().extractingPath("$.flights[1].aircraft").isEqualTo("B789"); // 표에 없으면 코드 그대로
+        assertThat(result).bodyJson().extractingPath("$.flights[1].seatMapReady").isEqualTo(false);
+    }
+    @Test void 배치가_여럿인_기종은_후보를_전부_주고_확정하지_않는다() {
+        molitBody.set(molitJson("""
+                {"airlineNm":"대한항공","arrPlandTime":%1$s1520,"depPlandTime":%1$s1410,"vihicleId":"KE1203"}""".formatted(VALID_DATE_MOLIT)));
+        kacPages.set(List.of(kacPage(1, kacItem("KE1203", "1410", "O", "GMP", "CJU", "A333"))));
+        var result = search("GMP", "CJU", VALID_DATE).exchange();
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMaps").asArray()
+                .containsExactly("KE-A333-272", "KE-A333-284", "KE-A333-276");
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMapConfirmed").isEqualTo(false);
+        assertThat(result).bodyJson().extractingPath("$.flights[0].aircraft").isEqualTo("A330-300");
+    }
+    @Test void 당일_편의_등록번호가_배치에_있으면_하나로_확정한다() {
+        molitBody.set(molitJson("""
+                {"airlineNm":"에어부산","arrPlandTime":%1$s1520,"depPlandTime":%1$s1410,"vihicleId":"BX8111"}""".formatted(VALID_DATE_MOLIT)));
+        kacPages.set(List.of(kacPage(1, kacItem("BX8111", "1410", "O", "GMP", "CJU", "A321", "HL8099"))));
+        var result = search("GMP", "CJU", VALID_DATE).exchange();
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMaps").asArray().containsExactly("BX-A321-HL8099");
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMapConfirmed").isEqualTo(true);
+
+        kacPages.set(List.of(kacPage(1, kacItem("BX8111", "1410", "O", "GMP", "CJU", "A321")))); // 모르는 번호 HL0000
+        var unknown = search("GMP", "CJU", VALID_DATE).exchange();
+        assertThat(unknown).bodyJson().extractingPath("$.flights[0].seatMaps").asArray().hasSizeGreaterThan(1);
+        assertThat(unknown).bodyJson().extractingPath("$.flights[0].seatMapConfirmed").isEqualTo(false);
+    }
+    @Test void 배치가_하나뿐인_기종은_확정이다() {
+        molitBody.set(molitJson("""
+                {"airlineNm":"티웨이항공","arrPlandTime":%1$s1520,"depPlandTime":%1$s1410,"vihicleId":"TW701"}""".formatted(VALID_DATE_MOLIT)));
+        kacPages.set(List.of(kacPage(1, kacItem("TW701", "1410", "O", "GMP", "CJU", "B738"))));
+        var result = search("GMP", "CJU", VALID_DATE).exchange();
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMaps").asArray().containsExactly("TW-B738-189");
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMapConfirmed").isEqualTo(true);
+    }
+    @Test void 빠진_배치가_있는_조합은_후보가_하나여도_확정하지_않는다() {
+        molitBody.set(molitJson("""
+                {"airlineNm":"파라타항공","arrPlandTime":%1$s1520,"depPlandTime":%1$s1410,"vihicleId":"WE501"}""".formatted(VALID_DATE_MOLIT)));
+        kacPages.set(List.of(kacPage(1, kacItem("WE501", "1410", "O", "GMP", "CJU", "A320"))));
+        var result = search("GMP", "CJU", VALID_DATE).exchange();
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMaps").asArray().containsExactly("WE-A320-174");
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMapConfirmed").isEqualTo(false);
+    }
+    @Test void 가장_가까운_기록의_등록번호도_함께_넘긴다() {
+        var morning = new KacAircraftResponse.Item("BX8111", "202611100745", "O", "GMP", "CJU", "A321", "HL8099");
+        var evening = new KacAircraftResponse.Item("BX8111", "202611101830", "O", "GMP", "CJU", "A321", "HL7729");
+        assertThat(AircraftTypeService.nearestRecord(List.of(evening, morning), "08:00").aplRegNo()).isEqualTo("HL8099");
+        assertThat(AircraftTypeService.nearestRecord(null, "08:00")).isNull();
     }
 
     @Test
@@ -404,8 +494,8 @@ class FlightApiTest {
 
     static final LocalDateTime TODAY_2PM = LocalDateTime.of(2026, 11, 9, 14, 0);
     static final List<Flight> ONE_PM_AND_THREE_PM = List.of(
-            new Flight("제주항공", "7C101", "13:00", "14:10", "1시간 10분", "", "", false),
-            new Flight("진에어", "LJ303", "15:00", "16:10", "1시간 10분", "", "", false));
+            new Flight("제주항공", "7C101", "13:00", "14:10", "1시간 10분", "", "", false, List.of(), false),
+            new Flight("진에어", "LJ303", "15:00", "16:10", "1시간 10분", "", "", false, List.of(), false));
 
     @Test
     void 오늘_14시면_13시_편은_빠지고_15시_편은_남는다() {
@@ -438,9 +528,13 @@ class FlightApiTest {
 
     /** 공항공사 기록 한 건 — 실제 응답의 칸을 그대로 갖췄다. */
     static String kacItem(String flightNo, String hhmm, String io, String airport, String city, String code) {
+        return kacItem(flightNo, hhmm, io, airport, city, code, "HL0000");
+    }
+
+    static String kacItem(String flightNo, String hhmm, String io, String airport, String city, String code, String reg) {
         return """
-                {"airFln":"%s","airlineEnglish":"AIRLINE","airlineKorean":"항공사","airport":"%s","aplRegNo":"HL0000","arrivedEng":"","arrivedKor":"","boardingEng":"","boardingKor":"","cdsrYn":"N","city":"%s","etd":"","fid":"","gate":"1","icaoApmCd":"%s","io":"%s","line":"국내","rmkEng":"","rmkKor":"","std":"%s%s"}"""
-                .formatted(flightNo, airport, city, code, io, VALID_DATE_MOLIT, hhmm);
+                {"airFln":"%s","airlineEnglish":"AIRLINE","airlineKorean":"항공사","airport":"%s","aplRegNo":"%s","arrivedEng":"","arrivedKor":"","boardingEng":"","boardingKor":"","cdsrYn":"N","city":"%s","etd":"","fid":"","gate":"1","icaoApmCd":"%s","io":"%s","line":"국내","rmkEng":"","rmkKor":"","std":"%s%s"}"""
+                .formatted(flightNo, airport, reg, city, code, io, VALID_DATE_MOLIT, hhmm);
     }
 
     /** 공항공사 정상 응답 한 쪽. totalCount는 모든 쪽을 합친 기록 수. */
