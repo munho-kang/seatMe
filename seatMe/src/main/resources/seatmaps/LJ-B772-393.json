@@ -1,0 +1,158 @@
+{
+  "id": "LJ-B772-393",
+  "airline": "LJ",
+  "aircraftCodes": [
+    "B772"
+  ],
+  "name": "B777-200ER",
+  "order": 1,
+  "officialSeats": [
+    393
+  ],
+  "registrations": [],
+  "source": "https://www.jinair.com/addService/seatLayer?airplane=b777&layerId=113",
+  "checkedOn": "2026-11-11",
+  "cabins": [
+    {
+      "class": "economy",
+      "fromRow": 1,
+      "toRow": 3,
+      "seats": "ABC DEFG HJK",
+      "missing": [
+        "1C",
+        "1H"
+      ]
+    },
+    {
+      "class": "economy",
+      "fromRow": 5,
+      "toRow": 6,
+      "seats": "ABC DEFG HJK"
+    },
+    {
+      "class": "economy",
+      "fromRow": 28,
+      "toRow": 63,
+      "seats": "ABC DEFG HJK",
+      "missing": [
+        "50H",
+        "50J",
+        "50K",
+        "51D",
+        "51E",
+        "51F",
+        "51G",
+        "60C",
+        "60H",
+        "61C",
+        "61H",
+        "62C",
+        "62H",
+        "63C",
+        "63H"
+      ]
+    }
+  ],
+  "exitRows": [
+    51
+  ],
+  "extraLegroom": [
+    "1",
+    "2",
+    "3",
+    "5",
+    "6",
+    "31",
+    "52D",
+    "52E",
+    "52F",
+    "52G"
+  ],
+  "overWing": {
+    "fromRow": 34,
+    "toRow": 50
+  },
+  "noWindow": [
+    "36A",
+    "36K",
+    "43A"
+  ],
+  "noRecline": null,
+  "facilities": [
+    {
+      "type": "lavatory",
+      "afterRow": 0,
+      "side": "center"
+    },
+    {
+      "type": "exit",
+      "afterRow": 0,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 30,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 30,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 30,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 50,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 50,
+      "side": "center"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 50,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 50,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 63,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 63,
+      "side": "center"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 63,
+      "side": "center"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 63,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 63,
+      "side": "both"
+    },
+    {
+      "type": "galley",
+      "afterRow": 63,
+      "side": "center"
+    }
+  ]
+}

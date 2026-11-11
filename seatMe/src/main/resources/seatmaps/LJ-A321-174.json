@@ -1,0 +1,102 @@
+{
+  "id": "LJ-A321-174",
+  "airline": "LJ",
+  "aircraftCodes": [
+    "A321"
+  ],
+  "name": "A321-200",
+  "order": 4,
+  "officialSeats": [
+    174
+  ],
+  "registrations": [],
+  "source": "https://www.jinair.com/addService/seatLayer?airplane=b777&layerId=113",
+  "checkedOn": "2026-11-11",
+  "cabins": [
+    {
+      "class": "business",
+      "fromRow": 7,
+      "toRow": 9,
+      "seats": "AB DE"
+    },
+    {
+      "class": "economy",
+      "fromRow": 28,
+      "toRow": 55,
+      "seats": "ABC DEF",
+      "missing": [
+        "31A",
+        "31F",
+        "43F",
+        "55D",
+        "55E",
+        "55F"
+      ]
+    }
+  ],
+  "exitRows": [
+    32,
+    43
+  ],
+  "extraLegroom": [
+    "28",
+    "44F"
+  ],
+  "overWing": {
+    "fromRow": 35,
+    "toRow": 42
+  },
+  "noWindow": [
+    "32A",
+    "32F",
+    "43A"
+  ],
+  "noRecline": null,
+  "facilities": [
+    {
+      "type": "lavatory",
+      "afterRow": 0,
+      "side": "left"
+    },
+    {
+      "type": "exit",
+      "afterRow": 0,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 31,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 42,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 42,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 42,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 55,
+      "side": "left"
+    },
+    {
+      "type": "exit",
+      "afterRow": 55,
+      "side": "both"
+    },
+    {
+      "type": "galley",
+      "afterRow": 55,
+      "side": "center"
+    }
+  ]
+}

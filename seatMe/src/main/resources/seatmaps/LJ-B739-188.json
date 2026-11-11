@@ -1,0 +1,88 @@
+{
+  "id": "LJ-B739-188",
+  "airline": "LJ",
+  "aircraftCodes": [
+    "B739"
+  ],
+  "name": "B737-900",
+  "order": 3,
+  "officialSeats": [
+    188
+  ],
+  "registrations": [],
+  "source": "https://www.jinair.com/addService/seatLayer?airplane=b777&layerId=113",
+  "checkedOn": "2026-11-11",
+  "cabins": [
+    {
+      "class": "business",
+      "fromRow": 7,
+      "toRow": 8,
+      "seats": "AB DE"
+    },
+    {
+      "class": "economy",
+      "fromRow": 28,
+      "toRow": 57,
+      "seats": "ABC DEF"
+    }
+  ],
+  "exitRows": [
+    39,
+    40
+  ],
+  "extraLegroom": [
+    "28"
+  ],
+  "overWing": {
+    "fromRow": 36,
+    "toRow": 43
+  },
+  "noWindow": [
+    "35A"
+  ],
+  "noRecline": [
+    "39"
+  ],
+  "facilities": [
+    {
+      "type": "lavatory",
+      "afterRow": 0,
+      "side": "left"
+    },
+    {
+      "type": "exit",
+      "afterRow": 0,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 38,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 39,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 57,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 57,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 57,
+      "side": "both"
+    },
+    {
+      "type": "galley",
+      "afterRow": 57,
+      "side": "center"
+    }
+  ]
+}

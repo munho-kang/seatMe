@@ -19,7 +19,7 @@ class SeatMapFilesTest {
     static final SeatMapRepository REPO = new SeatMapRepository(JSON);
 
     /** 화면에 뜨는 "항공사 기종 코드" 조합. 항공사를 옮겨 적을 때마다 줄을 더한다. */
-    static final List<String> EXPECTED_COMBOS = List.of("7C B738", "7C B38M");
+    static final List<String> EXPECTED_COMBOS = List.of("7C B738", "7C B38M", "LJ B738", "LJ B38M", "LJ B739", "LJ B772", "LJ A321");
 
     @Test void 우리_노선의_조합마다_배치도가_있다() {
         assertThat(EXPECTED_COMBOS).allSatisfy(combo ->
@@ -41,6 +41,9 @@ class SeatMapFilesTest {
                     .contains("class", "fromRow", "toRow", "seats").isSubsetOf("class", "fromRow", "toRow", "seats", "missing"));
             root.path("facilities").forEach(facility -> assertThat(facility.propertyNames()).as(file.getFilename())
                     .containsExactlyInAnyOrder("type", "afterRow", "side"));
+            if (root.path("overWing").isObject())   // torow 같은 잘못 쓴 칸이 조용히 무시되지 않게
+                assertThat(root.path("overWing").propertyNames()).as(file.getFilename())
+                        .containsExactlyInAnyOrder("fromRow", "toRow");
         }
     }
     @Test void 출처는_https_주소이고_확인_날짜는_날짜다() {
