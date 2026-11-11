@@ -27,6 +27,10 @@ export type Flight = {
   aircraftCode: string
   seatMapReady: boolean
   duration: string
+  // 좌석 배치도 후보 id. 대표 배치가 맨 앞이고, 없으면 []
+  seatMaps: string[]
+  // 후보가 하나로 정해졌는가. 후보 개수로 판단하지 않고 이 값을 그대로 쓴다 (후보가 하나여도 false일 수 있다)
+  seatMapConfirmed: boolean
 }
 
 function isAirportCode(value: string | null): value is AirportCode {
