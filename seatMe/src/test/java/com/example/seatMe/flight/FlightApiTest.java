@@ -44,6 +44,7 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester.MockMvcRequest
  *  - seatMapReady: 편명 앞 두 글자(항공사) + 기종 코드의 배치도가 하나라도 있으면 true.
  *  - seatMaps: 후보 배치도 id 목록. 대표가 맨 앞이고, 없으면 [].
  *  - seatMapConfirmed: 후보가 정확히 하나로 정해졌으면 true (당일 편의 등록번호로 정해질 때 등).
+ *    단, 항공사에 배치가 더 있는데 일부만 옮겨 적은 조합(파라타 A320, 대한항공 A333)은 후보가 하나여도 false (등록번호로 정해질 때만 true).
  * 편명이 두 글자보다 짧거나 표에 없는 기종이어도 오류 없이 "배치도 없음"으로 나간다.
  */
 @SpringBootTest
@@ -319,7 +320,7 @@ class FlightApiTest {
                 {"airlineNm":"에어부산","arrPlandTime":%1$s1520,"depPlandTime":%1$s1410,"vihicleId":"BX8111"}""".formatted(VALID_DATE_MOLIT)));
         kacPages.set(List.of(kacPage(1, kacItem("BX8111", "1410", "O", "GMP", "CJU", "A321", "HL8099"))));
         var result = search("GMP", "CJU", VALID_DATE).exchange();
-        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMaps").asArray().hasSize(1);
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMaps").asArray().containsExactly("BX-A321-HL8099");
         assertThat(result).bodyJson().extractingPath("$.flights[0].seatMapConfirmed").isEqualTo(true);
 
         kacPages.set(List.of(kacPage(1, kacItem("BX8111", "1410", "O", "GMP", "CJU", "A321")))); // 모르는 번호 HL0000
@@ -334,6 +335,14 @@ class FlightApiTest {
         var result = search("GMP", "CJU", VALID_DATE).exchange();
         assertThat(result).bodyJson().extractingPath("$.flights[0].seatMaps").asArray().containsExactly("TW-B738-189");
         assertThat(result).bodyJson().extractingPath("$.flights[0].seatMapConfirmed").isEqualTo(true);
+    }
+    @Test void 빠진_배치가_있는_조합은_후보가_하나여도_확정하지_않는다() {
+        molitBody.set(molitJson("""
+                {"airlineNm":"파라타항공","arrPlandTime":%1$s1520,"depPlandTime":%1$s1410,"vihicleId":"WE501"}""".formatted(VALID_DATE_MOLIT)));
+        kacPages.set(List.of(kacPage(1, kacItem("WE501", "1410", "O", "GMP", "CJU", "A320"))));
+        var result = search("GMP", "CJU", VALID_DATE).exchange();
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMaps").asArray().containsExactly("WE-A320-174");
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMapConfirmed").isEqualTo(false);
     }
     @Test void 가장_가까운_기록의_등록번호도_함께_넘긴다() {
         var morning = new KacAircraftResponse.Item("BX8111", "202611100745", "O", "GMP", "CJU", "A321", "HL8099");

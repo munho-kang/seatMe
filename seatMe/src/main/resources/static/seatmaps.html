@@ -154,6 +154,7 @@ function drawHead(map) {
     featureLine('창문', windows.map(v => v === null ? null : !v), '창문 없는 좌석'),
     featureLine('날개', s.map(x => x.overWing), '날개 위 좌석'),
     featureLine('등받이', s.map(x => x.noRecline), '등받이 고정 좌석'),
+    featureLine('화장실 근처', s.map(x => x.nearLavatory), '화장실 근처 좌석'),
   ].join(' · ')));
 }
 

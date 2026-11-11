@@ -101,6 +101,16 @@ class SeatMapTest {
                 .containsExactly("1:false", "7:true", "8:true", "28:true", "29:true", "30:false");
     }
 
+    @Test void 화장실과_갤리가_하나도_없는_배치는_화장실_근처가_모름이다() {
+        assertThat(map(with("facilities", "[]")).seats()).extracting(SeatMap.Seat::nearLavatory).containsOnlyNulls();
+        assertThat(map(with("facilities", """
+                [{ "type": "exit", "afterRow": 8, "side": "both" }]""")).seats())
+                .extracting(SeatMap.Seat::nearLavatory).containsOnlyNulls();
+        SeatMap one = map(with("facilities", """
+                [{ "type": "lavatory", "afterRow": 8, "side": "left" }]"""));
+        assertThat(List.of("7A", "30A")).extracting(id -> seat(one, id).nearLavatory()).containsExactly(true, false);
+    }
+
     @Test void 빠진_좌석이_있어도_옆_좌석의_자리는_그대로다() {
         String json = with(WIDE, "cabins", """
                 [{ "class": "economy", "fromRow": 7, "toRow": 8, "seats": "ABC DEF", "missing": ["7A", "7C", "7F"] }]""");
@@ -184,7 +194,9 @@ class SeatMapTest {
                 with(WIDE, "cabins", "[{\"class\":\"economy\",\"fromRow\":8,\"toRow\":7,\"seats\":\"ABC DEF\"}]"),
                 with(WIDE, "cabins", "[{\"class\":\"economy\",\"fromRow\":7,\"toRow\":8,\"seats\":\"ABA DEF\"}]"),
                 with(WIDE, "cabins", "[{\"class\":\"cheap\",\"fromRow\":7,\"toRow\":8,\"seats\":\"ABC DEF\"}]"),
-                with(WIDE, "cabins", "[]"));
+                with(WIDE, "cabins", "[]"),
+                with(WIDE, "cabins", "[{\"class\":\"economy\",\"fromRow\":7,\"toRow\":8,\"seats\":\"abc def\"}]"),   // 소문자
+                with(WIDE, "cabins", "[{\"class\":\"economy\",\"fromRow\":7,\"toRow\":8,\"seats\":\"\"}]"));            // 빈 문자열
     }
 
     @Test void 기종_코드의_화면_이름() {

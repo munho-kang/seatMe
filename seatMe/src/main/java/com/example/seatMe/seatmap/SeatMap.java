@@ -35,13 +35,14 @@ public record SeatMap(
             Boolean overWing,
             boolean exitRow,
             String zone,
-            boolean nearLavatory,
+            Boolean nearLavatory,
             Boolean noRecline,
             boolean extraLegroom) {}
 
     private static final Set<String> CLASSES = Set.of("first", "business", "premium", "economy");
     private static final Set<String> FACILITY_TYPES = Set.of("lavatory", "galley", "exit");
     private static final Set<String> SIDES = Set.of("left", "right", "center", "both");
+    private static final Pattern SEATS = Pattern.compile("[A-Z]+( [A-Z]+)*");
     private static final Pattern REF = Pattern.compile("(\\d+)([A-Z]?)");
 
     /** 열 하나: 열 번호, 어느 객실인지, 선언된 글자 묶음, 그 열에서 빠진 좌석 번호. */
@@ -59,19 +60,20 @@ public record SeatMap(
         rows.forEach(r -> rowNumbers.add(r.number()));
 
         // 좌석 만들기 (위치와 구역까지). 특징은 뒤에서 채운다.
-        List<String> ids = new ArrayList<>();
+        Set<String> ids = new HashSet<>();
         List<Seat> seats = new ArrayList<>();
-        List<boolean[]> near = new ArrayList<>(); // 열 위치별 화장실 근처 여부
-        for (int i = 0; i < rowCount; i++) near.add(new boolean[1]);
+        boolean[] near = new boolean[rowCount]; // 열 위치별 화장실 근처 여부
+        boolean lavatoryKnown = false; // 화장실이나 갤리가 하나라도 파일에 있는가
         for (SeatMapFile.Facility fac : nz(f.facilities())) {
             if (!FACILITY_TYPES.contains(fac.type())) throw bad(id, "정해지지 않은 시설 type: " + fac.type());
             if (!SIDES.contains(fac.side())) throw bad(id, "정해지지 않은 시설 side: " + fac.side());
             if (fac.afterRow() != 0 && !rowNumbers.contains(fac.afterRow()))
                 throw bad(id, "afterRow가 없는 열이다: " + fac.afterRow());
             if (fac.type().equals("exit")) continue;
+            lavatoryKnown = true;
             int p = 0; // 시설 앞에 있는 열의 수
             for (Row r : rows) if (r.number() <= fac.afterRow()) p++;
-            for (int i = Math.max(0, p - 2); i <= Math.min(rowCount - 1, p + 1); i++) near.get(i)[0] = true;
+            for (int i = Math.max(0, p - 2); i <= Math.min(rowCount - 1, p + 1); i++) near[i] = true;
         }
         for (int i = 0; i < rowCount; i++) {
             Row r = rows.get(i);
@@ -86,10 +88,9 @@ public record SeatMap(
                             : (c == 0 || c == group.length() - 1) ? "aisle" : "middle";
                     String seatId = r.number() + group.substring(c, c + 1);
                     if (r.missing().contains(seatId)) continue;
-                    if (ids.contains(seatId)) throw bad(id, "좌석 번호가 겹친다: " + seatId);
-                    ids.add(seatId);
+                    if (!ids.add(seatId)) throw bad(id, "좌석 번호가 겹친다: " + seatId);
                     seats.add(new Seat(seatId, r.number(), group.substring(c, c + 1), r.cabin().cabinClass(), side,
-                            position, null, null, false, zone, near.get(i)[0], null, false));
+                            position, null, null, false, zone, lavatoryKnown ? near[i] : null, null, false));
                 }
             }
         }
@@ -128,7 +129,9 @@ public record SeatMap(
         for (SeatMapFile.Cabin c : f.cabins()) {
             if (!CLASSES.contains(c.cabinClass())) throw bad(id, "정해지지 않은 class: " + c.cabinClass());
             if (c.fromRow() > c.toRow()) throw bad(id, "fromRow가 toRow보다 크다: " + c.fromRow() + ">" + c.toRow());
-            String[] groups = c.seats().trim().split(" +");
+            if (c.seats() == null || !SEATS.matcher(c.seats()).matches())
+                throw bad(id, "seats 표기가 틀렸다 (대문자 글자와 빈칸뿐이어야 한다): " + c.seats());
+            String[] groups = c.seats().split(" ");
             Set<Character> letters = new HashSet<>();
             for (String g : groups)
                 for (char ch : g.toCharArray())
@@ -146,7 +149,6 @@ public record SeatMap(
             }
             for (int n = c.fromRow(); n <= c.toRow(); n++) {
                 if (missingRows.contains(n)) continue;
-                final int row = n;
                 rows.add(new Row(n, c, List.of(groups), missingSeats));
             }
         }

@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.Collections;
 import java.util.List;
 import org.junit.jupiter.api.Test;
@@ -46,10 +47,21 @@ class SeatMapFilesTest {
                         .containsExactlyInAnyOrder("fromRow", "toRow");
         }
     }
+    @Test void 파일마다_id가_항공사와_첫_기종_코드로_시작한다() {
+        assertThat(REPO.files()).allSatisfy(f ->
+                assertThat(f.id()).startsWith(f.airline() + "-" + f.aircraftCodes().get(0) + "-"));
+    }
+    @Test void 비상구와_시설_칸은_배열이다() throws IOException {   // null이면 조용히 "없음"으로 읽힌다
+        for (Resource file : new PathMatchingResourcePatternResolver().getResources("classpath*:seatmaps/*.json")) {
+            JsonNode root = JSON.readTree(file.getInputStream());
+            assertThat(root.path("exitRows").isArray()).as(file.getFilename() + " exitRows").isTrue();
+            assertThat(root.path("facilities").isArray()).as(file.getFilename() + " facilities").isTrue();
+        }
+    }
     @Test void 출처는_https_주소이고_확인_날짜는_날짜다() {
         assertThat(REPO.files()).allSatisfy(f -> {
             assertThat(f.source()).as(f.id()).startsWith("https://");
-            assertThat(LocalDate.parse(f.checkedOn())).as(f.id()).isBeforeOrEqualTo(LocalDate.now());
+            assertThat(LocalDate.parse(f.checkedOn())).as(f.id()).isBeforeOrEqualTo(LocalDate.now(ZoneId.of("Asia/Seoul")));
         });
     }
     @Test void 등록번호는_HL과_숫자_네_개다() {   // 소문자나 공백이 섞이면 조용히 "확정 안 됨"이 된다

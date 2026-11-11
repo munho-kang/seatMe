@@ -15,6 +15,10 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester;
  *   {id, airline, aircraft, name, seatCount, source, checkedOn, cabins[{class, fromRow, toRow, seats}], seats[...], facilities[...]}.
  *   좌석 하나는 {seat, row, column, cabin, side, position, hasWindow, overWing, exitRow, zone, nearLavatory, noRecline, extraLegroom}.
  *   항공사가 공개하지 않은 특징("모름")은 null로 나가고, 칸 이름(키)은 그대로 남는다.
+ *   값 범위: hasWindow · overWing · noRecline · nearLavatory는 true / false / null(모름, false처럼 그리면 안 된다).
+ *   exitRow · extraLegroom은 좌석 하나 단위의 true / false. side는 left · right · center, position은 window · middle · aisle,
+ *   cabin은 first · business · premium · economy, zone은 front · middle · rear.
+ *   배치도의 aircraft는 파일의 첫 기종 코드 이름이라, 두 기종 공용 배치(LJ-B738-189, ZE-B738-189)는 항공편의 aircraft를 화면에 쓴다.
  * - 없는 id · 소문자 id · 아주 긴 id → 404 {"error": "SEAT_MAP_NOT_FOUND"} (500이 아니다).
  * - GET /api/seatmaps: 200 {"seatMaps": [{id, airline, aircraft, name, seatCount}]} — 요약만, 항공사 → 순서 → id 차례.
  * - /seatmaps.html: 확인용 미리보기 화면. 위 두 창구로 어떤 배치도든 그려서 항공사 공식 그림과 눈으로 비교한다 (#<id>로 바로 열림).
