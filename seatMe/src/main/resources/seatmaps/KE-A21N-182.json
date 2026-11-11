@@ -1,0 +1,106 @@
+{
+  "id": "KE-A21N-182",
+  "airline": "KE",
+  "aircraftCodes": [
+    "A21N"
+  ],
+  "name": "A321-neo (182석)",
+  "order": 1,
+  "officialSeats": [
+    182
+  ],
+  "registrations": [],
+  "source": "https://www.koreanair.com/contents/plan-your-travel/in-flight-experience/fleet/a321/neo-182/seat-map",
+  "checkedOn": "2026-11-11",
+  "cabins": [
+    {
+      "class": "business",
+      "fromRow": 7,
+      "toRow": 8,
+      "seats": "AB DE"
+    },
+    {
+      "class": "economy",
+      "fromRow": 28,
+      "toRow": 56,
+      "seats": "ABC DEF"
+    }
+  ],
+  "exitRows": [
+    38,
+    39
+  ],
+  "extraLegroom": [
+    "28D",
+    "28E",
+    "28F"
+  ],
+  "overWing": {
+    "fromRow": 36,
+    "toRow": 43
+  },
+  "noWindow": null,
+  "noRecline": null,
+  "facilities": [
+    {
+      "type": "lavatory",
+      "afterRow": 0,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 0,
+      "side": "both"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 37,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 38,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 56,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 56,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 56,
+      "side": "right"
+    },
+    {
+      "type": "galley",
+      "afterRow": 56,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 56,
+      "side": "both"
+    },
+    {
+      "type": "galley",
+      "afterRow": 56,
+      "side": "center"
+    }
+  ]
+}
