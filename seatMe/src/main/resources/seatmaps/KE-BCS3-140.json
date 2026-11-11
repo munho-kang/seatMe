@@ -1,0 +1,84 @@
+{
+  "id": "KE-BCS3-140",
+  "airline": "KE",
+  "aircraftCodes": [
+    "BCS3"
+  ],
+  "name": "A220-300 (140석)",
+  "order": 1,
+  "officialSeats": [
+    140
+  ],
+  "registrations": [],
+  "source": "https://www.koreanair.com/contents/plan-your-travel/in-flight-experience/fleet/a220/300-140/seat-map",
+  "checkedOn": "2026-11-11",
+  "cabins": [
+    {
+      "class": "economy",
+      "fromRow": 28,
+      "toRow": 55,
+      "seats": "AB DEF"
+    }
+  ],
+  "exitRows": [
+    39
+  ],
+  "extraLegroom": [
+    "28D",
+    "28E",
+    "28F"
+  ],
+  "overWing": {
+    "fromRow": 36,
+    "toRow": 44
+  },
+  "noWindow": null,
+  "noRecline": null,
+  "facilities": [
+    {
+      "type": "lavatory",
+      "afterRow": 0,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 0,
+      "side": "both"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 38,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 55,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 55,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 55,
+      "side": "both"
+    },
+    {
+      "type": "galley",
+      "afterRow": 55,
+      "side": "center"
+    }
+  ]
+}
