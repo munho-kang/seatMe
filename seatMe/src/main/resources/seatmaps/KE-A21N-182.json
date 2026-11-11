@@ -36,11 +36,17 @@
     "28F"
   ],
   "overWing": {
-    "fromRow": 36,
+    "fromRow": 35,
     "toRow": 43
   },
-  "noWindow": null,
-  "noRecline": null,
+  "noWindow": [
+    "49A",
+    "49F"
+  ],
+  "noRecline": [
+    "37",
+    "38"
+  ],
   "facilities": [
     {
       "type": "lavatory",

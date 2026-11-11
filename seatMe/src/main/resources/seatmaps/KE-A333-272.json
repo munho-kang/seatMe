@@ -62,11 +62,13 @@
     "46G"
   ],
   "overWing": {
-    "fromRow": 31,
+    "fromRow": 30,
     "toRow": 44
   },
   "noWindow": null,
-  "noRecline": null,
+  "noRecline": [
+    "45"
+  ],
   "facilities": [
     {
       "type": "lavatory",

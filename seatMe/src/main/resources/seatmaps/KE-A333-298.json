@@ -43,7 +43,12 @@
     }
   ],
   "exitRows": [
-    48
+    "28G",
+    "28H",
+    "48A",
+    "48B",
+    "48G",
+    "48H"
   ],
   "extraLegroom": [
     "28C",
@@ -57,7 +62,7 @@
   ],
   "overWing": {
     "fromRow": 31,
-    "toRow": 44
+    "toRow": 45
   },
   "noWindow": null,
   "noRecline": null,
