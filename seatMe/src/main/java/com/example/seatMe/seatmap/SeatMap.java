@@ -97,22 +97,22 @@ public record SeatMap(
         // 특징 목록이 가리키는 좌석
         Set<String> noWindow = f.noWindow() == null ? null : windowless(id, f.noWindow(), seats);
         Set<String> noRecline = f.noRecline() == null ? null : refs(id, "noRecline", f.noRecline(), seats);
-        Set<String> legroom = refs(id, "extraLegroom", nz(f.extraLegroom()), seats);
-        Set<Integer> exitRows = new HashSet<>(nz(f.exitRows()));
-        for (int r : exitRows) if (!rowNumbers.contains(r)) throw bad(id, "exitRows의 열이 없다: " + r);
+        Set<String> exits = refs(id, "exitRows", nz(f.exitRows()), seats);
+        // 다리 공간 표시가 없으면(null) 비상구 좌석을 넓다고 본다. 목록이 있으면 목록에 있는 좌석만 넓다.
+        Set<String> legroom = f.extraLegroom() == null ? exits : refs(id, "extraLegroom", f.extraLegroom(), seats);
         SeatMapFile.RowRange wing = f.overWing();
         if (wing != null && rows.stream().noneMatch(r -> r.number() >= wing.fromRow() && r.number() <= wing.toRow()))
             throw bad(id, "overWing 범위에 열이 하나도 없다");
 
         List<Seat> out = new ArrayList<>();
         for (Seat s : seats) {
-            boolean exit = exitRows.contains(s.row());
+            boolean exit = exits.contains(s.seat());
             Boolean hasWindow = !s.position().equals("window") ? Boolean.FALSE
                     : noWindow == null ? null : !noWindow.contains(s.seat());
             Boolean overWing = wing == null ? null : s.row() >= wing.fromRow() && s.row() <= wing.toRow();
             Boolean recline = noRecline == null ? null : noRecline.contains(s.seat());
             out.add(new Seat(s.seat(), s.row(), s.column(), s.cabin(), s.side(), s.position(), hasWindow, overWing,
-                    exit, s.zone(), s.nearLavatory(), recline, exit || legroom.contains(s.seat())));
+                    exit, s.zone(), s.nearLavatory(), recline, legroom.contains(s.seat())));
         }
 
         List<Cabin> cabins = f.cabins().stream()

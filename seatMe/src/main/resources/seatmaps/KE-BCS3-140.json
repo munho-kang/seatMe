@@ -26,7 +26,10 @@
   "extraLegroom": [
     "28D",
     "28E",
-    "28F"
+    "28F",
+    "39B",
+    "39D",
+    "39E"
   ],
   "overWing": {
     "fromRow": 36,

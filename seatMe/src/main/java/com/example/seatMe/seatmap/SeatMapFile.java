@@ -15,7 +15,7 @@ public record SeatMapFile(
         String source,
         String checkedOn,
         List<Cabin> cabins,
-        List<Integer> exitRows,
+        List<String> exitRows,
         List<String> extraLegroom,
         RowRange overWing,
         List<String> noWindow,

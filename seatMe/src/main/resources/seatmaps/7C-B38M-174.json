@@ -30,7 +30,7 @@
     15,
     16
   ],
-  "extraLegroom": [],
+  "extraLegroom": null,
   "overWing": {
     "fromRow": 12,
     "toRow": 18

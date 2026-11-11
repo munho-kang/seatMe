@@ -123,7 +123,30 @@ class SeatMapTest {
                 .containsExactly(true, true, false, false);
         assertThat(List.of("28A", "8A")).extracting(id -> seat(m, id).exitRow()).containsExactly(true, false);
         assertThat(List.of("7C", "1A", "1C", "28D", "8A")).extracting(id -> seat(m, id).extraLegroom())
-                .containsExactly(true, true, false, true, false);
+                .containsExactly(true, true, false, false, false);
+    }
+
+    @Test void 다리_공간_목록이_있으면_비상구열이어도_목록에_없는_좌석은_넓지_않다() {
+        SeatMap m = map(with("extraLegroom", "[\"28A\"]"));
+        assertThat(List.of("28A", "28B", "28D")).extracting(id -> seat(m, id).extraLegroom())
+                .containsExactly(true, false, false);
+        assertThat(List.of("28A", "28B", "28D")).extracting(id -> seat(m, id).exitRow()).containsOnly(true);
+    }
+
+    @Test void 다리_공간이_모름이면_비상구_좌석을_넓다고_본다() {
+        SeatMap m = map(with("extraLegroom", "null"));
+        assertThat(List.of("28A", "28F", "7C", "1A")).extracting(id -> seat(m, id).extraLegroom())
+                .containsExactly(true, true, false, false);
+    }
+
+    @Test void 비상구를_좌석_하나로_적으면_그_좌석만_비상구다() {
+        SeatMap one = map(with("exitRows", "[\"28A\"]"));
+        assertThat(List.of("28A", "28B", "28D")).extracting(id -> seat(one, id).exitRow())
+                .containsExactly(true, false, false);
+        // JSON 숫자와 문자열이 섞여도 읽힌다 (기존 파일은 숫자로 적혀 있다)
+        SeatMap mixed = map(with("exitRows", "[28, \"8A\"]"));
+        assertThat(List.of("28F", "8A", "8B")).extracting(id -> seat(mixed, id).exitRow())
+                .containsExactly(true, true, false);
     }
 
     @Test void 공개하지_않은_특징은_모름이다() {
@@ -149,6 +172,7 @@ class SeatMapTest {
                 with("noRecline", "[\"99\"]"),                       // 없는 열
                 with("extraLegroom", "[\"1B\"]"),
                 with("exitRows", "[9]"),
+                with("exitRows", "[\"9A\"]"),                      // 없는 좌석
                 with("overWing", "{\"fromRow\":40,\"toRow\":45}"),
                 with("facilities", "[{\"type\":\"lavatory\",\"afterRow\":5,\"side\":\"left\"}]"),
                 with("facilities", "[{\"type\":\"toilet\",\"afterRow\":0,\"side\":\"left\"}]"),
