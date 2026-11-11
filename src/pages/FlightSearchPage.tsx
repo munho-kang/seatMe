@@ -7,6 +7,7 @@ import CalendarSheet from '../components/CalendarSheet'
 import PassengerSheet from '../components/PassengerSheet'
 import TabBar from '../components/TabBar'
 import { AIRPORT_NAMES, formatPassengers, type AirportCode, type Passengers } from '../mocks/flights'
+import { describeSeatProfile } from '../mocks/seatProfile'
 import './FlightSearchPage.css'
 
 type TripType = 'one-way' | 'round-trip'
@@ -166,7 +167,7 @@ function FlightSearchPage() {
 
       <section className="summary-card info-card--blue search-profile">
         <h2 className="summary-card-title">내 Seat Profile 자동 적용</h2>
-        <p className="summary-card-text">창가 선호 · 햇빛 5 · 조용함 4 · 흔들림 4</p>
+        <p className="summary-card-text">{describeSeatProfile()}</p>
         <button type="button" className="text-link summary-card-link">
           이번 여행만 바꾸기
         </button>

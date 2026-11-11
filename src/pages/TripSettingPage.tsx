@@ -4,12 +4,14 @@ import Button from '../components/Button'
 import SelectableCard from '../components/SelectableCard'
 import TabBar from '../components/TabBar'
 import { getRouteTitle } from '../mocks/flights'
+import { describeSeatProfile } from '../mocks/seatProfile'
 import './TripSettingPage.css'
 
 type ProfileMode = 'default' | 'adjust' | 'reset'
 
-const PROFILE_OPTIONS: { value: ProfileMode; title: string; description: string }[] = [
-  { value: 'default', title: '평소처럼 그대로 사용', description: '창가 선호 · 햇빛 5 · 조용함 4 · 흔들림 4' },
+// '평소처럼'의 설명은 저장된 취향 요약이라 그릴 때 만든다
+const PROFILE_OPTIONS: { value: ProfileMode; title: string; description?: string }[] = [
+  { value: 'default', title: '평소처럼 그대로 사용' },
   { value: 'adjust', title: '이번 여행만 조금 바꾸기', description: '예: 이번엔 전망이 더 중요해요' },
   { value: 'reset', title: '처음부터 다시 설정', description: '저장된 프로필은 유지하고 새 설정으로 추천' },
 ]
@@ -42,7 +44,7 @@ function TripSettingPage() {
             onSelect={() => setProfileMode(option.value)}
           >
             <span className="trip-option-title">{option.title}</span>
-            <span className="trip-option-desc">{option.description}</span>
+            <span className="trip-option-desc">{option.description ?? describeSeatProfile()}</span>
           </SelectableCard>
         ))}
       </div>

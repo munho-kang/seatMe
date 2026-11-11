@@ -1,5 +1,5 @@
 // 저장된 Seat Profile 읽기 확인. `npm test`로 돌린다. 틀리면 오류를 내고 멈춘다
-import { parseSeatProfile } from './seatProfile.ts'
+import { describeSeatProfile, parseSeatProfile } from './seatProfile.ts'
 
 function check(actual: unknown, expected: unknown) {
   if (JSON.stringify(actual) !== JSON.stringify(expected)) {
@@ -21,5 +21,8 @@ check(parseSeatProfile(JSON.stringify({ ...saved, seatPosition: 'middle', sunlig
   sunlight: 5,
   view: 3,
 })
+// 요약 한 줄은 저장된 값을 그대로 보여 준다
+check(describeSeatProfile(parseSeatProfile(null)), '창가 선호 · 햇빛 5 · 조용함 4 · 흔들림 4')
+check(describeSeatProfile(parseSeatProfile(JSON.stringify(saved))), '항상 통로 · 햇빛 1 · 조용함 2 · 흔들림 3')
 
 console.log('seatProfile 확인 통과')

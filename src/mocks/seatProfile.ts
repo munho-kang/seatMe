@@ -11,6 +11,15 @@ export const SEAT_POSITION_OPTIONS: { value: SeatPosition; label: string }[] = [
   { value: 'always-window', label: '항상 창가석에 앉아요' },
 ]
 
+// 취향 요약에 쓰는 짧은 이름. 문구는 임시다 (디자인 확인)
+export const SEAT_POSITION_SHORT: Record<SeatPosition, string> = {
+  'always-aisle': '항상 통로',
+  'prefer-aisle': '통로 선호',
+  any: '자리 상관없음',
+  'prefer-window': '창가 선호',
+  'always-window': '항상 창가',
+}
+
 // 숫자는 1(전혀 신경 안 씀) ~ 5(매우 중요)
 export type SeatProfile = {
   seatPosition: SeatPosition
@@ -69,6 +78,11 @@ let seatProfile: SeatProfile | undefined
 
 export function getSeatProfile() {
   return (seatProfile ??= load())
+}
+
+// 화면에 보여 주는 취향 요약 한 줄 (홈 · 항공편 검색 · 여행 설정). 예: "창가 선호 · 햇빛 5 · 조용함 4 · 흔들림 4"
+export function describeSeatProfile({ seatPosition, sunlight, quietness, turbulence } = getSeatProfile()) {
+  return `${SEAT_POSITION_SHORT[seatPosition]} · 햇빛 ${sunlight} · 조용함 ${quietness} · 흔들림 ${turbulence}`
 }
 
 export function saveSeatProfile(profile: SeatProfile) {

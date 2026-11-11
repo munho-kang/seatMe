@@ -45,7 +45,7 @@ function RecommendPage() {
       <header className="screen-header screen-header--caption">
         <p className="logo">SeatME</p>
         <h1 className="screen-title screen-title--route">시트밍님에게 잘 맞는 좌석</h1>
-        <p className="screen-caption recommend-caption">평소 취향 + 이번 여행 ‘풍경 보기’ 반영</p>
+        <p className="screen-caption recommend-caption">평소 취향 반영</p>
       </header>
 
       {!recommendation && <RecommendStatus isFailed={recommendation === null} />}

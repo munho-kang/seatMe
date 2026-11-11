@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { Link, useNavigate } from 'react-router'
 import Button from '../components/Button'
 import TabBar from '../components/TabBar'
-import { getSeatProfile } from '../mocks/seatProfile'
+import { getSeatProfile, SEAT_POSITION_SHORT } from '../mocks/seatProfile'
 import './MyPage.css'
 
 // 인증 API 전까지 쓰는 Figma(2014:1626) mock 메뉴 값
@@ -16,6 +16,7 @@ const SERVICE_MENUS = [
 function MyPage() {
   const navigate = useNavigate()
   const logoutDialogRef = useRef<HTMLDialogElement>(null)
+  const profile = getSeatProfile()
 
   return (
     <main className="screen screen--tab-bar">
@@ -38,7 +39,9 @@ function MyPage() {
       <div className="menu-list">
         <Link to="/my/profile" className="menu-row">
           <span className="menu-row-label">Seat Profile 관리</span>
-          <span className="menu-row-value">창가 · 햇빛 {getSeatProfile().sunlight} &gt;</span>
+          <span className="menu-row-value">
+            {SEAT_POSITION_SHORT[profile.seatPosition]} · 햇빛 {profile.sunlight} &gt;
+          </span>
         </Link>
         <div className="menu-row">
           <span className="menu-row-label">최근 검색 기록</span>
