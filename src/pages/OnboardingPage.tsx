@@ -2,18 +2,10 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import Button from '../components/Button'
 import ScaleSelector from '../components/ScaleSelector'
+import { saveSeatProfile, SEAT_POSITION_OPTIONS, type SeatPosition } from '../mocks/seatProfile'
 import './OnboardingPage.css'
 
-type SeatPosition = 'always-aisle' | 'prefer-aisle' | 'any' | 'prefer-window' | 'always-window'
 type SensitivityKey = 'sunlight' | 'quietness' | 'turbulence' | 'quickExit' | 'view'
-
-const SEAT_POSITION_OPTIONS: { value: SeatPosition; label: string }[] = [
-  { value: 'always-aisle', label: '항상 통로석에 앉아요' },
-  { value: 'prefer-aisle', label: '통로석 쪽이 더 좋아요' },
-  { value: 'any', label: '상관없어요' },
-  { value: 'prefer-window', label: '창가석 쪽이 더 좋아요' },
-  { value: 'always-window', label: '항상 창가석에 앉아요' },
-]
 
 const SENSITIVITY_ITEMS: { key: SensitivityKey; label: string; priorityLabel: string }[] = [
   { key: 'sunlight', label: '햇빛', priorityLabel: '햇빛' },
@@ -47,6 +39,14 @@ function OnboardingPage() {
   const [sensitivity, setSensitivity] = useState<Partial<Record<SensitivityKey, number>>>({})
 
   const priorities = SENSITIVITY_ITEMS.toSorted((a, b) => (sensitivity[b.key] ?? 0) - (sensitivity[a.key] ?? 0))
+
+  // 고른 값을 Seat Profile로 저장한다. 고르지 않고 넘긴 질문은 "신경 안 씀"(1) · "상관없어요"로 둔다
+  // (바로 위 우선 순위 화면도 고르지 않은 항목을 맨 아래 · 빈 막대로 보여 준다)
+  function handleFinish() {
+    const unanswered = { sunlight: 1, quietness: 1, turbulence: 1, quickExit: 1, view: 1 }
+    saveSeatProfile({ seatPosition: seatPosition ?? 'any', ...unanswered, ...sensitivity })
+    navigate('/home')
+  }
 
   if (step === 0) {
     return (
@@ -168,7 +168,7 @@ function OnboardingPage() {
       </ol>
 
       <footer className="screen-footer">
-        <Button onClick={() => navigate('/home')}>이 조건으로 추천받기</Button>
+        <Button onClick={handleFinish}>이 조건으로 추천받기</Button>
         <button type="button" className="text-link onboarding-back" onClick={() => setStep(2)}>
           이전
         </button>

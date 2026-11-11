@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router'
 import Button from '../components/Button'
 import ScaleSelector from '../components/ScaleSelector'
 import TabBar from '../components/TabBar'
-import { getSeatProfile, saveSeatProfile, type SeatProfile } from '../mocks/seatProfile'
+import { getSeatProfile, saveSeatProfile, SEAT_POSITION_OPTIONS, type SeatProfile } from '../mocks/seatProfile'
 import './SeatProfileEditPage.css'
 
 const SCALE_ITEMS: { key: 'sunlight' | 'quietness' | 'turbulence' | 'quickExit'; label: string }[] = [
@@ -37,7 +37,9 @@ function SeatProfileEditPage() {
 
       <div className="profile-edit-side">
         <span>창가/통로</span>
-        <span className="profile-edit-side-value">{profile.seatPosition}</span>
+        <span className="profile-edit-side-value">
+          {SEAT_POSITION_OPTIONS.find((option) => option.value === profile.seatPosition)?.label}
+        </span>
       </div>
 
       <div className="profile-edit-scales">
