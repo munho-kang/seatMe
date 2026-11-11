@@ -19,7 +19,7 @@ class SeatMapFilesTest {
     static final SeatMapRepository REPO = new SeatMapRepository(JSON);
 
     /** 화면에 뜨는 "항공사 기종 코드" 조합. 항공사를 옮겨 적을 때마다 줄을 더한다. */
-    static final List<String> EXPECTED_COMBOS = List.of("7C B738", "7C B38M", "LJ B738", "LJ B38M", "LJ B739", "LJ B772", "LJ A321", "KE B739", "KE BCS3", "KE A21N", "KE A333", "BX A321");
+    static final List<String> EXPECTED_COMBOS = List.of("7C B738", "7C B38M", "LJ B738", "LJ B38M", "LJ B739", "LJ B772", "LJ A321", "KE B739", "KE BCS3", "KE A21N", "KE A333", "BX A321", "BX A320", "BX A21N");
 
     @Test void 우리_노선의_조합마다_배치도가_있다() {
         assertThat(EXPECTED_COMBOS).allSatisfy(combo ->
