@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
-    "test": "node src/seatMap.check.ts",
+    "test": "node src/seatMap.check.ts && node src/mocks/seatProfile.check.ts",
     "preview": "vite preview"
   },
   "dependencies": {
