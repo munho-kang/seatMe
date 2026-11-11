@@ -314,6 +314,19 @@ class FlightApiTest {
         assertThat(result).bodyJson().extractingPath("$.flights[0].seatMapConfirmed").isEqualTo(false);
         assertThat(result).bodyJson().extractingPath("$.flights[0].aircraft").isEqualTo("A330-300");
     }
+    @Test void 당일_편의_등록번호가_배치에_있으면_하나로_확정한다() {
+        molitBody.set(molitJson("""
+                {"airlineNm":"에어부산","arrPlandTime":%1$s1520,"depPlandTime":%1$s1410,"vihicleId":"BX8111"}""".formatted(VALID_DATE_MOLIT)));
+        kacPages.set(List.of(kacPage(1, kacItem("BX8111", "1410", "O", "GMP", "CJU", "A321", "HL8099"))));
+        var result = search("GMP", "CJU", VALID_DATE).exchange();
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMaps").asArray().hasSize(1);
+        assertThat(result).bodyJson().extractingPath("$.flights[0].seatMapConfirmed").isEqualTo(true);
+
+        kacPages.set(List.of(kacPage(1, kacItem("BX8111", "1410", "O", "GMP", "CJU", "A321")))); // 모르는 번호 HL0000
+        var unknown = search("GMP", "CJU", VALID_DATE).exchange();
+        assertThat(unknown).bodyJson().extractingPath("$.flights[0].seatMaps").asArray().hasSizeGreaterThan(1);
+        assertThat(unknown).bodyJson().extractingPath("$.flights[0].seatMapConfirmed").isEqualTo(false);
+    }
     @Test void 가장_가까운_기록의_등록번호도_함께_넘긴다() {
         var morning = new KacAircraftResponse.Item("BX8111", "202611100745", "O", "GMP", "CJU", "A321", "HL8099");
         var evening = new KacAircraftResponse.Item("BX8111", "202611101830", "O", "GMP", "CJU", "A321", "HL7729");
@@ -498,9 +511,13 @@ class FlightApiTest {
 
     /** 공항공사 기록 한 건 — 실제 응답의 칸을 그대로 갖췄다. */
     static String kacItem(String flightNo, String hhmm, String io, String airport, String city, String code) {
+        return kacItem(flightNo, hhmm, io, airport, city, code, "HL0000");
+    }
+
+    static String kacItem(String flightNo, String hhmm, String io, String airport, String city, String code, String reg) {
         return """
-                {"airFln":"%s","airlineEnglish":"AIRLINE","airlineKorean":"항공사","airport":"%s","aplRegNo":"HL0000","arrivedEng":"","arrivedKor":"","boardingEng":"","boardingKor":"","cdsrYn":"N","city":"%s","etd":"","fid":"","gate":"1","icaoApmCd":"%s","io":"%s","line":"국내","rmkEng":"","rmkKor":"","std":"%s%s"}"""
-                .formatted(flightNo, airport, city, code, io, VALID_DATE_MOLIT, hhmm);
+                {"airFln":"%s","airlineEnglish":"AIRLINE","airlineKorean":"항공사","airport":"%s","aplRegNo":"%s","arrivedEng":"","arrivedKor":"","boardingEng":"","boardingKor":"","cdsrYn":"N","city":"%s","etd":"","fid":"","gate":"1","icaoApmCd":"%s","io":"%s","line":"국내","rmkEng":"","rmkKor":"","std":"%s%s"}"""
+                .formatted(flightNo, airport, reg, city, code, io, VALID_DATE_MOLIT, hhmm);
     }
 
     /** 공항공사 정상 응답 한 쪽. totalCount는 모든 쪽을 합친 기록 수. */

@@ -1,0 +1,111 @@
+{
+  "id": "BX-A321-HL7210",
+  "airline": "BX",
+  "aircraftCodes": [
+    "A321"
+  ],
+  "name": "A321-200 (HL7210)",
+  "order": 5,
+  "officialSeats": [
+    195,
+    220
+  ],
+  "registrations": [
+    "HL7210"
+  ],
+  "source": "https://www.airbusan.com/content/common/introduction/aircraft",
+  "checkedOn": "2026-11-11",
+  "cabins": [
+    {
+      "class": "economy",
+      "fromRow": 28,
+      "toRow": 65,
+      "seats": "ABC DEF",
+      "missing": [
+        "37F",
+        "38A",
+        "38F",
+        "52A",
+        "52F",
+        "65A",
+        "65B",
+        "65C"
+      ]
+    }
+  ],
+  "exitRows": [
+    38,
+    39,
+    53
+  ],
+  "extraLegroom": [
+    "28"
+  ],
+  "overWing": {
+    "fromRow": 42,
+    "toRow": 50
+  },
+  "noWindow": null,
+  "noRecline": [
+    "37A",
+    "37B",
+    "37C",
+    "37D",
+    "37E",
+    "64A",
+    "64B",
+    "64C"
+  ],
+  "facilities": [
+    {
+      "type": "lavatory",
+      "afterRow": 0,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 0,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 38,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 52,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 65,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 65,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 65,
+      "side": "right"
+    },
+    {
+      "type": "galley",
+      "afterRow": 65,
+      "side": "center"
+    },
+    {
+      "type": "exit",
+      "afterRow": 65,
+      "side": "both"
+    }
+  ]
+}
