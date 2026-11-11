@@ -3,6 +3,48 @@
   min-height: 167px;
 }
 
+/* 어느 배치인지 확정되지 않은 편의 안내 + 다른 후보 고르기 */
+.seat-map-notice {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-box);
+  background: var(--color-tint-yellow);
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--color-text-sub);
+}
+
+.seat-map-notice label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.seat-map-notice select {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 8px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-seat);
+  background: var(--color-surface);
+  font: inherit;
+  color: inherit;
+}
+
+.seat-map-loading {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 20px;
+  color: var(--color-section);
+}
+
 .seat-map {
   display: flex;
   flex-direction: column;
@@ -13,7 +55,9 @@
 }
 
 .seat-map-front,
-.seat-map-wing {
+.seat-map-wing,
+.seat-map-legend,
+.seat-cabin {
   font-size: 9px;
   white-space: pre;
 }
@@ -22,15 +66,46 @@
   font-weight: 700;
 }
 
-.seat-map-wing {
+.seat-map-wing,
+.seat-map-legend,
+.seat-cabin {
   color: var(--color-text-sub);
+}
+
+.seat-cabin {
+  font-weight: 700;
+  text-align: center;
+}
+
+.seat-map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 10px;
+  margin-top: 7px;
+  padding: 0 8px;
+}
+
+.seat-map-legend span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.seat-legend-mark {
+  width: 12px;
+  height: 10px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 3px;
 }
 
 .seat-map-rows {
   display: flex;
   flex-direction: column;
   gap: 7px;
+  align-self: stretch;
   margin: 20px 0 7px;
+  padding: 0 4px;
 }
 
 .seat-row {
@@ -42,6 +117,7 @@
 
 .seat-row-number {
   display: flex;
+  flex: none;
   align-items: center;
   justify-content: center;
   width: 24px;
@@ -50,15 +126,26 @@
   font-weight: 700;
 }
 
-.seat-aisle {
-  width: 12px;
+/* 좌석 수가 다른 객실(비즈니스석 등)도 통로가 가운데에 오도록 가운데로 모은다 */
+.seat-row-seats {
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  gap: 5px;
+  min-width: 0;
 }
 
+.seat-aisle {
+  flex: 0 1 12px;
+}
+
+/* 한 줄에 10석(통로 둘)인 비행기도 화면 너비에 들어가도록 좌석 너비가 줄어든다 */
 .seat {
   display: flex;
+  flex: 0 1 39px;
   align-items: center;
   justify-content: center;
-  width: 39px;
+  min-width: 0;
   height: 30px;
   padding: 0;
   border: 1px solid var(--color-border-strong);
@@ -73,6 +160,10 @@ button.seat {
   cursor: pointer;
 }
 
+.seat--none {
+  visibility: hidden;
+}
+
 .seat--recommended {
   background: var(--color-seat-recommended);
 }
@@ -81,4 +172,66 @@ button.seat {
   border-color: var(--color-primary);
   background: var(--color-primary);
   color: #ffffff;
+}
+
+.seat--exit {
+  border: 2px solid var(--color-danger);
+}
+
+/* 정보를 보고 있는 좌석 */
+.seat--viewed {
+  outline: 2px solid var(--color-text);
+  outline-offset: 1px;
+}
+
+/* 열 사이의 화장실 · 갤리 · 비상구 (왼쪽 / 가운데 / 오른쪽) */
+.seat-facilities {
+  display: flex;
+  gap: 4px;
+  margin-left: 29px;
+  padding: 3px 8px;
+  border-radius: var(--radius-bar);
+  background: var(--color-surface-muted);
+  font-size: 9px;
+  color: var(--color-text-sub);
+}
+
+.seat-facilities span {
+  flex: 1;
+  text-align: center;
+}
+
+.seat-facilities span:first-child {
+  text-align: left;
+}
+
+.seat-facilities span:last-child {
+  text-align: right;
+}
+
+/* 배치도가 한 화면보다 길어서, 좌석 정보와 버튼을 항공편 목록의 다음 버튼과 같은 위치(탭바 위 42px)에 띄워 둔다 */
+.seat-map-footer {
+  position: sticky;
+  bottom: calc(var(--tab-bar-height) + 42px);
+  gap: 10px;
+}
+
+.seat-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 14px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-box);
+  background: var(--color-surface);
+  box-shadow: 0 2px 8px rgba(23, 28, 41, 0.08);
+  font-size: 10px;
+  line-height: 1.5;
+  color: var(--color-text-sub);
+}
+
+.seat-info-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--color-text);
 }
