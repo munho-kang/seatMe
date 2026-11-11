@@ -27,10 +27,9 @@ public class SeatMapRepository {
 
     /**
      * "항공사 + 빈칸 + 기종 코드" 중 항공사에 배치가 더 있는데 일부만 옮겨 적은 조합. 후보가 하나여도 확정하지 않는다.
-     * 파라타 A320은 공식 페이지에 174 · 168 · 156석 세 배치가 있는데 "국내선"이라 적힌 174석만 옮겼다.
-     * 대한항공 A330-300은 다섯 배치 중 298 · 290석을 좌석 글자를 읽을 수 없어 보류했다. 배치를 다 옮기면 이 줄에서 지운다.
+     * 파라타 A320은 공식 페이지에 174 · 168 · 156석 세 배치가 있는데 "국내선"이라 적힌 174석만 옮겼다. 배치를 다 옮기면 이 줄에서 지운다.
      */
-    static final Set<String> INCOMPLETE = Set.of("WE A320", "KE A333");
+    static final Set<String> INCOMPLETE = Set.of("WE A320");
 
     private final List<SeatMapFile> files; // 항공사 → order → id 순
     private final Map<String, SeatMap> byId = new LinkedHashMap<>(); // 같은 순서

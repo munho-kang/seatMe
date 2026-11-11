@@ -44,7 +44,7 @@ import org.springframework.test.web.servlet.assertj.MockMvcTester.MockMvcRequest
  *  - seatMapReady: 편명 앞 두 글자(항공사) + 기종 코드의 배치도가 하나라도 있으면 true.
  *  - seatMaps: 후보 배치도 id 목록. 대표가 맨 앞이고, 없으면 [].
  *  - seatMapConfirmed: 후보가 정확히 하나로 정해졌으면 true (당일 편의 등록번호로 정해질 때 등).
- *    단, 항공사에 배치가 더 있는데 일부만 옮겨 적은 조합(파라타 A320, 대한항공 A333)은 후보가 하나여도 false (등록번호로 정해질 때만 true).
+ *    단, 항공사에 배치가 더 있는데 일부만 옮겨 적은 조합(파라타 A320)은 후보가 하나여도 false (등록번호로 정해질 때만 true).
  * 편명이 두 글자보다 짧거나 표에 없는 기종이어도 오류 없이 "배치도 없음"으로 나간다.
  */
 @SpringBootTest
@@ -311,7 +311,7 @@ class FlightApiTest {
         kacPages.set(List.of(kacPage(1, kacItem("KE1203", "1410", "O", "GMP", "CJU", "A333"))));
         var result = search("GMP", "CJU", VALID_DATE).exchange();
         assertThat(result).bodyJson().extractingPath("$.flights[0].seatMaps").asArray()
-                .containsExactly("KE-A333-272", "KE-A333-284", "KE-A333-276");
+                .containsExactly("KE-A333-272", "KE-A333-284", "KE-A333-276", "KE-A333-298", "KE-A333-290");
         assertThat(result).bodyJson().extractingPath("$.flights[0].seatMapConfirmed").isEqualTo(false);
         assertThat(result).bodyJson().extractingPath("$.flights[0].aircraft").isEqualTo("A330-300");
     }

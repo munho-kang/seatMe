@@ -36,10 +36,10 @@
     "toRow": 18
   },
   "noWindow": [
-    "10A",
     "11A",
-    "10F",
-    "11F"
+    "12A",
+    "11F",
+    "12F"
   ],
   "noRecline": null,
   "facilities": [
