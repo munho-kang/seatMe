@@ -1,5 +1,6 @@
 import { Link } from 'react-router'
 import TabBar from '../components/TabBar'
+import { describeSeatProfile } from '../mocks/seatProfile'
 import './HomePage.css'
 
 function HomePage() {
@@ -21,7 +22,7 @@ function HomePage() {
 
         <section className="summary-card info-card--green">
           <h2 className="summary-card-title">내 Seat Profile</h2>
-          <p className="summary-card-text">창가 선호 · 햇빛 5 · 조용함 4 · 흔들림 4</p>
+          <p className="summary-card-text">{describeSeatProfile()}</p>
           <button type="button" className="text-link summary-card-link">
             프로필 수정
           </button>
