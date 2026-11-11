@@ -46,6 +46,8 @@ function RecommendPage() {
         <p className="logo">SeatME</p>
         <h1 className="screen-title screen-title--route">시트밍님에게 잘 맞는 좌석</h1>
         <p className="screen-caption recommend-caption">평소 취향 반영</p>
+        {/* 기상청 예보 한 줄. 점수에는 들어가지 않는 보조 설명이다. 자리와 모양은 임시다 (디자인 확인) */}
+        {recommendation?.weatherNote && <p className="screen-caption recommend-weather">{recommendation.weatherNote}</p>}
       </header>
 
       {!recommendation && <RecommendStatus isFailed={recommendation === null} />}

@@ -4,19 +4,31 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import com.example.seatMe.seatmap.SeatMap;
 import com.example.seatMe.seatmap.SeatMapRepository;
+import com.jayway.jsonpath.JsonPath;
+import com.sun.net.httpserver.HttpServer;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.assertj.MockMvcTester;
 import org.springframework.test.web.servlet.assertj.MvcTestResult;
 
 /**
- * 창구 GET /api/recommend 확인 (추천 창구의 규칙은 이 주석이 기준이다). 계산만 하고 공공데이터는 부르지 않는다.
+ * 창구 GET /api/recommend 확인 (추천 창구의 규칙은 이 주석이 기준이다). 좌석과 점수는 계산만으로 정한다.
+ * 공공데이터는 날씨 한 줄(weatherNote)을 붙이려고 기상청 단기예보만 부른다. 기상청 자리에는 이 테스트가 띄운 가짜 서버가 앉아 있다.
  *
  * 받는 칸 — 화면이 항공편을 고를 때 /api/flights에서 받은 값과 취향을 그대로 실어 보낸다:
  *  - from · to · date: /api/flights와 같은 규칙 (공항 GMP · CJU · PUS, 날짜는 오늘 ~ 1년 뒤).
@@ -26,7 +38,7 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
  *  - sunlight · view · quietness · turbulence · quickExit: 1~5 정수 (1은 "전혀 신경 안 씀").
  *  - seatPosition: always-aisle · prefer-aisle · any · prefer-window · always-window.
  *
- * 200 {aircraft, seatMapId, sun{left, right}, seats[3]}:
+ * 200 {aircraft, seatMapId, sun{left, right}, seats[3], weatherNote}:
  *  - aircraft: 기종 화면 이름. seatMapId: 계산에 쓴 배치도 (좌석 목록은 /api/seatmaps/{id}로 따로 받는다).
  *  - sun: 비행 중 왼쪽 · 오른쪽 창의 햇빛 세기 0~1.
  *  - seats: 일반석 TOP 3 {rank, seat, score, scores, features, tradeoff}.
@@ -34,6 +46,11 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
  *    날개 위치를 모르는 배치는 scores.turbulence가 null이다 (계산에서 뺀 것이지 0점이 아니다).
  *    features는 잘 맞는 항목 이름(점수 0.7 이상, 최대 4개, 없으면 []), tradeoff는 가장 아쉬운 항목 이름(점수 0.7 미만 중 하나, 없으면 null).
  *    같은 항목이 양쪽에 나오지 않고, 모르는 정보(null)로 매긴 항목은 어느 쪽에도 나오지 않는다. 문구는 화면이 만든다.
+ *  - weatherNote: 출발 · 도착 공항의 기상청 예보로 만든 설명 한 줄, 없으면 null. 점수는 바꾸지 않는다. 이 한 줄만 서버가 문장으로 준다.
+ *    흐림(SKY 4)이나 비 · 눈(PTY 1~4) 예보가 있으면 "출발할 때 김포공항 흐림 예보라 햇빛 걱정이 적어요 (11일 23시 발표 예보 기준)",
+ *    두 공항 다 없으면 "출발 · 도착 공항 모두 흐림 · 비 예보가 없어요 (…)". 구름많음(SKY 3)은 흐림으로 치지 않는다.
+ *    예보는 출발 · 도착 시각에 가장 가까운 것을 쓴다 (1시간 30분 안). 그런 예보가 없거나(4~5일 넘는 비행) 기상청이 답하지 않거나
+ *    햇빛이 없는 밤 비행이면 null이고, 추천은 그대로 나간다.
  *
  * 오류: 값이 틀리거나 빠지면 400 {"error": "INVALID_QUERY"} (seatMap이 그 편의 후보가 아닐 때도).
  * 그 항공사 + 기종의 배치도가 하나도 없으면 404 {"error": "SEAT_MAP_NOT_READY"} (기종을 모르는 편도 여기).
@@ -44,14 +61,29 @@ class RecommendApiTest {
 
     static final String DAY = LocalDate.now().plusDays(7).toString();
 
+    // 가짜 기상청 — 기본은 죽어 있다(500). 테스트가 kmaBody를 채우면 그 예보를 돌려준다
+    static final AtomicReference<String> kmaBody = new AtomicReference<>();
+    static final HttpServer KMA = startFakeKma();
+
+    @DynamicPropertySource
+    static void pointAtFakeKma(DynamicPropertyRegistry registry) {
+        registry.add("seatme.kma.base-url", () -> "http://localhost:" + KMA.getAddress().getPort());
+        registry.add("seatme.kma.timeout-ms", () -> 300);
+        registry.add("seatme.kma.service-key", () -> "kma-test-key");
+    }
+
     @Autowired MockMvcTester mvc;
     @Autowired SeatMapRepository seatMaps;
+
+    @BeforeEach void 기상청은_기본으로_죽어_있다() {
+        kmaBody.set(null);
+    }
 
     @Test void 일반석_TOP_3를_돌려준다() {
         var result = recommend(Map.of());
 
         assertThat(result).hasStatusOk();
-        assertThat(result).bodyJson().extractingPath("$").asMap().containsOnlyKeys("aircraft", "seatMapId", "sun", "seats");
+        assertThat(result).bodyJson().extractingPath("$").asMap().containsOnlyKeys("aircraft", "seatMapId", "sun", "seats", "weatherNote");
         assertThat(result).bodyJson().extractingPath("$.aircraft").isEqualTo("B737-800");
         assertThat(result).bodyJson().extractingPath("$.seatMapId").isEqualTo("7C-B738-189");
         assertThat(result).bodyJson().extractingPath("$.seats[*].rank").asArray().containsExactly(1, 2, 3);
@@ -150,6 +182,56 @@ class RecommendApiTest {
                 Map.of("flight", "XX123"))) {
             assertThat(recommend(change)).as(change.toString())
                     .hasStatus(404).bodyJson().extractingPath("$.error").isEqualTo("SEAT_MAP_NOT_READY");
+        }
+    }
+
+    @Test void 흐림_예보면_날씨_한_줄이_붙고_기상청이_죽어도_추천은_그대로다() throws Exception {
+        String tomorrow = LocalDate.now().plusDays(1).toString();
+        var down = recommend(Map.of("date", tomorrow)); // 기상청이 500으로 죽어 있다
+        assertThat(down).hasStatusOk();
+        assertThat(down).bodyJson().extractingPath("$.weatherNote").isNull();
+
+        // 출발 14:10에 가장 가까운 14시는 흐림, 도착 15:20에 가장 가까운 15시는 맑음
+        String day = tomorrow.replace("-", "");
+        kmaBody.set(kmaJson(forecast(day, "1400", "SKY", 4), forecast(day, "1400", "PTY", 0),
+                forecast(day, "1500", "SKY", 1), forecast(day, "1500", "PTY", 0)));
+        var cloudy = recommend(Map.of("date", tomorrow));
+        assertThat(cloudy).bodyJson().extractingPath("$.weatherNote").asString()
+                .matches("출발할 때 김포공항 흐림 예보라 햇빛 걱정이 적어요 \\(\\d+일 \\d+시 발표 예보 기준\\)");
+        // 날씨는 설명만 붙인다. 좌석과 점수는 그대로다
+        assertThat(cloudy).bodyJson().extractingPath("$.seats")
+                .isEqualTo(JsonPath.read(down.getResponse().getContentAsString(), "$.seats"));
+    }
+
+    /** 기상청 단기예보 한 줄: 그 날 · 그 시각의 SKY(1 맑음 · 3 구름많음 · 4 흐림) 또는 PTY(0 없음 · 1 비 …) 값. */
+    private static String forecast(String day, String time, String category, int value) {
+        return """
+                {"baseDate":"20261111","baseTime":"2300","category":"%s","fcstDate":"%s","fcstTime":"%s","fcstValue":"%d","nx":57,"ny":126}"""
+                .formatted(category, day, time, value);
+    }
+
+    private static String kmaJson(String... items) {
+        return """
+                {"response":{"header":{"resultCode":"00","resultMsg":"NORMAL_SERVICE"},"body":{"dataType":"JSON",\
+                "items":{"item":[%s]},"pageNo":1,"numOfRows":2000,"totalCount":%d}}}"""
+                .formatted(String.join(",", items), items.length);
+    }
+
+    static HttpServer startFakeKma() {
+        try {
+            HttpServer server = HttpServer.create(new InetSocketAddress("localhost", 0), 0);
+            server.createContext("/", exchange -> {
+                String json = kmaBody.get();
+                byte[] body = (json == null ? "기상청 점검 중" : json).getBytes(StandardCharsets.UTF_8);
+                exchange.sendResponseHeaders(json == null ? 500 : 200, body.length);
+                try (OutputStream out = exchange.getResponseBody()) {
+                    out.write(body);
+                }
+            });
+            server.start();
+            return server;
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
         }
     }
 
