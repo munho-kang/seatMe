@@ -58,10 +58,15 @@
     "47G"
   ],
   "overWing": {
-    "fromRow": 31,
+    "fromRow": 30,
     "toRow": 44
   },
-  "noWindow": null,
+  "noWindow": [
+    "32A",
+    "32H",
+    "46A",
+    "46H"
+  ],
   "noRecline": null,
   "facilities": [
     {

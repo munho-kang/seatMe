@@ -33,10 +33,12 @@
   ],
   "overWing": {
     "fromRow": 36,
-    "toRow": 44
+    "toRow": 45
   },
   "noWindow": null,
-  "noRecline": null,
+  "noRecline": [
+    "55"
+  ],
   "facilities": [
     {
       "type": "lavatory",
