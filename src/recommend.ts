@@ -9,12 +9,14 @@ export type RecommendedSeat = {
   rank: number
   seat: string
   score: number
-  // 항목별 점수 0~1. null은 0점이 아니라 "계산에서 뺀 항목"이다 (날개 위치를 모르는 배치의 흔들림)
-  scores: Record<ScoreItem, number | null>
+  // 항목별 점수 0~1
+  scores: Record<ScoreItem, number>
   // 잘 맞는 항목 (최대 4개, 없을 수 있다)
   features: ScoreItem[]
   // 가장 아쉬운 항목 (없으면 null)
   tradeoff: ScoreItem | null
+  // 항공사가 알려 주지 않은 정보(창문 · 날개 · 화장실 위치)로 어림한 항목. 점수는 있지만 "모름"으로 보여 준다
+  unsure: ScoreItem[]
 }
 
 export type Recommendation = {

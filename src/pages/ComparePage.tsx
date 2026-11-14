@@ -23,11 +23,14 @@ const TRADEOFF_LABELS: Record<ScoreItem, string> = {
   position: '자리 위치',
 }
 
-// 항목 점수(0~1)를 말로 바꾼다. 기준은 임시다 (디자인 확인). null은 서버가 계산에서 뺀 항목이다.
+// 항목 점수(0~1)를 말로 바꾼다. 기준은 임시다 (디자인 확인).
 // "좋음"의 0.7은 서버가 "잘 맞는 항목"으로 치는 기준과 같다. 서버는 0.7 미만에서만 아쉬운 점을 고르니,
-// 이 숫자가 다르면 같은 좌석에 "좋음"과 "아쉬운 점"이 함께 뜬다
-function getLevel(score: number | null) {
-  if (score === null) return '정보 없음'
+// 이 숫자가 다르면 같은 좌석에 "좋음"과 "아쉬운 점"이 함께 뜬다.
+// 항공사가 알려 주지 않은 정보로 어림한 항목(unsure)은 등급을 매기지 않는다:
+// 창문이 있는지 모르는 창가의 전망 0.5는 "보통"이 아니라 "모름"이다
+function getLevel(seat: RecommendedSeat, item: ScoreItem) {
+  if (seat.unsure.includes(item)) return '정보 없음'
+  const score = seat.scores[item]
   return score >= 0.8 ? '매우 좋음' : score >= 0.7 ? '좋음' : '보통'
 }
 
@@ -37,7 +40,7 @@ function getCompareRows(seats: RecommendedSeat[]) {
     { label: '좌석', values: seats.map((seat) => seat.seat), isFirstHighlighted: true },
     { label: '적합도', values: seats.map((seat) => `${seat.score}점`), isFirstHighlighted: true },
     ...SCORE_ROWS.map(({ label, item }) => {
-      const values = seats.map((seat) => getLevel(seat.scores[item]))
+      const values = seats.map((seat) => getLevel(seat, item))
       return { label, values, isFirstHighlighted: values[0] === '매우 좋음' || values[0] === '좋음' }
     }),
     {

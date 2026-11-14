@@ -41,11 +41,12 @@ import org.springframework.test.web.servlet.assertj.MvcTestResult;
  * 200 {aircraft, seatMapId, sun{left, right}, seats[3], weatherNote}:
  *  - aircraft: 기종 화면 이름. seatMapId: 계산에 쓴 배치도 (좌석 목록은 /api/seatmaps/{id}로 따로 받는다).
  *  - sun: 비행 중 왼쪽 · 오른쪽 창의 햇빛 세기 0~1.
- *  - seats: 일반석 TOP 3 {rank, seat, score, scores, features, tradeoff}.
+ *  - seats: 일반석 TOP 3 {rank, seat, score, scores, features, tradeoff, unsure}. 등받이가 고정이라고 확인된 좌석은 나오지 않는다.
  *    score는 0~100 정수. scores는 항목별 점수 0~1 (sunlight · view · quietness · turbulence · quickExit · position).
- *    날개 위치를 모르는 배치는 scores.turbulence가 null이다 (계산에서 뺀 것이지 0점이 아니다).
  *    features는 잘 맞는 항목 이름(점수 0.7 이상, 최대 4개, 없으면 []), tradeoff는 가장 아쉬운 항목 이름(점수 0.7 미만 중 하나, 없으면 null).
- *    같은 항목이 양쪽에 나오지 않고, 모르는 정보(null)로 매긴 항목은 어느 쪽에도 나오지 않는다. 문구는 화면이 만든다.
+ *    unsure는 항공사가 알려 주지 않은 정보로 어림한 항목 이름이다 (없으면 []): 창문 · 날개 위 여부를 모르는 창가의 view,
+ *    화장실 위치를 모르는 배치의 quietness, 날개 위치를 모르는 배치의 turbulence. 점수는 있지만 화면은 "모름"으로 보여 준다.
+ *    같은 항목이 features와 tradeoff 양쪽에 나오지 않고, unsure 항목은 어느 쪽에도 나오지 않는다. 문구는 화면이 만든다.
  *  - weatherNote: 출발 · 도착 공항의 기상청 예보로 만든 설명 한 줄, 없으면 null. 점수는 바꾸지 않는다. 이 한 줄만 서버가 문장으로 준다.
  *    흐림(SKY 4)이나 비 · 눈(PTY 1~4) 예보가 있으면 "출발할 때 김포공항 흐림 예보라 햇빛 걱정이 적어요 (11일 23시 발표 예보 기준)",
  *    두 공항 다 없으면 "출발 · 도착 공항 모두 흐림 · 비 예보가 없어요 (…)". 구름많음(SKY 3)은 흐림으로 치지 않는다.
@@ -88,7 +89,7 @@ class RecommendApiTest {
         assertThat(result).bodyJson().extractingPath("$.seatMapId").isEqualTo("7C-B738-189");
         assertThat(result).bodyJson().extractingPath("$.seats[*].rank").asArray().containsExactly(1, 2, 3);
         assertThat(result).bodyJson().extractingPath("$.seats[0]").asMap()
-                .containsOnlyKeys("rank", "seat", "score", "scores", "features", "tradeoff");
+                .containsOnlyKeys("rank", "seat", "score", "scores", "features", "tradeoff", "unsure");
         assertThat(result).bodyJson().extractingPath("$.seats[0].scores").asMap()
                 .containsOnlyKeys("sunlight", "view", "quietness", "turbulence", "quickExit", "position");
         assertThat(result).bodyJson().extractingPath("$.seats[0].score").asNumber().satisfies(n -> assertThat(n.intValue()).isBetween(0, 100));
@@ -126,18 +127,21 @@ class RecommendApiTest {
                 .satisfies(scores -> assertThat(scores[1]).isEqualTo(scores[0]));
     }
 
-    @Test void 날개_위치를_모르는_배치는_흔들림_점수가_null이다() {
+    @Test void 날개_위치를_모르는_배치도_흔들림_점수를_어림해서_준다() {
         var result = recommend(Map.of("flight", "ZE201", "seatMap", "ZE-B738-189"));
 
         assertThat(result).hasStatusOk();
-        assertThat(result).bodyJson().extractingPath("$.seats[0].scores").asMap().containsEntry("turbulence", null);
+        assertThat(result).bodyJson().extractingPath("$.seats[0].scores.turbulence").asNumber().isNotNull();
+        assertThat(result).bodyJson().extractingPath("$.seats[0].unsure").asArray().contains("turbulence");
         assertThat(result).bodyJson().extractingPath("$.seats[*].features[*]").asArray().doesNotContain("turbulence");
     }
 
     @Test void 모든_배치도에서_오류_없이_세_좌석이_나온다() {
         var profile = new SeatScorer.Preferences(5, 3, 4, 4, 2, "prefer-window");
         for (SeatMap map : seatMaps.all()) {
-            assertThat(SeatScorer.rank(map, new Sun(0.3, 0), profile)).as(map.id()).hasSizeGreaterThanOrEqualTo(3);
+            List<String> fixed = map.seats().stream().filter(s -> Boolean.TRUE.equals(s.noRecline())).map(SeatMap.Seat::seat).toList();
+            assertThat(SeatScorer.rank(map, new Sun(0.3, 0), profile)).as(map.id()).hasSizeGreaterThanOrEqualTo(3)
+                    .noneMatch(s -> fixed.contains(s.seat())); // 등받이 고정 좌석은 추천하지 않는다
         }
     }
 
