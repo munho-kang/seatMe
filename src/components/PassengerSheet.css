@@ -79,3 +79,9 @@
   font-size: 13px;
   line-height: 20px;
 }
+
+.passenger-limit {
+  font-size: 13px;
+  line-height: 18px;
+  color: var(--color-label);
+}
