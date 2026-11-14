@@ -11,7 +11,7 @@
   ],
   "registrations": [],
   "source": "https://www.koreanair.com/contents/plan-your-travel/in-flight-experience/fleet/b737/900er-173/seat-map",
-  "checkedOn": "2026-11-11",
+  "checkedOn": "2026-11-14",
   "cabins": [
     {
       "class": "business",
@@ -42,11 +42,19 @@
     "39"
   ],
   "overWing": {
-    "fromRow": 36,
+    "fromRow": 35,
     "toRow": 43
   },
-  "noWindow": null,
-  "noRecline": null,
+  "noWindow": [
+    "34A"
+  ],
+  "noRecline": [
+    "37",
+    "38",
+    "54A",
+    "54B",
+    "54C"
+  ],
   "facilities": [
     {
       "type": "lavatory",

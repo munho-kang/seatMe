@@ -11,7 +11,7 @@
   ],
   "registrations": [],
   "source": "https://www.koreanair.com/contents/plan-your-travel/in-flight-experience/fleet/a330/300-290/seat-map",
-  "checkedOn": "2026-11-11",
+  "checkedOn": "2026-11-14",
   "cabins": [
     {
       "class": "business",
@@ -43,7 +43,12 @@
     }
   ],
   "exitRows": [
-    47
+    "28G",
+    "28H",
+    "47A",
+    "47B",
+    "47G",
+    "47H"
   ],
   "extraLegroom": [
     "28A",
@@ -55,9 +60,11 @@
   ],
   "overWing": {
     "fromRow": 31,
-    "toRow": 44
+    "toRow": 45
   },
-  "noWindow": null,
+  "noWindow": [
+    "33H"
+  ],
   "noRecline": null,
   "facilities": [
     {
