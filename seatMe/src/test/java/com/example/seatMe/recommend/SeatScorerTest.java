@@ -67,6 +67,15 @@ class SeatScorerTest {
         assertThat(all).hasSize(180).allMatch(s -> seat(plane, s.seat()).cabin().equals("economy"));
     }
 
+    @Test void 등받이가_고정된_좌석은_추천하지_않는다() {
+        // 빠른 하차만 보면 맨 앞 7열이 1위인데, 7열 등받이가 고정이면 8열부터 추천한다
+        SeatMap plane = plane(PLANE.replace("\"noRecline\": null", "\"noRecline\": [\"7\"]"));
+        List<Scored> all = SeatScorer.rank(plane, NO_SUN, new Preferences(1, 1, 1, 1, 5, "any"));
+
+        assertThat(all).hasSize(174).noneMatch(s -> seat(plane, s.seat()).noRecline());
+        assertThat(all.get(0).seat()).isEqualTo("8A");
+    }
+
     @Test void 빠른_하차는_열_번호가_아니라_앞에서_몇_번째_줄인지로_잰다() {
         List<Scored> all = SeatScorer.rank(plane(PLANE), NO_SUN, new Preferences(1, 1, 1, 1, 5, "any"));
 
@@ -150,14 +159,19 @@ class SeatScorerTest {
         assertThat(all).allMatch(s -> s.tradeoff() == null || s.scores().get(s.tradeoff()) < SeatScorer.FEATURE_MIN);
     }
 
-    @Test void 모르는_정보는_가운데_점수를_주고_날개를_모르면_흔들림을_뺀다() {
+    @Test void 모르는_정보는_가운데_점수를_주고_날개를_모르면_날개_자리를_어림한다() {
         List<Scored> all = SeatScorer.rank(plane(UNKNOWN), NO_SUN, new Preferences(1, 1, 1, 5, 1, "any"));
 
         assertThat(score(all, "1A", "view")).isEqualTo(0.5); // 창문도 날개도 모르는 창가
         assertThat(score(all, "1A", "quietness")).isCloseTo(0.85, within(0.005)); // 화장실 위치를 몰라 반만 깎음
-        assertThat(score(all, "1A", "turbulence")).isNull();
-        // 흔들림만 중요한데 계산할 수 없으니 가중치가 없는 것과 같다
-        assertThat(all).allMatch(s -> s.score() == 100 && s.tradeoff() == null);
+        // 날개는 어느 비행기나 가운데보다 조금 앞에 있다: 다섯 줄 중 셋째 줄이 가장 덜 흔들린다고 본다
+        assertThat(all.subList(0, 3)).extracting(Scored::seat).containsExactly("3A", "3B", "3C");
+        assertThat(score(all, "3A", "turbulence")).isGreaterThan(score(all, "1A", "turbulence"));
+        assertThat(score(all, "1A", "turbulence")).isGreaterThan(score(all, "5A", "turbulence"));
+        // 흔들림만 중요해도 좌석마다 점수가 다르다 (흔들림을 계산에서 빼면 모든 좌석이 100점이 된다)
+        assertThat(total(all, "3A")).isGreaterThan(total(all, "1A"));
+        // 어림한 값이라 "흔들림 적음"이라고 내세우지는 않는다
+        assertThat(all).allMatch(s -> s.features().isEmpty() && s.tradeoff() == null);
     }
 
     @Test void 모르는_정보로_매긴_항목은_잘_맞는_점에도_아쉬운_점에도_넣지_않는다() {
@@ -166,6 +180,10 @@ class SeatScorerTest {
         assertThat(find(view, "1A").features()).containsExactly("position");
         assertThat(find(view, "1A").tradeoff()).isNull();
         assertThat(find(view, "1D").tradeoff()).isEqualTo("view"); // 가운데 좌석에 전망이 없는 것은 아는 사실이다
+        // 어느 항목을 모르고 매겼는지 알려 준다 (화면이 "보통" 대신 "정보 없음"으로 보여 줄 수 있게)
+        assertThat(find(view, "1A").unsure()).containsExactly("view", "quietness", "turbulence");
+        assertThat(find(view, "1D").unsure()).containsExactly("quietness", "turbulence");
+        assertThat(SeatScorer.rank(plane(PLANE), NO_SUN, DONT_CARE)).allMatch(s -> s.unsure().isEmpty());
 
         // 화장실 위치를 모르는 배치의 조용함도 마찬가지
         List<Scored> quiet = SeatScorer.rank(plane(UNKNOWN), NO_SUN, new Preferences(1, 1, 5, 1, 1, "any"));
