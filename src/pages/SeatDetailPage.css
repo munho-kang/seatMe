@@ -59,3 +59,20 @@
 .info-box--blue {
   background: var(--color-tint-blue);
 }
+
+/* 예매 버튼 위 안내: 항공사 화면에서 직접 고를 내용 (편명 · 좌석 · 인원) */
+.booking-guide {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--color-text-sub);
+  text-align: center;
+}
+
+.booking-guide strong {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text);
+}
