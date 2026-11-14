@@ -11,7 +11,7 @@
   ],
   "registrations": [],
   "source": "https://www.koreanair.com/contents/plan-your-travel/in-flight-experience/fleet/a321/neo-180/seat-map",
-  "checkedOn": "2026-11-11",
+  "checkedOn": "2026-11-14",
   "cabins": [
     {
       "class": "business",
@@ -36,11 +36,17 @@
     "28F"
   ],
   "overWing": {
-    "fromRow": 36,
-    "toRow": 43
+    "fromRow": 35,
+    "toRow": 42
   },
-  "noWindow": null,
-  "noRecline": null,
+  "noWindow": [
+    "48A",
+    "48F"
+  ],
+  "noRecline": [
+    "36",
+    "37"
+  ],
   "facilities": [
     {
       "type": "lavatory",
