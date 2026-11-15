@@ -19,40 +19,56 @@ export type KacItem = {
 // oxlint-disable-next-line typescript/no-explicit-any
 type Json = any
 
+const PAGE_SIZE = 100 // 공항공사는 100을 넘으면 오류를 돌려준다
+// 전체 개수가 터무니없이 크게 와도 요청을 무한정 보내지 않는다. 김포·제주도 하루 5쪽 안팎 (2026-11-15 확인)
+const MAX_PAGES = 10
+
 /**
  * 한 공항의 하루치 기록을 끝까지 받아요. 편명마다 따로 묻지 않고 한꺼번에 받으려고 만들었어요.
- * airport는 공항 코드(예: GMP), date는 'YYYY-MM-DD'. 중간에 오류가 나면 거기까지 받은 것만 돌려줘요 (던지지 않아요).
+ * 첫 쪽에서 전체 개수를 보고, 나머지 쪽은 동시에 받아요 (차례로 받을 때보다 2배쯤 빠름, 2026-11-15 측정).
+ * airport는 공항 코드(예: GMP), date는 'YYYY-MM-DD'. 실패한 쪽은 빼고 받은 쪽만 돌려줘요 (던지지 않아요).
  */
-// ponytail: 쪽을 하나씩 차례로 받는다. 응답이 느리면 대기 시간이 쪽 수만큼 늘어나니, 조회가 느려지면 동시에 받거나 결과를 저장해 두도록 바꾼다.
 export async function searchAirportDay(env: Env, airport: string, date: string): Promise<KacItem[]> {
   const day = date.replaceAll('-', '')
-  const all: KacItem[] = []
+  let first: { items: KacItem[], total: number }
   try {
-    for (let page = 1; ; page++) {
-      // 공항공사가 답을 안 해도 하염없이 기다리지 않도록 제한 시간을 둬요
-      const response = await fetch(
-        `${config.kacBaseUrl}?serviceKey=${encodeKey(env.KAC_API_KEY)}&type=json&numOfRows=100&pageNo=${page}`
-          + `&schAirCode=${airport}&schStTime=${day}0000&schEdTime=${day}2359`,
-        { signal: AbortSignal.timeout(config.kacTimeoutMs) })
-      if (!response.ok) throw new Error('HTTP ' + response.status)
-      const result: Json = await response.json()
-      const error = errorOf(result)
-      if (error !== null) {
-        console.warn(redact('공항공사 기종 API 오류 응답 → 기종만 비운다: ' + error, env))
-        return all
-      }
-
-      const items = itemsOf(result)
-      all.push(...items)
-      // 전체 개수가 없거나 숫자가 아니면 0으로 보고 여기서 멈춘다 (Java 서버와 같다)
-      if (items.length === 0 || all.length >= (Number(result.response.body.totalCount) || 0)) return all
-    }
+    first = await fetchPage(env, airport, day, 1)
   } catch (e) {
-    // JSON 오류 문구에는 답의 앞머리가 들어 있어 그대로 남기지 않는다 (인증키 조각이 섞일 수 있다)
-    const why = e instanceof SyntaxError ? 'JSON이 아닌 응답' : e instanceof Error ? e.message : e
-    console.warn(redact('공항공사 기종 API 오류 → 기종만 비운다: ' + why, env))
-    return all
+    warn(env, e)
+    return []
   }
+  const all = [...first.items]
+  if (first.items.length === 0) return all
+
+  const rest: Promise<{ items: KacItem[] }>[] = []
+  for (let page = 2; page <= Math.min(Math.ceil(first.total / PAGE_SIZE), MAX_PAGES); page++)
+    rest.push(fetchPage(env, airport, day, page))
+  for (const result of await Promise.allSettled(rest)) {
+    if (result.status === 'fulfilled') all.push(...result.value.items)
+    else warn(env, result.reason)
+  }
+  return all
+}
+
+/** 한 쪽을 받아 기록과 전체 개수를 돌려줘요. 실패하거나 오류 답이면 던져요. */
+async function fetchPage(env: Env, airport: string, day: string, page: number): Promise<{ items: KacItem[], total: number }> {
+  // 공항공사가 답을 안 해도 하염없이 기다리지 않도록 제한 시간을 둬요
+  const response = await fetch(
+    `${config.kacBaseUrl}?serviceKey=${encodeKey(env.KAC_API_KEY)}&type=json&numOfRows=${PAGE_SIZE}&pageNo=${page}`
+      + `&schAirCode=${airport}&schStTime=${day}0000&schEdTime=${day}2359`,
+    { signal: AbortSignal.timeout(config.kacTimeoutMs) })
+  if (!response.ok) throw new Error('HTTP ' + response.status)
+  const result: Json = await response.json()
+  const error = errorOf(result)
+  if (error !== null) throw new Error('오류 응답 ' + error)
+  // 전체 개수가 없거나 숫자가 아니면 0으로 보고 첫 쪽에서 멈춘다 (Java 서버와 같다)
+  return { items: itemsOf(result), total: Number(result.response.body?.totalCount) || 0 }
+}
+
+function warn(env: Env, e: unknown) {
+  // JSON 오류 문구에는 답의 앞머리가 들어 있어 그대로 남기지 않는다 (인증키 조각이 섞일 수 있다)
+  const why = e instanceof SyntaxError ? 'JSON이 아닌 응답' : e instanceof Error ? e.message : e
+  console.warn(redact('공항공사 기종 API 오류 → 기종만 비운다: ' + why, env))
 }
 
 /** 정상 답(resultCode "00")이면 null, 아니면 오류 이름과 코드. 주소·인증키는 넣지 않는다. */
