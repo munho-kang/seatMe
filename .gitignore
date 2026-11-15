@@ -35,3 +35,7 @@ API_연결_계획.md
 
 # 작업별 할 일 메모 (개인 참고용)
 할일/
+
+# Cloudflare: 내 컴퓨터용 인증키 파일과 wrangler 작업 폴더 (절대 커밋하지 않기)
+.dev.vars
+.wrangler/

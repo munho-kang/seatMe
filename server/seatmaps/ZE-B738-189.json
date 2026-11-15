@@ -1,0 +1,56 @@
+{
+  "id": "ZE-B738-189",
+  "airline": "ZE",
+  "aircraftCodes": [
+    "B738",
+    "B38M"
+  ],
+  "name": "B737-800 / B737-8 (189)",
+  "order": 1,
+  "officialSeats": [
+    189
+  ],
+  "registrations": [],
+  "source": "https://main.eastarjet.com/service-guide/additional/seat",
+  "checkedOn": "2026-11-11",
+  "cabins": [
+    {
+      "class": "economy",
+      "fromRow": 1,
+      "toRow": 32,
+      "seats": "ABC DEF",
+      "missing": [
+        "1D",
+        "1E",
+        "1F"
+      ]
+    }
+  ],
+  "exitRows": [
+    15,
+    16
+  ],
+  "extraLegroom": null,
+  "overWing": null,
+  "noWindow": [
+    "11A",
+    "12A",
+    "12F"
+  ],
+  "noRecline": [
+    "14",
+    "15"
+  ],
+  "facilities": [
+    {
+      "type": "exit",
+      "afterRow": 14,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 15,
+      "side": "both"
+    }
+  ]
+}

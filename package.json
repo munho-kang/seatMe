@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "server": "mkdir -p dist && wrangler dev",
     "build": "tsc -b && vite build",
+    "deploy": "npm run build && wrangler deploy",
     "lint": "oxlint",
-    "test": "node src/seatMap.check.ts && node src/mocks/seatProfile.check.ts && node src/booking.check.ts",
+    "test": "node src/seatMap.check.ts && node src/mocks/seatProfile.check.ts && node src/booking.check.ts && node --test \"server/**/*.test.ts\"",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -22,6 +24,7 @@
     "@vitejs/plugin-react": "^6.1.1",
     "oxlint": "^1.81.0",
     "typescript": "~6.0.2",
-    "vite": "^8.3.0"
+    "vite": "^8.3.0",
+    "wrangler": "^4.162.0"
   }
 }
