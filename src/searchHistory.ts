@@ -45,6 +45,7 @@ async function putHistory(value: History, keepalive = false) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(value),
       keepalive,
+      signal: AbortSignal.timeout(3000), // 서버가 멈춰도 로그아웃이 끝없이 기다리지 않게
     })
     return response.ok
   } catch {
