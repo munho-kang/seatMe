@@ -1,56 +1,57 @@
-import { Link, useNavigate, useSearchParams } from 'react-router'
+import { useState } from 'react'
+import { Link, useNavigate } from 'react-router'
+import { getBookingLink } from '../booking'
+import { AIRPORT_NAMES, formatPassengers } from '../mocks/flights'
+import { frequentTrip, frequentTripUrl, getSearchHistory, kstToday, rateTrip, removeTrip, splitTrips, tripParams } from '../searchHistory'
+import type { TripRecord } from '../../server/history/rules'
 import planeIcon from '../assets/icon-plane-large.svg'
 import Button from '../components/Button'
 import StatusMessage from '../components/StatusMessage'
 import TabBar from '../components/TabBar'
 import './MyTripsPage.css'
 
-type Trip = {
-  title: string
-  date: string
-  seat: string
-  action: string
-  actionTo?: string
-}
+const md = (date: string) => `${+date.slice(5, 7)}월 ${+date.slice(8)}일`
+const route = ({ from, to }: TripRecord) => `${AIRPORT_NAMES[from]} → ${AIRPORT_NAMES[to]}`
 
-// 여행 기록 API 전까지 쓰는 Figma(2014:1446) mock 데이터
-const UPCOMING_TRIP: Trip = {
-  title: '김포 → 제주 · 제주항공 7C115',
-  date: '9월 25일 14:10',
-  seat: '추천 좌석  12A · 적합도 92점',
-  action: '항공사에서 좌석 확인하기',
-}
-
-const PAST_TRIPS: Trip[] = [
-  {
-    title: '부산 → 제주 · 진에어 LJ563',
-    date: '8월 28일 15:00',
-    seat: '추천 좌석  9A · 만족도 4.5/5',
-    action: '같은 취향으로 다시 검색',
-    actionTo: '/flight',
-  },
-  {
-    title: '제주 → 김포 · 에어부산 BX8012',
-    date: '8월 10일 11:30',
-    seat: '추천 좌석  7F · 만족도 4.0/5',
-    action: '추천 기준 다시 보기',
-  },
-]
-
-function TripCard({ trip, isUpcoming = false }: { trip: Trip; isUpcoming?: boolean }) {
+function TripCard({ trip, isUpcoming, onRemove, onRate }: { trip: TripRecord; isUpcoming: boolean; onRemove: () => void; onRate: (rating: number) => void }) {
+  const bookingUrl = isUpcoming ? getBookingLink(tripParams(trip))?.url : undefined
+  const searchParams = new URLSearchParams({ from: trip.from, to: trip.to, passengers: formatPassengers(trip.passengers) })
   return (
     <article className={`trip-card${isUpcoming ? ' trip-card--upcoming' : ''}`}>
-      <h3 className="trip-card-title">{trip.title}</h3>
-      <p className="trip-card-date">{trip.date}</p>
-      <p className="trip-card-seat">{trip.seat}</p>
-      {trip.actionTo ? (
-        <Link to={trip.actionTo} className="text-link trip-card-action">
-          {trip.action}
-        </Link>
+      <h3 className="trip-card-title">
+        {route(trip)} · {trip.airline} {trip.flight}
+      </h3>
+      <button type="button" className="trip-card-close" aria-label="여행 기록 지우기" onClick={onRemove}>
+        ✕
+      </button>
+      <p className="trip-card-date">
+        {md(trip.date)} {trip.dep}
+      </p>
+      <p className="trip-card-seat">
+        추천 좌석  {trip.seat} · 적합도 {trip.score}점
+      </p>
+      {!isUpcoming && (
+        <div className="trip-card-rating">
+          <span>만족도</span>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <button key={n} type="button" className="trip-star" aria-label={`만족도 ${n}점`} aria-pressed={n <= (trip.rating ?? 0)} onClick={() => onRate(n)}>
+              {n <= (trip.rating ?? 0) ? '★' : '☆'}
+            </button>
+          ))}
+          {/* 문구는 임시다 (디자인 확인) */}
+          <span>{trip.rating ? `${trip.rating}/5` : '만족도를 남겨 주세요'}</span>
+        </div>
+      )}
+      {isUpcoming ? (
+        bookingUrl && (
+          <a href={bookingUrl} target="_blank" rel="noreferrer" className="text-link trip-card-action">
+            항공사에서 좌석 확인하기
+          </a>
+        )
       ) : (
-        <button type="button" className="text-link trip-card-action">
-          {trip.action}
-        </button>
+        <Link to={`/flight?${searchParams}`} className="text-link trip-card-action">
+          같은 취향으로 다시 검색
+        </Link>
       )}
     </article>
   )
@@ -58,10 +59,12 @@ function TripCard({ trip, isUpcoming = false }: { trip: Trip; isUpcoming?: boole
 
 function MyTripsPage() {
   const navigate = useNavigate()
-  const [searchParams] = useSearchParams()
+  const [history, setHistory] = useState(getSearchHistory)
+  const today = kstToday()
+  const { upcoming, past } = splitTrips(history.trips, today)
+  const frequent = frequentTrip(history, today)
 
-  // 여행 기록 API 연결 전까지 ?status=empty로 빈 화면을 확인한다
-  if (searchParams.get('status') === 'empty') {
+  if (!upcoming.length && !past.length) {
     return (
       <main className="screen screen--status">
         <header className="status-header">
@@ -84,6 +87,22 @@ function MyTripsPage() {
     )
   }
 
+  const section = (label: string, trips: TripRecord[], isUpcoming: boolean) =>
+    trips.length > 0 && (
+      <section className={`trip-section${isUpcoming ? '' : ' trip-section--past'}`}>
+        <h2 className="trip-section-label">{label}</h2>
+        {trips.map((trip) => (
+          <TripCard
+            key={`${trip.flight}${trip.date}${trip.dep}`}
+            trip={trip}
+            isUpcoming={isUpcoming}
+            onRemove={() => setHistory(removeTrip(trip))}
+            onRate={(rating) => setHistory(rateTrip(trip, rating))}
+          />
+        ))}
+      </section>
+    )
+
   return (
     <main className="screen screen--tab-bar">
       <header>
@@ -92,19 +111,10 @@ function MyTripsPage() {
         <p className="screen-sub">추천받았던 좌석과 지난 여행을 다시 확인할 수 있어요.</p>
       </header>
 
-      <section className="trip-section">
-        <h2 className="trip-section-label">다가오는 여행</h2>
-        <TripCard trip={UPCOMING_TRIP} isUpcoming />
-      </section>
+      {section('다가오는 여행', upcoming, true)}
+      {section('지난 여행', past, false)}
 
-      <section className="trip-section trip-section--past">
-        <h2 className="trip-section-label">지난 여행</h2>
-        {PAST_TRIPS.map((trip) => (
-          <TripCard key={trip.title} trip={trip} />
-        ))}
-      </section>
-
-      <Link to="/flight" className="text-link trip-new-link">
+      <Link to={frequent ? frequentTripUrl(frequent) : '/flight'} className="text-link trip-new-link">
         최근 노선으로 새 여행 만들기  →
       </Link>
 
