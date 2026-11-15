@@ -64,6 +64,10 @@ function SignupPage() {
       <Link className="text-link signup-browse" to="/home">
         로그인 없이 둘러보기
       </Link>
+
+      <Link className="text-link auth-back" to="/">
+        이전
+      </Link>
     </main>
   )
 }

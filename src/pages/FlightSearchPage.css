@@ -45,6 +45,7 @@
 }
 
 .search-field {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -56,6 +57,27 @@
   background: var(--color-surface);
   text-align: left;
   cursor: pointer;
+}
+
+/* Figma 화살표는 오른쪽 방향 아이콘을 90° 돌린 것. 칸 오른쪽 28px, 위 44px */
+.search-field-arrow {
+  position: absolute;
+  top: 44px;
+  right: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 8px;
+}
+
+/* 날짜 · 인원 칸의 화살표는 Figma에서 3px 더 아래에 있다 */
+.search-field-cell:not(.search-field-cell--wide) .search-field-arrow {
+  top: 47px;
+}
+
+.search-field-arrow img {
+  transform: rotate(90deg);
 }
 
 .search-field--active {
