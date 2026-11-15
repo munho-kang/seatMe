@@ -13,6 +13,11 @@
  *  - seatMapConfirmed: 후보가 정확히 하나로 정해졌으면 true (당일 편의 등록번호로 정해질 때 등).
  *    단, 항공사에 배치가 더 있는데 일부만 옮겨 적은 조합(파라타 A320)은 후보가 하나여도 false (등록번호로 정해질 때만 true).
  * 편명이 두 글자보다 짧거나 표에 없는 기종이어도 오류 없이 "배치도 없음"으로 나간다.
+ *
+ * 답에는 목록 옆에 aircraftMissing 한 칸이 더 있다: 기종이 빈 편(aircraft "")이 있다면 그 이유. 화면이 카드에 이유를 적는다.
+ *  - "NOT_YET": 날짜가 8일 넘게 멀다. 공항공사는 오늘 ~ 7일 뒤까지만 기록을 준다 (공항공사가 어떻게 답했든 이 이유가 먼저다).
+ *  - "FAILED": 공항공사가 한 쪽이라도 제대로 답하지 않았다 (다시 검색하면 나올 수 있다).
+ *  - "NO_RECORD": 공항공사가 다 답했는데 그 편의 기록이 없다. 기종이 빈 편이 하나도 없을 때도 이 값이다.
  */
 import assert from 'node:assert/strict'
 import http from 'node:http'
@@ -501,6 +506,40 @@ test('공항공사가_HTTP_200으로_오류를_주면_기록에_오류_이름을
   assert.equal(flights.length, 2)
   assert.equal(flights[0].aircraftCode, '')
   assert.ok(logs.includes('LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR') && !logs.includes('kac-test-key'), logs)
+})
+
+// ── 기종이 빈 이유 (aircraftMissing) ──
+
+const missing = async (date: string) => (await json(await search('GMP', 'CJU', date))).aircraftMissing
+
+test('공항공사가_다_답했는데_그_편_기록이_없으면_이유는_NO_RECORD', async () => {
+  twoMolitFlights()
+  fake.kacPages = [kacPage(1, kacItem('7C115', '1410', 'O', 'GMP', 'CJU', 'B738'))] // LJ569 기록이 없다
+
+  assert.equal(await missing(day(7)), 'NO_RECORD') // 7일 뒤까지는 공항공사 기록이 나오는 날짜다
+})
+
+test('공항공사가_오류를_돌려주면_이유는_FAILED', async () => {
+  twoMolitFlights()
+  fake.kacFailFromPage = 1
+
+  assert.equal(await missing(day(7)), 'FAILED')
+})
+
+test('공항공사가_중간_쪽만_실패해도_이유는_FAILED', async () => {
+  twoMolitFlights()
+  fake.kacPages = [kacPage(101, kacItem('7C115', '1410', 'O', 'GMP', 'CJU', 'B738'))]
+  fake.kacFailFromPage = 2
+
+  assert.equal(await missing(day(7)), 'FAILED')
+})
+
+test('8일_넘게_먼_날짜면_공항공사가_어떻게_답하든_이유는_NOT_YET', async () => {
+  twoMolitFlights()
+  assert.equal(await missing(day(8)), 'NOT_YET') // 공항공사는 빈 목록을 준다
+
+  fake.kacFailFromPage = 1
+  assert.equal(await missing(day(8)), 'NOT_YET') // 다시 검색해도 나오지 않으니 FAILED가 아니다
 })
 
 // ── 오늘 검색이면 이미 떠난 편은 뺀다 ──

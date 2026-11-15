@@ -49,8 +49,12 @@ const DAY = day(7)
 // 가짜 기상청 — 기본은 죽어 있다(500). 테스트가 kmaBody를 채우면 그 예보를 돌려준다
 let kmaBody: string | null = null
 let kmaLastQuery = ''
+// 처음 kmaHangFirstCalls번의 요청에는 끝내 답하지 않는다 (가끔 멈추는 연결)
+let kmaCalls = 0
+let kmaHangFirstCalls = 0
 const server = http.createServer((req, res) => {
   kmaLastQuery = (req.url ?? '').split('?')[1] ?? ''
+  if (++kmaCalls <= kmaHangFirstCalls) return
   res.writeHead(kmaBody === null ? 500 : 200).end(kmaBody ?? '기상청 점검 중')
 })
 
@@ -70,6 +74,8 @@ after(() => {
 beforeEach(() => { // 기상청은 기본으로 죽어 있다
   kmaBody = null
   kmaLastQuery = ''
+  kmaCalls = 0
+  kmaHangFirstCalls = 0
   logs = ''
 })
 
@@ -219,6 +225,30 @@ test('흐림_예보면_날씨_한_줄이_붙고_기상청이_죽어도_추천은
   assert.match(cloudy.weatherNote, /^출발할 때 김포공항 흐림 예보라 햇빛 걱정이 적어요 \(\d+일 \d+시 발표 예보 기준\)$/)
   // 날씨는 설명만 붙인다. 좌석과 점수는 그대로다
   assert.deepEqual(cloudy.seats, downBody.seats)
+})
+
+// 배포된 서버에서 기상청으로 가는 연결이 가끔 그냥 멈춘다 (2026-11-15: 추천 16번 중 5번, 날씨 문장이 빠지거나 한쪽 공항만 나왔다)
+test('기상청이_한_번_답하지_않아도_다시_물어서_날씨_한_줄을_붙인다', async () => {
+  const tomorrow = day(1)
+  const date = tomorrow.replaceAll('-', '')
+  kmaBody = kmaJson(forecastLine(date, '1400', 'SKY', 4), forecastLine(date, '1400', 'PTY', 0),
+    forecastLine(date, '1500', 'SKY', 4), forecastLine(date, '1500', 'PTY', 0))
+  kmaHangFirstCalls = 1 // 출발 · 도착 공항 두 요청 중 먼저 닿은 하나가 멈춘다
+
+  const body = await json(await recommend({ date: tomorrow }))
+
+  assert.match(body.weatherNote, /^출발할 때 김포공항 흐림, 도착할 때 제주공항 흐림 예보라/)
+  assert.equal(kmaCalls, 3)
+})
+
+test('기상청이_끝내_답하지_않으면_두_번까지만_묻고_날씨_한_줄만_뺀다', async () => {
+  kmaHangFirstCalls = Infinity
+
+  const result = await recommend({ date: day(1) })
+
+  assert.equal(result.status, 200)
+  assert.equal((await json(result)).weatherNote, null)
+  assert.equal(kmaCalls, 4) // 공항 둘 × 두 번
 })
 
 // ── JavaScript로 옮기면서 새로 생기는 문제 ──

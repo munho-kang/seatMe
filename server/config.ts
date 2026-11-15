@@ -22,11 +22,12 @@ export const config = {
   // 공항공사가 이 시간 안에 답하지 않으면 다시 묻고, 끝까지 답이 없으면 기종만 비우고 항공편 목록은 보여준다 (한 번에 2초)
   kacTimeoutMs: 2000,
   // 국토부 · 공항공사에 같은 요청을 모두 몇 번까지 보내는지. 배포된 서버에서 공공데이터로 가는 연결이 가끔 그냥 멈춘다
-  // (2026-11-15 측정: 검색 16번 중 6번. 답할 때는 한 번에 0.6초 안, 멈추면 5초를 넘겨도 답이 없다. 같은 때 이 컴퓨터에서 직접 부른 60번은 전부 0.2초 안)
+  // (2026-11-15 측정: 검색 16번 중 6번, 추천 16번 중 5번. 답할 때는 한 번에 0.6초 안, 멈추면 5초를 넘겨도 답이 없다. 같은 때 이 컴퓨터에서 직접 부른 60번은 전부 0.2초 안)
   publicDataTries: 3,
   // 기상청 단기예보 — https://www.data.go.kr/data/15084084/openapi.do (추천에 붙는 날씨 한 줄)
   kmaBaseUrl: 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0',
-  // 기상청이 이 시간 안에 답하지 않으면 날씨 한 줄만 빼고 추천은 그대로 나간다 (3초)
+  // 기상청이 이 시간 안에 답하지 않으면 한 번 더 묻고, 그래도 없으면 날씨 한 줄만 빼고 추천은 그대로 나간다 (한 번에 3초)
+  // 평소 답은 1.2 ~ 1.7초. 날씨는 설명 한 줄이라 추천을 오래 붙잡지 않도록 두 번까지만 묻는다 (weather/kma.ts)
   kmaTimeoutMs: 3000,
   // 네이버 로그인 — https://developers.naver.com/docs/login/devguide/devguide.md
   naverAuthUrl: 'https://nid.naver.com/oauth2.0',
@@ -44,18 +45,18 @@ export function encodeKey(key: string | undefined): string {
 }
 
 /**
- * 공공데이터 주소를 불러 상태와 몸통 글자를 받는다. timeoutMs 안에 답이 없거나 연결이 안 되면 같은 요청을 다시 보낸다 (모두 publicDataTries번).
+ * 공공데이터 주소를 불러 상태와 몸통 글자를 받는다. timeoutMs 안에 답이 없거나 연결이 안 되면 같은 요청을 다시 보낸다 (모두 tries번).
  * 끝까지 안 되면 마지막 오류를 던진다. 오류 답(HTTP 오류 · 오류 몸통)은 답이 온 것이라 다시 묻지 않는다.
  */
-export async function fetchPublicData(url: string, timeoutMs: number): Promise<{ status: number; body: string }> {
+export async function fetchPublicData(url: string, timeoutMs: number, tries = config.publicDataTries): Promise<{ status: number; body: string }> {
   for (let attempt = 1; ; attempt++) {
     try {
       const response = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) })
       return { status: response.status, body: await response.text() }
     } catch (e) {
-      if (attempt >= config.publicDataTries) throw e
+      if (attempt >= tries) throw e
       // 주소의 ? 뒤에는 인증키가 있어 경로만 남긴다
-      console.warn(`공공데이터 ${new URL(url).pathname} 가 답하지 않아 다시 묻는다 (${attempt + 1}/${config.publicDataTries}번째)`)
+      console.warn(`공공데이터 ${new URL(url).pathname} 가 답하지 않아 다시 묻는다 (${attempt + 1}/${tries}번째)`)
     }
   }
 }
