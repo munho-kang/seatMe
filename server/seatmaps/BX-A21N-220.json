@@ -1,0 +1,100 @@
+{
+  "id": "BX-A21N-220",
+  "airline": "BX",
+  "aircraftCodes": [
+    "A21N"
+  ],
+  "name": "A321neo LR (220석)",
+  "order": 1,
+  "officialSeats": [
+    220
+  ],
+  "registrations": [
+    "HL8366",
+    "HL8394"
+  ],
+  "source": "https://www.airbusan.com/content/common/introduction/aircraft",
+  "checkedOn": "2026-11-11",
+  "cabins": [
+    {
+      "class": "economy",
+      "fromRow": 28,
+      "toRow": 64,
+      "seats": "ABC DEF",
+      "missing": [
+        "54A",
+        "54F"
+      ]
+    }
+  ],
+  "exitRows": [
+    44,
+    54,
+    55
+  ],
+  "extraLegroom": [
+    "28",
+    "29",
+    "30",
+    "44",
+    "54",
+    "55A",
+    "55F"
+  ],
+  "overWing": {
+    "fromRow": 42,
+    "toRow": 49
+  },
+  "noWindow": null,
+  "noRecline": [
+    "43",
+    "64"
+  ],
+  "facilities": [
+    {
+      "type": "lavatory",
+      "afterRow": 0,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 0,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 43,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 54,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 64,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 64,
+      "side": "right"
+    },
+    {
+      "type": "galley",
+      "afterRow": 64,
+      "side": "center"
+    },
+    {
+      "type": "exit",
+      "afterRow": 64,
+      "side": "both"
+    }
+  ]
+}

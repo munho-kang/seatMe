@@ -1,0 +1,95 @@
+{
+  "id": "BX-A320-HL7744",
+  "airline": "BX",
+  "aircraftCodes": [
+    "A320"
+  ],
+  "name": "A320-200 (HL7744/7753/8055, HL8309, HL8328)",
+  "order": 1,
+  "officialSeats": [
+    180
+  ],
+  "registrations": [
+    "HL7744",
+    "HL7753",
+    "HL8055",
+    "HL8309",
+    "HL8328"
+  ],
+  "source": "https://www.airbusan.com/content/common/introduction/aircraft",
+  "checkedOn": "2026-11-11",
+  "cabins": [
+    {
+      "class": "economy",
+      "fromRow": 28,
+      "toRow": 57,
+      "seats": "ABC DEF"
+    }
+  ],
+  "exitRows": [
+    39,
+    40
+  ],
+  "extraLegroom": [
+    "28",
+    "39",
+    "40"
+  ],
+  "overWing": {
+    "fromRow": 37,
+    "toRow": 44
+  },
+  "noWindow": null,
+  "noRecline": [
+    "38",
+    "39",
+    "57"
+  ],
+  "facilities": [
+    {
+      "type": "lavatory",
+      "afterRow": 0,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 0,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 38,
+      "side": "both"
+    },
+    {
+      "type": "exit",
+      "afterRow": 39,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 57,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 57,
+      "side": "right"
+    },
+    {
+      "type": "galley",
+      "afterRow": 57,
+      "side": "center"
+    },
+    {
+      "type": "exit",
+      "afterRow": 57,
+      "side": "both"
+    }
+  ]
+}

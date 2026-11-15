@@ -1,0 +1,168 @@
+{
+  "id": "OZ-A333-298",
+  "airline": "OZ",
+  "aircraftCodes": [
+    "A333"
+  ],
+  "name": "A330-300 (298석)",
+  "order": 2,
+  "officialSeats": [
+    298
+  ],
+  "registrations": [],
+  "source": "https://flyasiana.com/C/KR/KO/contents/a330-300",
+  "checkedOn": "2026-11-11",
+  "cabins": [
+    {
+      "class": "business",
+      "fromRow": 7,
+      "toRow": 11,
+      "seats": "AB DE GH"
+    },
+    {
+      "class": "economy",
+      "fromRow": 28,
+      "toRow": 58,
+      "seats": "AB CDEF GH",
+      "missing": [
+        "46A",
+        "46B",
+        "47A",
+        "47B",
+        "47C",
+        "47D",
+        "47E",
+        "47F"
+      ]
+    },
+    {
+      "class": "economy",
+      "fromRow": 59,
+      "toRow": 62,
+      "seats": "AB DEF GH"
+    }
+  ],
+  "exitRows": [
+    "28G",
+    "28H",
+    "48A",
+    "48B",
+    "48G",
+    "48H"
+  ],
+  "extraLegroom": [
+    "28",
+    "48A",
+    "48B",
+    "48G",
+    "48H"
+  ],
+  "overWing": {
+    "fromRow": 33,
+    "toRow": 45
+  },
+  "noWindow": null,
+  "noRecline": null,
+  "facilities": [
+    {
+      "type": "lavatory",
+      "afterRow": 0,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 0,
+      "side": "both"
+    },
+    {
+      "type": "galley",
+      "afterRow": 0,
+      "side": "center"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 0,
+      "side": "right"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 11,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 11,
+      "side": "right"
+    },
+    {
+      "type": "galley",
+      "afterRow": 11,
+      "side": "center"
+    },
+    {
+      "type": "galley",
+      "afterRow": 11,
+      "side": "center"
+    },
+    {
+      "type": "exit",
+      "afterRow": 11,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 45,
+      "side": "left"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 46,
+      "side": "center"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 46,
+      "side": "center"
+    },
+    {
+      "type": "exit",
+      "afterRow": 47,
+      "side": "both"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 62,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 62,
+      "side": "center"
+    },
+    {
+      "type": "lavatory",
+      "afterRow": 62,
+      "side": "right"
+    },
+    {
+      "type": "exit",
+      "afterRow": 62,
+      "side": "both"
+    },
+    {
+      "type": "galley",
+      "afterRow": 62,
+      "side": "left"
+    },
+    {
+      "type": "galley",
+      "afterRow": 62,
+      "side": "right"
+    }
+  ]
+}

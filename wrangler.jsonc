@@ -1,0 +1,11 @@
+{
+  "name": "seatme",
+  "main": "server/index.ts",
+  "compatibility_date": "2026-10-01",
+  // 서버를 서울 근처에서 돌린다. 이 줄이 없으면 미국에서 돌아 공공데이터가 1~7초 걸린다 (2026-11-14 측정)
+  "placement": { "region": "aws:ap-northeast-2" },
+  // 화면 파일은 dist/. /api/* 만 서버 코드가 받고, 나머지 모르는 주소는 화면(index.html)이 받는다
+  "assets": { "directory": "dist", "not_found_handling": "single-page-application", "run_worker_first": ["/api/*"] },
+  // 서버 기록(로그)만 켠다. 추적(traces)은 공공데이터 요청 주소를 통째로 저장하는데, 그 주소에 인증키가 들어 있어 꺼 둔다
+  "observability": { "enabled": true, "traces": { "enabled": false } }
+}
