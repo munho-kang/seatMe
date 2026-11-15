@@ -7,5 +7,7 @@
   // 화면 파일은 dist/. /api/* 만 서버 코드가 받고, 나머지 모르는 주소는 화면(index.html)이 받는다
   "assets": { "directory": "dist", "not_found_handling": "single-page-application", "run_worker_first": ["/api/*"] },
   // 서버 기록(로그)만 켠다. 추적(traces)은 공공데이터 요청 주소를 통째로 저장하는데, 그 주소에 인증키가 들어 있어 꺼 둔다
+  // 좌석 취향 보관함 (열쇠 = 네이버 id, 값 = 취향 JSON). 내 컴퓨터(npm run server)에서는 .wrangler/ 안의 가짜 보관함을 쓴다
+  "kv_namespaces": [{ "binding": "PROFILES", "id": "0faf15d6a2cb4981a829ff1de9b4d695" }],
   "observability": { "enabled": true, "traces": { "enabled": false } }
 }

@@ -1,5 +1,7 @@
+import { logout, naverCallback, naverLogin } from './auth/naver.ts'
 import { type Env, redact } from './config.ts'
 import { flightsApi } from './flight/flights.ts'
+import { profileApi } from './profile/api.ts'
 import { recommendApi } from './recommend/api.ts'
 import { seatMapApi, seatMapListApi } from './seatmap/api.ts'
 
@@ -8,11 +10,17 @@ import { seatMapApi, seatMapListApi } from './seatmap/api.ts'
  * Cloudflare는 /api/* 요청만 여기로 보내고, 나머지 주소는 화면 파일(dist/)이 답한다 (wrangler.jsonc).
  */
 export async function handle(request: Request, env: Env): Promise<Response> {
-  if (request.method !== 'GET' && request.method !== 'HEAD')
-    return Response.json({ error: 'METHOD_NOT_ALLOWED' }, { status: 405 })
+  const url = new URL(request.url)
+  const path = url.pathname
+  const method = request.method === 'HEAD' ? 'GET' : request.method
+  // GET이 아닌 창구는 이 둘뿐이다
+  const allowed = path === '/api/profile' ? ['GET', 'PUT'] : path === '/api/auth/logout' ? ['POST'] : ['GET']
+  if (!allowed.includes(method)) return Response.json({ error: 'METHOD_NOT_ALLOWED' }, { status: 405 })
   try {
-    const url = new URL(request.url)
-    const path = url.pathname
+    if (path === '/api/auth/naver') return await naverLogin(request, env)
+    if (path === '/api/auth/naver/callback') return await naverCallback(request, env)
+    if (path === '/api/auth/logout') return logout()
+    if (path === '/api/profile') return await profileApi(request, env, Date.now())
     if (path === '/api/flights') return await flightsApi(url.searchParams, env, Date.now())
     if (path === '/api/recommend') return await recommendApi(url.searchParams, env, Date.now())
     if (path === '/api/seatmaps') return seatMapListApi()

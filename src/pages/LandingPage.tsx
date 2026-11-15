@@ -29,7 +29,7 @@ function LandingPage() {
       </div>
 
       <footer className="screen-footer">
-        <Button onClick={() => navigate('/login/naver')}>네이버로 계속하기</Button>
+        <Button onClick={() => window.location.assign('/api/auth/naver')}>네이버로 계속하기</Button>
         <Button variant="outline" onClick={() => navigate('/login')}>
           이메일로  로그인
         </Button>

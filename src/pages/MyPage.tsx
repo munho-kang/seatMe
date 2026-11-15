@@ -2,7 +2,7 @@ import { useRef } from 'react'
 import { Link, useNavigate } from 'react-router'
 import Button from '../components/Button'
 import TabBar from '../components/TabBar'
-import { getSeatProfile, SEAT_POSITION_SHORT } from '../mocks/seatProfile'
+import { forgetAccountProfile, getSeatProfile, isLoggedIn, SEAT_POSITION_SHORT } from '../mocks/seatProfile'
 import './MyPage.css'
 
 // 인증 API 전까지 쓰는 Figma(2014:1626) mock 메뉴 값
@@ -17,6 +17,17 @@ function MyPage() {
   const navigate = useNavigate()
   const logoutDialogRef = useRef<HTMLDialogElement>(null)
   const profile = getSeatProfile()
+  const loggedIn = isLoggedIn()
+
+  async function handleLogout() {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST' })
+    } catch {
+      // 서버에 닿지 않아도 화면에서는 로그아웃한다
+    }
+    forgetAccountProfile()
+    navigate('/')
+  }
 
   return (
     <main className="screen screen--tab-bar">
@@ -26,13 +37,20 @@ function MyPage() {
       </header>
 
       <section className="account-header">
+        {/* 이름은 네이버에서 받지 않는다 (이용자 식별자만). 문구는 임시다 (디자인 확인) */}
         <div>
-          <p className="account-name">시트밍</p>
-          <p className="account-provider">네이버 계정으로 로그인됨</p>
+          <p className="account-name">{loggedIn ? '네이버 회원' : '로그인 안 함'}</p>
+          <p className="account-provider">{loggedIn ? '네이버 계정으로 로그인됨' : 'Seat Profile이 이 기기에만 저장돼요'}</p>
         </div>
-        <button type="button" className="text-link account-manage">
-          계정 관리
-        </button>
+        {loggedIn ? (
+          <button type="button" className="text-link account-manage">
+            계정 관리
+          </button>
+        ) : (
+          <Link to="/" className="text-link account-manage">
+            로그인
+          </Link>
+        )}
       </section>
 
       <h2 className="menu-section-label">개인화</h2>
@@ -61,10 +79,12 @@ function MyPage() {
             <span className="menu-row-value">{menu.value}</span>
           </div>
         ))}
-        <button type="button" className="menu-row menu-row--danger" onClick={() => logoutDialogRef.current?.showModal()}>
-          <span className="menu-row-label">로그아웃</span>
-          <span className="menu-row-value">&gt;</span>
-        </button>
+        {loggedIn && (
+          <button type="button" className="menu-row menu-row--danger" onClick={() => logoutDialogRef.current?.showModal()}>
+            <span className="menu-row-label">로그아웃</span>
+            <span className="menu-row-value">&gt;</span>
+          </button>
+        )}
       </div>
 
       <dialog ref={logoutDialogRef} className="logout-modal" aria-labelledby="logout-modal-title">
@@ -72,12 +92,12 @@ function MyPage() {
           로그아웃할까요?
         </h2>
         <p className="logout-modal-desc">
-          로그아웃해도 저장된 Seat Profile과 여행 기록은 계정에 유지돼요.
+          로그아웃해도 저장된 Seat Profile은 계정에 유지돼요.
           <br />
           다시 로그인하면 그대로 불러올 수 있어요.
         </p>
         <div className="logout-modal-actions">
-          <Button variant="danger" className="logout-modal-button" onClick={() => navigate('/')}>
+          <Button variant="danger" className="logout-modal-button" onClick={handleLogout}>
             로그아웃
           </Button>
           <Button
