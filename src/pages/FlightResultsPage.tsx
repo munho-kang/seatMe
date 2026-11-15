@@ -6,6 +6,7 @@ import SelectableCard from '../components/SelectableCard'
 import StatusMessage from '../components/StatusMessage'
 import TabBar from '../components/TabBar'
 import { getRouteTitle, type Flight } from '../mocks/flights'
+import { addPick, timeBand } from '../searchHistory'
 import { useJson } from '../useJson'
 import './FlightResultsPage.css'
 
@@ -38,7 +39,12 @@ function FlightResultsPage() {
   const { data, retry } = useJson<{ flights: Flight[] }>(`/api/flights?${query}`)
   const isLoading = data === undefined
   // 불러오는 중이거나 실패했으면 null
-  const flights = data ? data.flights : null
+  const time = searchParams.get('time')
+  const flights = data
+    ? time === 'morning' || time === 'afternoon' || time === 'evening'
+      ? data.flights.toSorted((a, b) => Number(timeBand(b.departureTime) === time) - Number(timeBand(a.departureTime) === time))
+      : data.flights
+    : null
 
   // 뒤로 돌아왔을 때 선택한 카드가 보이도록 선택값을 목록 URL에 남긴다.
   // 다음 화면들(추천 계산 · 좌석맵)이 서버를 다시 부르지 않도록 그 편의 시각 · 기종 · 좌석 배치도도 함께 싣는다
@@ -46,6 +52,7 @@ function FlightResultsPage() {
     const params = new URLSearchParams(searchParams)
     const selection = {
       flight: flight.flightNumber,
+      airline: flight.airline,
       dep: flight.departureTime,
       arr: flight.arrivalTime,
       aircraft: flight.aircraft,
@@ -148,7 +155,14 @@ function FlightResultsPage() {
         <footer className="screen-footer flight-list-footer">
           {/* 좌석 배치도가 없는 편("추천 준비 중")은 추천을 계산할 수 없어 넘어가지 못한다. 문구는 임시다 (디자인 확인) */}
           {searchParams.get('seatMap') ? (
-            <Button onClick={() => navigate(`/flight/trip?${searchParams}`)}>다음</Button>
+            <Button
+              onClick={() => {
+                addPick({ from: searchParams.get('from'), to: searchParams.get('to'), dep: selectedDeparture })
+                navigate(`/flight/trip?${searchParams}`)
+              }}
+            >
+              다음
+            </Button>
           ) : (
             <Button disabled>이 항공편은 아직 추천을 준비 중이에요</Button>
           )}

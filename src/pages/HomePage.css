@@ -67,3 +67,28 @@
   font-size: 15px;
   font-weight: 700;
 }
+
+.home-card--recent,
+.home-card--frequent {
+  position: relative;
+}
+
+.home-card--frequent {
+  min-height: 100px;
+  padding-top: 20px;
+  padding-bottom: 12px;
+  background: var(--color-tint-blue);
+}
+
+.home-card-close {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  background: none;
+  font-size: 14px;
+  color: var(--color-text-dim);
+}

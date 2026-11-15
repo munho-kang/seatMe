@@ -1,6 +1,7 @@
 import { logout, naverCallback, naverLogin } from './auth/naver.ts'
 import { type Env, redact } from './config.ts'
 import { flightsApi } from './flight/flights.ts'
+import { historyApi } from './history/api.ts'
 import { profileApi } from './profile/api.ts'
 import { recommendApi } from './recommend/api.ts'
 import { seatMapApi, seatMapListApi } from './seatmap/api.ts'
@@ -13,14 +14,15 @@ export async function handle(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url)
   const path = url.pathname
   const method = request.method === 'HEAD' ? 'GET' : request.method
-  // GET이 아닌 창구는 이 둘뿐이다
-  const allowed = path === '/api/profile' ? ['GET', 'PUT'] : path === '/api/auth/logout' ? ['POST'] : ['GET']
+  // GET이 아닌 창구는 이 셋뿐이다 (프로필·기록 저장, 로그아웃)
+  const allowed = path === '/api/profile' || path === '/api/history' ? ['GET', 'PUT'] : path === '/api/auth/logout' ? ['POST'] : ['GET']
   if (!allowed.includes(method)) return Response.json({ error: 'METHOD_NOT_ALLOWED' }, { status: 405 })
   try {
     if (path === '/api/auth/naver') return await naverLogin(request, env)
     if (path === '/api/auth/naver/callback') return await naverCallback(request, env)
     if (path === '/api/auth/logout') return logout()
     if (path === '/api/profile') return await profileApi(request, env, Date.now())
+    if (path === '/api/history') return await historyApi(request, env, Date.now())
     if (path === '/api/flights') return await flightsApi(url.searchParams, env, Date.now())
     if (path === '/api/recommend') return await recommendApi(url.searchParams, env, Date.now())
     if (path === '/api/seatmaps') return seatMapListApi()
