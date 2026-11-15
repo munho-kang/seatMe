@@ -82,8 +82,13 @@
 
 .home-card-close {
   position: absolute;
-  top: 16px;
-  right: 16px;
+  top: 6px;
+  right: 6px;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 0;
+  background: none;
   font-size: 14px;
   color: var(--color-text-dim);
 }

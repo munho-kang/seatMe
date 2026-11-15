@@ -14,7 +14,7 @@ export async function handle(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url)
   const path = url.pathname
   const method = request.method === 'HEAD' ? 'GET' : request.method
-  // GET이 아닌 창구는 이 둘뿐이다
+  // GET이 아닌 창구는 이 셋뿐이다 (프로필·기록 저장, 로그아웃)
   const allowed = path === '/api/profile' || path === '/api/history' ? ['GET', 'PUT'] : path === '/api/auth/logout' ? ['POST'] : ['GET']
   if (!allowed.includes(method)) return Response.json({ error: 'METHOD_NOT_ALLOWED' }, { status: 405 })
   try {

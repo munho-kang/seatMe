@@ -31,18 +31,20 @@ function deviceText() {
 }
 
 let history: History | undefined
-let loggedIn = false
+// 저장 방식: 계정(서버), 기기(localStorage), 메모리뿐 (동기화가 어긋났을 때)
+let mode: 'device' | 'account' | 'memory' = 'device'
 
 export function getSearchHistory() {
   return (history ??= parseHistory(deviceText()))
 }
 
-async function putHistory(value: History) {
+async function putHistory(value: History, keepalive = false) {
   try {
     const response = await fetch('/api/history', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(value),
+      keepalive,
     })
     return response.ok
   } catch {
@@ -55,8 +57,13 @@ async function putHistory(value: History) {
 export async function syncSearchHistory() {
   try {
     const response = await fetch('/api/history', { signal: AbortSignal.timeout(3000) })
-    if (!response.ok) return
-    loggedIn = true
+    // 401은 로그인 안 함(기기). 그 밖의 실패는 로그인 여부를 모르니 이번 접속 동안 메모리에만 둔다
+    if (response.status === 401) return
+    if (!response.ok) {
+      mode = 'memory'
+      return
+    }
+    mode = 'account'
     const body = await response.json()
     if (body.history !== null) {
       history = readHistory(body.history).history
@@ -75,17 +82,35 @@ export async function syncSearchHistory() {
 
 // 로그아웃 뒤에는 이 기기 기록(없으면 빈 기록)으로 돌아간다
 export function forgetAccountHistory() {
-  loggedIn = false
+  mode = 'device'
   history = undefined
+}
+
+let pending = false
+let timer: ReturnType<typeof setTimeout> | undefined
+
+function flush(keepalive = false) {
+  clearTimeout(timer)
+  timer = undefined
+  if (!pending || !history) return
+  pending = false
+  void putHistory(history, keepalive === true).then((ok) => ok || console.error('계정에 검색 기록을 저장하지 못했어요'))
+}
+
+// 탭을 닫거나 숨기면 기다리던 저장을 바로 보낸다
+if (typeof document !== 'undefined') {
+  document.addEventListener('visibilitychange', () => document.visibilityState === 'hidden' && flush(true))
 }
 
 // 메모리 값을 새 객체로 바꾸고 저장한다 (React가 새 참조로 다시 그린다). 저장이 안 돼도 예외는 밖으로 내지 않는다
 function save(next: History) {
   history = next
-  if (loggedIn) {
+  if (mode === 'account') {
+    // 계정 저장소는 같은 열쇠에 1초에 1번만 쓸 수 있어서 1초 뒤 마지막 값만 보낸다
     // ponytail: 계정 저장이 실패하면 이 화면에서만 유지되고 다음 접속 때 계정 값으로 돌아간다
-    void putHistory(next).then((ok) => ok || console.error('계정에 검색 기록을 저장하지 못했어요'))
-  } else {
+    pending = true
+    timer ??= setTimeout(() => flush(), 1000)
+  } else if (mode === 'device') {
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next))
     } catch {
@@ -141,6 +166,7 @@ export function rateTrip(trip: TripRecord, rating: number) {
 // --- 카드에 보일 값 계산 (저장하지 않고 기록에서 그때그때 계산한다) ---
 
 export type TimeBand = 'morning' | 'afternoon' | 'evening'
+// 문구는 임시다 (디자인 확인)
 export const TIME_BAND_LABEL: Record<TimeBand, string> = { morning: '오전 출발', afternoon: '오후 출발', evening: '저녁 출발' }
 
 // 'HH:MM' 문자열 비교: ~11:59 오전, 12:00~17:59 오후, 18:00~ 저녁

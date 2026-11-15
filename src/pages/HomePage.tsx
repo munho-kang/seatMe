@@ -62,7 +62,7 @@ function HomePage() {
               {recent.returnDate && ` - ${md(recent.returnDate)}`} · {formatPassengers(recent.passengers)}
             </p>
             <Link to={`/flight?${recentParams(recent)}`} className="text-link summary-card-link">
-              같은 취향으로 다시 찾기
+              같은 취향으로 다시 찾기 &gt;
             </Link>
           </section>
         )}
