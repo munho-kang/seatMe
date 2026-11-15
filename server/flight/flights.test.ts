@@ -121,7 +121,7 @@ function kacItem(flightNo: string, hhmm: string, io: string, airport: string, ci
   return `{"airFln":"${flightNo}","airlineEnglish":"AIRLINE","airlineKorean":"항공사","airport":"${airport}","aplRegNo":"${reg}","arrivedEng":"","arrivedKor":"","boardingEng":"","boardingKor":"","cdsrYn":"N","city":"${city}","etd":"","fid":"","gate":"1","icaoApmCd":"${code}","io":"${io}","line":"국내","rmkEng":"","rmkKor":"","std":"${D}${hhmm}"}`
 }
 
-/** 공항공사 정상 응답 한 쪽. totalCount는 모든 쪽을 합친 기록 수. */
+/** 공항공사 정상 응답 한 쪽. totalCount는 모든 쪽을 합친 기록 수 (한 쪽 100건으로 쪽 수를 센다: 101이면 2쪽). */
 function kacPage(totalCount: number, ...items: string[]): string {
   return `{"response":{"header":{"resultCode":"00","resultMsg":"NORMAL SERVICE."},"body":{"numOfRows":100,"pageNo":1,"totalCount":${totalCount},"items":{"item":[${items.join(',')}]}}}}`
 }
@@ -363,8 +363,8 @@ test('같은_편명이_하루_두_번이면_출발_시각이_가장_가까운_�
 test('공항공사_기록이_여러_쪽이면_끝까지_읽고_더_묻지_않는다', async () => {
   twoMolitFlights()
   fake.kacPages = [
-    kacPage(2, kacItem('7C115', '1410', 'O', 'GMP', 'CJU', 'B738')),
-    kacPage(2, kacItem('LJ569', '1435', 'O', 'GMP', 'CJU', 'A321'))]
+    kacPage(101, kacItem('7C115', '1410', 'O', 'GMP', 'CJU', 'B738')),
+    kacPage(101, kacItem('LJ569', '1435', 'O', 'GMP', 'CJU', 'A321'))]
 
   const { flights } = await json(await search('GMP', 'CJU', VALID_DATE))
 
@@ -421,8 +421,8 @@ test('공항공사가_제한_시간_안에_답하지_않으면_시각은_보여�
 test('중간_쪽에서_실패해도_앞서_받은_기종은_쓴다', async () => {
   twoMolitFlights()
   fake.kacPages = [
-    kacPage(2, kacItem('7C115', '1410', 'O', 'GMP', 'CJU', 'B738')),
-    kacPage(2, kacItem('LJ569', '1435', 'O', 'GMP', 'CJU', 'A321'))]
+    kacPage(101, kacItem('7C115', '1410', 'O', 'GMP', 'CJU', 'B738')),
+    kacPage(101, kacItem('LJ569', '1435', 'O', 'GMP', 'CJU', 'A321'))]
   fake.kacFailFromPage = 2
 
   const result = await search('GMP', 'CJU', VALID_DATE)
@@ -431,6 +431,30 @@ test('중간_쪽에서_실패해도_앞서_받은_기종은_쓴다', async () =>
   const { flights } = await json(result)
   assert.equal(flights[0].aircraftCode, 'B738')
   assert.equal(flights[1].aircraftCode, '')
+})
+
+test('나머지_쪽은_동시에_받아서_중간_쪽이_실패해도_뒤_쪽_기종은_쓴다', async () => {
+  twoMolitFlights()
+  fake.kacPages = [
+    kacPage(201, kacItem('7C115', '1410', 'O', 'GMP', 'CJU', 'B738')),
+    'JSON이 아닌 답', // 2쪽만 깨진다
+    kacPage(201, kacItem('LJ569', '1435', 'O', 'GMP', 'CJU', 'A321'))]
+
+  const { flights } = await json(await search('GMP', 'CJU', VALID_DATE))
+
+  assert.equal(flights[0].aircraftCode, 'B738')
+  assert.equal(flights[1].aircraftCode, 'A321')
+  assert.equal(fake.kacCalls, 3)
+})
+
+test('전체_개수가_터무니없이_커도_10쪽까지만_묻는다', async () => {
+  twoMolitFlights()
+  fake.kacPages = [kacPage(1_000_000, kacItem('7C115', '1410', 'O', 'GMP', 'CJU', 'B738'))]
+
+  const { flights } = await json(await search('GMP', 'CJU', VALID_DATE))
+
+  assert.equal(flights[0].aircraftCode, 'B738')
+  assert.equal(fake.kacCalls, 10)
 })
 
 test('공항공사가_실패해도_인증키는_응답과_기록_어디에도_나가지_않는다', async () => {
