@@ -6,6 +6,7 @@ import SelectableCard from '../components/SelectableCard'
 import StatusMessage from '../components/StatusMessage'
 import TabBar from '../components/TabBar'
 import { getRouteTitle, type Flight } from '../mocks/flights'
+import { addPick } from '../searchHistory'
 import { useJson } from '../useJson'
 import './FlightResultsPage.css'
 
@@ -46,6 +47,7 @@ function FlightResultsPage() {
     const params = new URLSearchParams(searchParams)
     const selection = {
       flight: flight.flightNumber,
+      airline: flight.airline,
       dep: flight.departureTime,
       arr: flight.arrivalTime,
       aircraft: flight.aircraft,
@@ -148,7 +150,14 @@ function FlightResultsPage() {
         <footer className="screen-footer flight-list-footer">
           {/* 좌석 배치도가 없는 편("추천 준비 중")은 추천을 계산할 수 없어 넘어가지 못한다. 문구는 임시다 (디자인 확인) */}
           {searchParams.get('seatMap') ? (
-            <Button onClick={() => navigate(`/flight/trip?${searchParams}`)}>다음</Button>
+            <Button
+              onClick={() => {
+                addPick({ from: searchParams.get('from'), to: searchParams.get('to'), dep: selectedDeparture })
+                navigate(`/flight/trip?${searchParams}`)
+              }}
+            >
+              다음
+            </Button>
           ) : (
             <Button disabled>이 항공편은 아직 추천을 준비 중이에요</Button>
           )}

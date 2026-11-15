@@ -8,6 +8,7 @@ import PassengerSheet from '../components/PassengerSheet'
 import TabBar from '../components/TabBar'
 import { AIRPORT_NAMES, formatPassengers, type AirportCode, type Passengers } from '../mocks/flights'
 import { describeSeatProfile } from '../mocks/seatProfile'
+import { addSearch } from '../searchHistory'
 import './FlightSearchPage.css'
 
 type TripType = 'one-way' | 'round-trip'
@@ -91,6 +92,7 @@ function FlightSearchPage() {
     }
     const params = new URLSearchParams({ from, to, date: startDate, passengers: formatPassengers(passengers) })
     if (endDate) params.set('returnDate', endDate)
+    addSearch({ from, to, date: startDate, ...(endDate && { returnDate: endDate }), passengers })
     navigate(`/flight/results?${params}`)
   }
 

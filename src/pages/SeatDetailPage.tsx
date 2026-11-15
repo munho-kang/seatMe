@@ -1,10 +1,11 @@
 import { useSearchParams } from 'react-router'
-import { getBookingGuide, getBookingLink } from '../booking'
+import { getBookingGuide, getBookingLink, parsePassengers } from '../booking'
 import '../components/Button.css'
 import RecommendStatus from '../components/RecommendStatus'
 import TabBar from '../components/TabBar'
 import { getSeatProfile } from '../mocks/seatProfile'
 import { useRecommendation, type ScoreItem } from '../recommend'
+import { addTrip } from '../searchHistory'
 import './SeatDetailPage.css'
 
 // 서버가 준 항목 이름을 문장으로 바꾸는 표. 문구는 임시다 (디자인 확인).
@@ -94,7 +95,23 @@ function SeatDetailPage() {
               {booking.prefilled ? '노선과 날짜는 채워 뒀어요. 아래는 직접 골라 주세요' : '항공사 화면에서 직접 골라 주세요'}
               <strong>{getBookingGuide(searchParams, seat)}</strong>
             </p>
-            <a className="button button--primary button--lg" href={booking.url} target="_blank" rel="noreferrer">
+            <a className="button button--primary button--lg" href={booking.url}
+              target="_blank"
+              rel="noreferrer"
+              onClick={() =>
+                addTrip({
+                  from: searchParams.get('from'),
+                  to: searchParams.get('to'),
+                  date: searchParams.get('date'),
+                  passengers: parsePassengers(searchParams.get('passengers')),
+                  airline: searchParams.get('airline'),
+                  flight: searchParams.get('flight'),
+                  dep: searchParams.get('dep'),
+                  seat: detail.seat,
+                  score: detail.score,
+                })
+              }
+            >
               항공사 사이트에서 예매하기
             </a>
           </>

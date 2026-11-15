@@ -2,6 +2,7 @@ import { useRef } from 'react'
 import { Link, useNavigate } from 'react-router'
 import Button from '../components/Button'
 import TabBar from '../components/TabBar'
+import { forgetAccountHistory } from '../searchHistory'
 import { forgetAccountProfile, getSeatProfile, isLoggedIn, SEAT_POSITION_SHORT } from '../mocks/seatProfile'
 import './MyPage.css'
 
@@ -26,6 +27,7 @@ function MyPage() {
       // 서버에 닿지 않아도 화면에서는 로그아웃한다
     }
     forgetAccountProfile()
+    forgetAccountHistory()
     navigate('/')
   }
 
