@@ -23,7 +23,8 @@ const isAirport = (x: unknown): x is Airport => x === 'GMP' || x === 'CJU' || x 
 /** 'YYYY-MM-DD' 모양이면서 달력에 실제 있는 날짜인가 (2026-02-30은 아니다). */
 function isDate(x: unknown): x is string {
   if (typeof x !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(x)) return false
-  return new Date(`${x}T00:00:00Z`).toISOString().slice(0, 10) === x
+  const time = new Date(`${x}T00:00:00Z`).getTime()
+  return !Number.isNaN(time) && new Date(time).toISOString().slice(0, 10) === x
 }
 
 // src/booking.ts isBookable과 같은 규칙: 성인 1명 이상, 합 9명 이하, 유아는 성인 수 이하

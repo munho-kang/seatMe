@@ -101,7 +101,7 @@ test('틀리면 400 INVALID_HISTORY', async () => {
     JSON.stringify({ picks: [], trips: [] }),
     JSON.stringify({ ...HISTORY, searches: Array(31).fill(search) }),
     JSON.stringify({ ...HISTORY, picks: [{ ...pick, dep: '24:00' }] }),
-    ...[{ to: 'GMP' }, { to: 'ICN' }, { date: '2026-02-30' }, { returnDate: '2026-11-30' },
+    ...[{ to: 'GMP' }, { to: 'ICN' }, { date: '2026-02-30' }, { date: '2026-13-01' }, { date: '2026-00-10' }, { date: '2026-12-00' }, { returnDate: '2026-11-30' },
       { passengers: { adult: 0, child: 0, infant: 0 } }, { passengers: { adult: 1, child: 0, infant: 2 } },
       { passengers: { adult: 5, child: 5, infant: 0 } }, { at: -1 }].map(p => JSON.stringify(withSearch(p))),
     ...[{ seat: '12a' }, { score: 101 }, { rating: 0 }, { rating: 4.5 }].map(p => JSON.stringify(withTrip(p)))]
