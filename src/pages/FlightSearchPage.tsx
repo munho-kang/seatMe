@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import alertIcon from '../assets/icon-alert-small.svg'
 import AirportSheet from '../components/AirportSheet'
 import Button from '../components/Button'
@@ -8,7 +8,7 @@ import PassengerSheet from '../components/PassengerSheet'
 import TabBar from '../components/TabBar'
 import { AIRPORT_NAMES, formatPassengers, type AirportCode, type Passengers } from '../mocks/flights'
 import { describeSeatProfile } from '../mocks/seatProfile'
-import { addSearch } from '../searchHistory'
+import { addSearch, getSearchHistory, kstToday, recentRoutes, searchPrefill } from '../searchHistory'
 import './FlightSearchPage.css'
 
 type TripType = 'one-way' | 'round-trip'
@@ -66,14 +66,22 @@ function SearchField({ label, value, isWide = false, isActive, errorMessage, onC
 
 function FlightSearchPage() {
   const navigate = useNavigate()
-  const [tripType, setTripType] = useState<TripType>()
-  const [from, setFrom] = useState<AirportCode>()
-  const [to, setTo] = useState<AirportCode>()
-  const [startDate, setStartDate] = useState<string>()
-  const [endDate, setEndDate] = useState<string>()
-  const [passengers, setPassengers] = useState<Passengers>()
+  const [urlParams] = useSearchParams()
+  const [prefill] = useState(() => searchPrefill(urlParams, kstToday()))
+  // 날짜가 지나서 비웠어도 왕복 · 편도는 주소 기준
+  const [tripType, setTripType] = useState<TripType | undefined>(() =>
+    urlParams.get('returnDate') ? 'round-trip' : urlParams.get('date') ? 'one-way' : undefined,
+  )
+  const [from, setFrom] = useState<AirportCode | undefined>(prefill.from)
+  const [to, setTo] = useState<AirportCode | undefined>(prefill.to)
+  const [startDate, setStartDate] = useState<string | undefined>(prefill.date)
+  const [endDate, setEndDate] = useState<string | undefined>(prefill.returnDate)
+  const [passengers, setPassengers] = useState<Passengers | undefined>(prefill.passengers)
   const [openSheet, setOpenSheet] = useState<SheetName>()
   const [isSubmitted, setIsSubmitted] = useState(false)
+
+  const history = recentRoutes(getSearchHistory())
+  const routes = history.length ? history : RECENT_ROUTES
 
   const dateLabel =
     startDate && (endDate ? `${formatFieldDate(startDate)} - ${formatFieldDate(endDate)}` : formatFieldDate(startDate))
@@ -152,7 +160,7 @@ function FlightSearchPage() {
 
       <h2 className="recent-routes-title">최근 경로</h2>
       <div className="recent-routes">
-        {RECENT_ROUTES.map(([routeFrom, routeTo]) => (
+        {routes.map(([routeFrom, routeTo]) => (
           <button
             key={`${routeFrom}-${routeTo}`}
             type="button"

@@ -6,7 +6,7 @@ import SelectableCard from '../components/SelectableCard'
 import StatusMessage from '../components/StatusMessage'
 import TabBar from '../components/TabBar'
 import { getRouteTitle, type Flight } from '../mocks/flights'
-import { addPick } from '../searchHistory'
+import { addPick, timeBand } from '../searchHistory'
 import { useJson } from '../useJson'
 import './FlightResultsPage.css'
 
@@ -39,7 +39,12 @@ function FlightResultsPage() {
   const { data, retry } = useJson<{ flights: Flight[] }>(`/api/flights?${query}`)
   const isLoading = data === undefined
   // 불러오는 중이거나 실패했으면 null
-  const flights = data ? data.flights : null
+  const time = searchParams.get('time')
+  const flights = data
+    ? time === 'morning' || time === 'afternoon' || time === 'evening'
+      ? data.flights.toSorted((a, b) => Number(timeBand(b.departureTime) === time) - Number(timeBand(a.departureTime) === time))
+      : data.flights
+    : null
 
   // 뒤로 돌아왔을 때 선택한 카드가 보이도록 선택값을 목록 URL에 남긴다.
   // 다음 화면들(추천 계산 · 좌석맵)이 서버를 다시 부르지 않도록 그 편의 시각 · 기종 · 좌석 배치도도 함께 싣는다
