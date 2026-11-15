@@ -1,4 +1,4 @@
-import { config, encodeKey, type Env, redact } from '../config.ts'
+import { config, encodeKey, type Env, fetchPublicData, redact } from '../config.ts'
 import { fromCompact, kst } from '../kst.ts'
 
 /**
@@ -44,10 +44,8 @@ export async function searchFlights(env: Env, depAirportId: string, arrAirportId
   let status: number
   let body: string
   try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(config.molitTimeoutMs) })
-    status = response.status
-    body = await response.text()
-  } catch (e) { // 시간 초과도 여기로 온다
+    ({ status, body } = await fetchPublicData(url, config.molitTimeoutMs))
+  } catch (e) { // 다시 물어도 시간 초과면 여기로 온다
     throw new UpstreamError('국토부가 답하지 않았어요: ' + e)
   }
   if (status !== 200) throw new UpstreamError(`국토부 HTTP ${status} ${head(body, env)}`)
