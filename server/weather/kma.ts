@@ -1,4 +1,4 @@
-import { config, encodeKey, type Env, redact } from '../config.ts'
+import { config, encodeKey, type Env, fetchPublicData, redact } from '../config.ts'
 import { compact, fromCompact, kst } from '../kst.ts'
 
 /** sky: 1 맑음 · 3 구름많음 · 4 흐림. pty: 0 없음 · 1 비 · 2 비/눈 · 3 눈 · 4 소나기. announced: 그 예보를 발표한 시각 (epoch ms). */
@@ -50,8 +50,7 @@ export async function forecast(env: Env, airport: string, when: number, now: num
     + '&base_date=' + compact(announced).slice(0, 8) + '&base_time=' + compact(announced).slice(8, 12)
     + '&nx=' + grid[0] + '&ny=' + grid[1]
   try {
-    const response = await fetch(url, { signal: AbortSignal.timeout(config.kmaTimeoutMs) })
-    const root: Json = JSON.parse(await response.text())
+    const root: Json = JSON.parse((await fetchPublicData(url, config.kmaTimeoutMs, 2)).body)
     const header = root?.response?.header
     if (String(header?.resultCode ?? '') !== '00') {
       console.warn(redact(`기상청 오류 응답 → 날씨 한 줄만 뺀다: ${header?.resultCode ?? ''} ${header?.resultMsg ?? ''}`, env))
