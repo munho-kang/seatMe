@@ -71,9 +71,9 @@ async function naverId(env: Env, code: string, state: string): Promise<string | 
   })
   // 네이버 문서대로 값은 주소에 싣는다. 이 주소는 로그에 남기지 않는다 (wrangler.jsonc에서 traces 꺼 둠)
   const token = await (await fetch(`${config.naverAuthUrl}/token?${query}`, { method: 'POST', signal })).json() as
-    { access_token?: unknown; error?: unknown }
+    { access_token?: unknown; error?: unknown; error_description?: unknown }
   if (typeof token.access_token !== 'string') {
-    console.warn(`네이버 토큰 발급 실패: ${String(token.error)}`)
+    console.warn(redact(`네이버 토큰 발급 실패: ${String(token.error)} (${String(token.error_description)})`, env))
     return null
   }
   const me = await (await fetch(`${config.naverApiUrl}/v1/nid/me`, {
