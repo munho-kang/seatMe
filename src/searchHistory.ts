@@ -1,7 +1,9 @@
 // 검색 · 여행 기록. 네이버로 로그인했으면 계정(서버 /api/history)에, 아니면 이 기기(브라우저 localStorage)에 저장한다.
 // seatProfile.ts와 같은 모양이다. 로그인 여부는 화면을 그리기 전에 syncSearchHistory()가 한 번 확인한다 (main.tsx).
 import { MAX_RECORDS, emptyHistory, readHistory, validPick, validSearch, validTrip } from '../server/history/rules.ts'
-import type { History, SearchRecord, TripRecord } from '../server/history/rules.ts'
+import type { Airport, History, Passengers, SearchRecord, TripRecord } from '../server/history/rules.ts'
+import { isBookable, parsePassengers } from './booking.ts'
+import { formatPassengers } from './mocks/flights.ts'
 
 const STORAGE_KEY = 'seatme.searchHistory'
 
@@ -134,4 +136,97 @@ export function removeTrip(trip: TripRecord) {
 export function rateTrip(trip: TripRecord, rating: number) {
   const current = getSearchHistory()
   return save({ ...current, trips: current.trips.map((t) => (sameFlight(t, trip) ? { ...t, rating } : t)) })
+}
+
+// --- 카드에 보일 값 계산 (저장하지 않고 기록에서 그때그때 계산한다) ---
+
+export type TimeBand = 'morning' | 'afternoon' | 'evening'
+export const TIME_BAND_LABEL: Record<TimeBand, string> = { morning: '오전 출발', afternoon: '오후 출발', evening: '저녁 출발' }
+
+// 'HH:MM' 문자열 비교: ~11:59 오전, 12:00~17:59 오후, 18:00~ 저녁
+export function timeBand(dep: string): TimeBand {
+  return dep < '12:00' ? 'morning' : dep < '18:00' ? 'afternoon' : 'evening'
+}
+
+export type FrequentTrip = { from: Airport; to: Airport; date: string; passengers: Passengers; time?: TimeBand }
+
+const DAY = 86400_000
+const addDays = (date: string, n: number) => new Date(Date.parse(`${date}T00:00:00Z`) + n * DAY).toISOString().slice(0, 10)
+const weekday = (date: string) => new Date(`${date}T00:00:00Z`).getUTCDay()
+
+// 값을 세어 가장 많은 것. 같으면 먼저 나온 것 (목록이 최신순이라 더 최근)
+function mostCommon<T>(items: T[]): T | undefined {
+  const counts = new Map<T, number>()
+  for (const item of items) counts.set(item, (counts.get(item) ?? 0) + 1)
+  let best: T | undefined
+  for (const [item, n] of counts) if (best === undefined || n > counts.get(best)!) best = item
+  return best
+}
+
+// 자주 가는 여행: 가장 많이 검색한 노선(2번 이상) + 그 노선을 자주 검색한 요일의 내일부터 7일 안 첫 날
+export function frequentTrip(history: History, today: string): FrequentTrip | null {
+  const key = (r: { from: Airport; to: Airport }) => `${r.from}>${r.to}`
+  const routeKey = mostCommon(history.searches.map(key))
+  if (routeKey === undefined) return null
+  const searches = history.searches.filter((r) => key(r) === routeKey)
+  if (searches.length < 2) return null
+
+  const day = mostCommon(searches.map((r) => weekday(r.date)))!
+  let date = addDays(today, 1)
+  while (weekday(date) !== day) date = addDays(date, 1)
+
+  const { from, to, passengers } = searches[0]
+  const band = mostCommon(history.picks.filter((p) => key(p) === routeKey).map((p) => timeBand(p.dep)))
+  return { from, to, date, passengers, ...(band && { time: band }) }
+}
+
+export function frequentTripUrl(trip: FrequentTrip) {
+  const params = new URLSearchParams({ from: trip.from, to: trip.to, date: trip.date, passengers: formatPassengers(trip.passengers) })
+  if (trip.time) params.set('time', trip.time)
+  return `/flight/results?${params}`
+}
+
+// 다가오는 여행(오늘 포함)은 이른 순, 지난 여행은 늦은 순
+export function splitTrips(trips: TripRecord[], today: string) {
+  const when = (t: TripRecord) => `${t.date} ${t.dep}`
+  const sorted = [...trips].sort((a, b) => (when(a) < when(b) ? -1 : when(a) > when(b) ? 1 : 0))
+  return { upcoming: sorted.filter((t) => t.date >= today), past: sorted.filter((t) => t.date < today).reverse() }
+}
+
+// 겹치지 않는 노선 최근 3개
+export function recentRoutes(history: History): [Airport, Airport][] {
+  const routes: [Airport, Airport][] = []
+  for (const { from, to } of history.searches) {
+    if (routes.length < 3 && !routes.some(([f, t]) => f === from && t === to)) routes.push([from, to])
+  }
+  return routes
+}
+
+const AIRPORTS = ['GMP', 'CJU', 'PUS']
+const isDateText = (x: string | null): x is string => x !== null && /^\d{4}-\d{2}-\d{2}$/.test(x)
+
+// 주소의 검색 칸을 화면 칸 값으로. 틀린 칸은 빈 칸으로 둔다
+export function searchPrefill(params: URLSearchParams, today: string) {
+  const from = params.get('from')
+  const to = params.get('to')
+  const date = params.get('date')
+  const returnDate = params.get('returnDate')
+  const passengers = params.get('passengers')
+  const dateOk = isDateText(date) && date >= today
+  const result: { from?: Airport; to?: Airport; date?: string; returnDate?: string; passengers?: Passengers } = {}
+  if (from !== to) {
+    if (AIRPORTS.includes(from ?? '')) result.from = from as Airport
+    if (AIRPORTS.includes(to ?? '')) result.to = to as Airport
+  }
+  if (dateOk) result.date = date
+  if (isDateText(returnDate) && returnDate >= today && (!isDateText(date) || (dateOk && returnDate >= date))) result.returnDate = returnDate
+  if (passengers !== null && isBookable(parsePassengers(passengers))) result.passengers = parsePassengers(passengers)
+  return result
+}
+
+// 예매 링크(getBookingLink)가 읽는 칸
+export function tripParams(trip: TripRecord) {
+  return new URLSearchParams({
+    from: trip.from, to: trip.to, date: trip.date, passengers: formatPassengers(trip.passengers), flight: trip.flight, dep: trip.dep,
+  })
 }
