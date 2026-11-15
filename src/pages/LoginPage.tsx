@@ -60,7 +60,7 @@ function LoginPage() {
           type="button"
           className="login-social-button"
           aria-label="네이버로 로그인"
-          onClick={() => navigate('/login/naver')}
+          onClick={() => window.location.assign('/api/auth/naver')}
         >
           <img src={naverIcon} alt="" width={50} height={50} />
         </button>

@@ -1,7 +1,15 @@
 // 서버 설정 (Java 서버의 application.properties 자리).
 
-/** 인증키 세 개. 배포된 서버는 Cloudflare 비밀 보관함에서, 내 컴퓨터에서는 .dev.vars 파일에서 온다 (저장소에 안 올라감). */
-export type Env = { MOLIT_SERVICE_KEY?: string; KAC_API_KEY?: string; KMA_SERVICE_KEY?: string }
+/**
+ * 인증키 · 비밀값. 배포된 서버는 Cloudflare 비밀 보관함에서, 내 컴퓨터에서는 .dev.vars 파일에서 온다 (저장소에 안 올라감).
+ * NAVER_* 는 네이버 개발자센터 앱의 값, SESSION_SECRET은 로그인 쿠키 서명 키(아무 긴 무작위 글자).
+ * PROFILES는 취향 보관함(Cloudflare KV, wrangler.jsonc의 kv_namespaces).
+ */
+export type Env = {
+  MOLIT_SERVICE_KEY?: string; KAC_API_KEY?: string; KMA_SERVICE_KEY?: string
+  NAVER_CLIENT_ID?: string; NAVER_CLIENT_SECRET?: string; SESSION_SECRET?: string
+  PROFILES?: { get(key: string): Promise<string | null>; put(key: string, value: string): Promise<unknown> }
+}
 
 /** 공공데이터 주소와 제한 시간. 테스트가 가짜 서버 주소 · 짧은 시간으로 바꿔 끼운다. */
 export const config = {
@@ -17,6 +25,11 @@ export const config = {
   kmaBaseUrl: 'https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0',
   // 기상청이 이 시간 안에 답하지 않으면 날씨 한 줄만 빼고 추천은 그대로 나간다 (3초)
   kmaTimeoutMs: 3000,
+  // 네이버 로그인 — https://developers.naver.com/docs/login/devguide/devguide.md
+  naverAuthUrl: 'https://nid.naver.com/oauth2.0',
+  naverApiUrl: 'https://openapi.naver.com',
+  // 네이버가 이 시간 안에 답하지 않으면 로그인 실패로 첫 화면에 돌려보낸다 (5초)
+  naverTimeoutMs: 5000,
 }
 
 /**
@@ -27,9 +40,9 @@ export function encodeKey(key: string | undefined): string {
   return !key ? '' : key.includes('%') ? key : encodeURIComponent(key)
 }
 
-/** 글자 안의 인증키(원문 · 부호화된 모양 모두)를 '<key>'로 바꾼다. 로그에 쓰는 글자는 전부 이걸 거친다. */
+/** 글자 안의 인증키 · 비밀값(원문 · 부호화된 모양 모두)를 '<key>'로 바꾼다. 로그에 쓰는 글자는 전부 이걸 거친다. */
 export function redact(text: string, env: Env): string {
-  for (const key of [env.MOLIT_SERVICE_KEY, env.KAC_API_KEY, env.KMA_SERVICE_KEY])
+  for (const key of [env.MOLIT_SERVICE_KEY, env.KAC_API_KEY, env.KMA_SERVICE_KEY, env.NAVER_CLIENT_SECRET, env.SESSION_SECRET])
     if (key) text = text.replaceAll(encodeURIComponent(key), '<key>').replaceAll(key, '<key>')
   return text
 }
