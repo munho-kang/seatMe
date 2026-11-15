@@ -39,3 +39,6 @@ API_연결_계획.md
 # Cloudflare: 내 컴퓨터용 인증키 파일과 wrangler 작업 폴더 (절대 커밋하지 않기)
 .dev.vars
 .wrangler/
+
+# 로고 같은 브랜드 그림 파일 (개인 보관용)
+/브랜드/
