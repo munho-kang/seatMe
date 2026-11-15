@@ -20,6 +20,8 @@ export type KacItem = {
 type Json = any
 
 const PAGE_SIZE = 100 // 공항공사는 100을 넘으면 오류를 돌려준다
+/** 공항공사는 오늘 ~ 이만큼 뒤 날짜까지만 기록을 준다 (2026-11-07 · 11-15 측정: 7일 뒤는 있고 8일 뒤는 0건). */
+export const RANGE_DAYS = 7
 // 전체 개수가 터무니없이 크게 와도 요청을 무한정 보내지 않는다. 김포·제주도 하루 5쪽 안팎 (2026-11-15 확인)
 const MAX_PAGES = 10
 
@@ -27,27 +29,32 @@ const MAX_PAGES = 10
  * 한 공항의 하루치 기록을 끝까지 받아요. 편명마다 따로 묻지 않고 한꺼번에 받으려고 만들었어요.
  * 첫 쪽에서 전체 개수를 보고, 나머지 쪽은 동시에 받아요 (차례로 받을 때보다 2배쯤 빠름, 2026-11-15 측정).
  * airport는 공항 코드(예: GMP), date는 'YYYY-MM-DD'. 실패한 쪽은 빼고 받은 쪽만 돌려줘요 (던지지 않아요).
+ * complete는 모든 쪽을 받았는지예요 (한 쪽이라도 실패했으면 false).
  */
-export async function searchAirportDay(env: Env, airport: string, date: string): Promise<KacItem[]> {
+export async function searchAirportDay(env: Env, airport: string, date: string): Promise<{ items: KacItem[], complete: boolean }> {
   const day = date.replaceAll('-', '')
   let first: { items: KacItem[], total: number }
   try {
     first = await fetchPage(env, airport, day, 1)
   } catch (e) {
     warn(env, e)
-    return []
+    return { items: [], complete: false }
   }
   const all = [...first.items]
-  if (first.items.length === 0) return all
+  if (first.items.length === 0) return { items: all, complete: true }
+  let complete = true
 
   const rest: Promise<{ items: KacItem[] }>[] = []
   for (let page = 2; page <= Math.min(Math.ceil(first.total / PAGE_SIZE), MAX_PAGES); page++)
     rest.push(fetchPage(env, airport, day, page))
   for (const result of await Promise.allSettled(rest)) {
     if (result.status === 'fulfilled') all.push(...result.value.items)
-    else warn(env, result.reason)
+    else {
+      warn(env, result.reason)
+      complete = false
+    }
   }
-  return all
+  return { items: all, complete }
 }
 
 /** 한 쪽을 받아 기록과 전체 개수를 돌려줘요. 실패하거나 오류 답이면 던져요. */
@@ -94,11 +101,13 @@ function itemsOf(result: Json): KacItem[] {
 
 /**
  * 그날 그 노선의 출발 기록을 한꺼번에 가져와요.
- * 돌려주는 값: 편명 → 그 편명의 출발 기록들 (하루 두 번 뜨는 편명은 기록이 둘). 공항공사가 답이 없으면 빈 Map
+ * 돌려주는 값: records = 편명 → 그 편명의 출발 기록들 (하루 두 번 뜨는 편명은 기록이 둘). 공항공사가 답이 없으면 빈 Map.
+ * complete = 공항공사가 모든 쪽을 답했는지 (false면 기록이 빠졌을 수 있다)
  */
-export async function findByRoute(env: Env, from: string, to: string, date: string): Promise<Map<string, KacItem[]>> {
+export async function findByRoute(env: Env, from: string, to: string, date: string): Promise<{ records: Map<string, KacItem[]>, complete: boolean }> {
   const byFlight = new Map<string, KacItem[]>()
-  for (const item of await searchAirportDay(env, from, date)) {
+  const { items, complete } = await searchAirportDay(env, from, date)
+  for (const item of items) {
     if (item.io !== 'O' || item.airport !== from || item.city !== to) continue
     if (item.airFln == null || item.icaoApmCd == null || item.icaoApmCd.trim() === '') continue
     if (item.std == null || !/^\d{12}$/.test(item.std)) continue
@@ -106,7 +115,7 @@ export async function findByRoute(env: Env, from: string, to: string, date: stri
     if (records) records.push(item)
     else byFlight.set(item.airFln, [item])
   }
-  return byFlight
+  return { records: byFlight, complete }
 }
 
 /**

@@ -1,4 +1,4 @@
-import { findByRoute, type KacItem, nearestRecord } from '../aircraft/kac.ts'
+import { findByRoute, type KacItem, nearestRecord, RANGE_DAYS } from '../aircraft/kac.ts'
 import { aircraftName } from '../aircraft/names.ts'
 import { type Env, redact } from '../config.ts'
 import { fromKst, kst } from '../kst.ts'
@@ -14,7 +14,8 @@ export const MOLIT_AIRPORT_ID = new Map([
 
 /**
  * 화면이 부르는 창구 — GET /api/flights?from=GMP&to=CJU&date=2026-11-13.
- * 요청을 먼저 확인해 틀리면 400, 국토부가 답하지 않으면 502, 아니면 {"flights":[...]}.
+ * 요청을 먼저 확인해 틀리면 400, 국토부가 답하지 않으면 502, 아니면 {"flights":[...], "aircraftMissing":"..."}.
+ * aircraftMissing은 기종이 빈 편이 있다면 그 이유 (NOT_YET · FAILED · NO_RECORD — 뜻은 flights.test.ts 머리 주석).
  */
 export async function flightsApi(query: URLSearchParams, env: Env, now: number): Promise<Response> {
   const from = param(query, 'from')
@@ -25,9 +26,11 @@ export async function flightsApi(query: URLSearchParams, env: Env, now: number):
     const flights = notDeparted(
       await searchFlights(env, MOLIT_AIRPORT_ID.get(from) ?? '', MOLIT_AIRPORT_ID.get(to) ?? '', day), day, now)
     // 항공편이 있을 때만 공항공사에 묻고, 편명 + 가장 가까운 출발 시각으로 합친다. 답이 없으면 기종만 빈 채로 나간다.
-    const records = flights.length === 0 ? new Map<string, KacItem[]>() : await findByRoute(env, from, to, day)
+    const { records, complete } = flights.length === 0
+      ? { records: new Map<string, KacItem[]>(), complete: true } : await findByRoute(env, from, to, day)
     return Response.json({
       flights: flights.map(flight => withSeatMaps(flight, nearestRecord(records.get(flight.flightNumber), flight.departureTime))),
+      aircraftMissing: day > kst(now + RANGE_DAYS * 86400_000).slice(0, 10) ? 'NOT_YET' : complete ? 'NO_RECORD' : 'FAILED',
     })
   } catch (e) {
     if (!(e instanceof UpstreamError)) throw e

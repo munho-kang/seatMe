@@ -12,6 +12,13 @@ import './FlightResultsPage.css'
 
 const SKELETON_COUNT = 4
 
+// 기종이 빈 이유(서버의 aircraftMissing)별로 카드에 적는 문구. 문구는 임시다 (디자인 확인)
+const AIRCRAFT_MISSING = {
+  NOT_YET: '기종은 출발 7일 전부터 나와요',
+  FAILED: '기종을 불러오지 못했어요',
+  NO_RECORD: '공항공사에 기종 정보가 없어요',
+}
+
 function formatSummaryDate(dateKey: string) {
   const [, month, day] = dateKey.split('-').map(Number)
   return `${month}월 ${day}일`
@@ -36,8 +43,9 @@ function FlightResultsPage() {
     to: searchParams.get('to') ?? '',
     date: searchParams.get('date') ?? '',
   }).toString()
-  const { data, retry } = useJson<{ flights: Flight[] }>(`/api/flights?${query}`)
+  const { data, retry } = useJson<{ flights: Flight[]; aircraftMissing: keyof typeof AIRCRAFT_MISSING }>(`/api/flights?${query}`)
   const isLoading = data === undefined
+  const missingText = data ? AIRCRAFT_MISSING[data.aircraftMissing] : ''
   // 불러오는 중이거나 실패했으면 null
   const time = searchParams.get('time')
   const flights = data
@@ -67,6 +75,15 @@ function FlightResultsPage() {
       else params.delete(key)
     }
     setSearchParams(params, { replace: true })
+  }
+
+  // 기종을 못 불러온 편을 골랐을 때: 선택을 지우고 목록을 다시 받는다 (새 목록에서 다시 고른다)
+  function handleRetry() {
+    const params = new URLSearchParams(searchParams)
+    params.delete('flight')
+    params.delete('dep')
+    setSearchParams(params, { replace: true })
+    retry()
   }
 
   if (!flights?.length) {
@@ -145,7 +162,7 @@ function FlightResultsPage() {
               {flight.departureTime} → {flight.arrivalTime}
             </span>
             <span className="flight-card-meta">
-              {flight.aircraft ? `${flight.aircraft} 예정` : '기종 확인 중'} · {flight.duration}
+              {flight.aircraft ? `${flight.aircraft} 예정` : missingText} · {flight.duration}
             </span>
           </SelectableCard>
         ))}
@@ -163,6 +180,8 @@ function FlightResultsPage() {
             >
               다음
             </Button>
+          ) : !searchParams.get('aircraft') && data?.aircraftMissing === 'FAILED' ? (
+            <Button onClick={handleRetry}>기종 정보 다시 불러오기</Button>
           ) : (
             <Button disabled>이 항공편은 아직 추천을 준비 중이에요</Button>
           )}
