@@ -53,10 +53,12 @@ async function putHistory(value: History, keepalive = false) {
 }
 
 // 화면을 그리기 전에 부른다. 로그인했으면 계정 기록을 쓰고, 계정에 아직 없으면 이 기기 기록을 계정으로 옮긴다.
-// 서버가 답하지 않으면 로그인 안 한 것으로 보고 기기 기록을 쓴다
+// 서버가 3초 안에 답하지 않으면 로그인 여부를 모르니 메모리에만 둔다 (계정 기록이 기기에 남지 않게)
 export async function syncSearchHistory() {
+  let answered = false
   try {
     const response = await fetch('/api/history', { signal: AbortSignal.timeout(3000) })
+    answered = true
     // 401은 로그인 안 함(기기). 그 밖의 실패는 로그인 여부를 모르니 이번 접속 동안 메모리에만 둔다
     if (response.status === 401) return
     if (!response.ok) {
@@ -76,12 +78,16 @@ export async function syncSearchHistory() {
       localStorage.removeItem(STORAGE_KEY)
     }
   } catch {
-    // 서버에 닿지 않는다
+    // 서버에 닿지 않는다. 응답으로 방식이 정해진 뒤의 실패(기기로 옮기기 등)는 그대로 둔다
+    if (!answered) mode = 'memory'
   }
 }
 
 // 로그아웃 뒤에는 이 기기 기록(없으면 빈 기록)으로 돌아간다
 export function forgetAccountHistory() {
+  clearTimeout(timer)
+  timer = undefined
+  pending = false
   mode = 'device'
   history = undefined
 }
@@ -92,10 +98,15 @@ let timer: ReturnType<typeof setTimeout> | undefined
 function flush(keepalive = false) {
   clearTimeout(timer)
   timer = undefined
-  if (!pending || !history) return
+  if (!pending || !history) return Promise.resolve()
   pending = false
-  void putHistory(history, keepalive === true).then((ok) => ok || console.error('계정에 검색 기록을 저장하지 못했어요'))
+  return putHistory(history, keepalive === true).then((ok) => {
+    if (!ok) console.error('계정에 검색 기록을 저장하지 못했어요')
+  })
 }
+
+// 로그아웃 직전에 부른다. 기다리던 저장을 바로 보내고 끝날 때까지 기다린다 (실패해도 던지지 않는다)
+export const flushSearchHistory = (): Promise<void> => flush()
 
 // 탭을 닫거나 숨기면 기다리던 저장을 바로 보낸다
 if (typeof document !== 'undefined') {
