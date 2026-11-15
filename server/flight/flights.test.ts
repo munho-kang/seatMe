@@ -30,23 +30,27 @@ const REAL_CONFIG = { ...config }
 
 // 가짜 국토부 서버 — 테스트마다 돌려줄 응답(몸통·상태·지연)을 바꿔 끼운다
 // 가짜 공항공사 서버(/kac) — pageNo번째 쪽을 돌려주고, kacFailFromPage 쪽부터는 500으로 실패한다
+// hangFirstCalls — 국토부 · 공항공사 각각 처음 이만큼의 요청에는 끝내 답하지 않는다 (가끔 멈추는 연결)
 const fake = {
   molitBody: '', molitStatus: 200, molitDelayMs: 0, molitCalls: 0, molitLastQuery: '',
   kacPages: [] as string[], kacFailFromPage: Infinity, kacDelayMs: 0, kacCalls: 0, kacLastQuery: '',
+  hangFirstCalls: 0,
 }
 const server = http.createServer((req, res) => {
   const [path, query = ''] = (req.url ?? '').split('?')
-  const send = (delayMs: number, status: number, body: string) =>
+  const send = (calls: number, delayMs: number, status: number, body: string) => {
+    if (calls <= fake.hangFirstCalls) return
     setTimeout(() => res.writeHead(status, { 'Content-Type': 'application/json;charset=UTF-8' }).end(body), delayMs).unref()
+  }
   if (path.startsWith('/kac')) {
     fake.kacCalls++
     fake.kacLastQuery = query
     const page = Number(/pageNo=(\d+)/.exec(query)?.[1] ?? 1)
-    send(fake.kacDelayMs, page >= fake.kacFailFromPage ? 500 : 200, fake.kacPages[page - 1] ?? kacPage(0))
+    send(fake.kacCalls, fake.kacDelayMs, page >= fake.kacFailFromPage ? 500 : 200, fake.kacPages[page - 1] ?? kacPage(0))
   } else {
     fake.molitCalls++
     fake.molitLastQuery = query
-    send(fake.molitDelayMs, fake.molitStatus, fake.molitBody)
+    send(fake.molitCalls, fake.molitDelayMs, fake.molitStatus, fake.molitBody)
   }
 })
 
@@ -72,6 +76,7 @@ beforeEach(() => {
     molitBody: molitJson('""'), // 기본은 "항공편 0개" 정상 응답
     molitStatus: 200, molitDelayMs: 0, molitCalls: 0, molitLastQuery: '',
     kacPages: [], kacFailFromPage: Infinity, kacDelayMs: 0, kacCalls: 0, kacLastQuery: '',
+    hangFirstCalls: 0,
   })
   logs = ''
 })
@@ -203,6 +208,24 @@ test('국토부가_제한_시간_안에_답하지_않으면_502', async () => {
   fake.molitDelayMs = 1500
 
   await assertUpstream(await search('GMP', 'CJU', VALID_DATE))
+  assert.equal(fake.molitCalls, 3) // 세 번까지 묻는다
+})
+
+// 배포된 서버에서 공공데이터로 가는 연결은 가끔 그냥 멈춘다 (2026-11-15: 16번 검색 중 6번). 짧게 기다리고 다시 물으면 답이 온다
+test('공공데이터가_한_번씩_답하지_않아도_다시_물어서_항공편과_기종을_받는다', async () => {
+  twoMolitFlights()
+  fake.kacPages = [kacPage(1, kacItem('7C115', '1410', 'O', 'GMP', 'CJU', 'B738'))]
+  fake.hangFirstCalls = 1
+
+  const result = await search('GMP', 'CJU', VALID_DATE)
+
+  assert.equal(result.status, 200)
+  const { flights } = await json(result)
+  assert.equal(flights.length, 2)
+  assert.equal(flights[0].aircraftCode, 'B738')
+  assert.equal(fake.molitCalls, 2)
+  assert.equal(fake.kacCalls, 2)
+  assert.ok(logs.includes('다시 묻는다') && !logs.includes('serviceKey'), logs)
 })
 
 test('국토부가_인증키_오류를_돌려주면_502', async () => {
@@ -415,7 +438,7 @@ test('공항공사가_제한_시간_안에_답하지_않으면_시각은_보여�
   const { flights } = await json(result)
   assert.equal(flights[0].flightNumber, '7C115')
   assert.equal(flights[0].aircraftCode, '')
-  assert.equal(fake.kacCalls, 1) // 한 번 시간을 넘기면 다음 쪽을 더 기다리지 않는다
+  assert.equal(fake.kacCalls, 3) // 첫 쪽을 세 번 물어도 답이 없으면 다음 쪽은 묻지 않는다
 })
 
 test('중간_쪽에서_실패해도_앞서_받은_기종은_쓴다', async () => {

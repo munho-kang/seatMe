@@ -1,4 +1,4 @@
-import { config, encodeKey, type Env, redact } from '../config.ts'
+import { config, encodeKey, type Env, fetchPublicData, redact } from '../config.ts'
 
 /**
  * 한국공항공사 기종 API의 항공편 한 건. 우리가 쓸 칸만 골라 담았어요.
@@ -52,13 +52,13 @@ export async function searchAirportDay(env: Env, airport: string, date: string):
 
 /** 한 쪽을 받아 기록과 전체 개수를 돌려줘요. 실패하거나 오류 답이면 던져요. */
 async function fetchPage(env: Env, airport: string, day: string, page: number): Promise<{ items: KacItem[], total: number }> {
-  // 공항공사가 답을 안 해도 하염없이 기다리지 않도록 제한 시간을 둬요
-  const response = await fetch(
+  // 공항공사가 답을 안 해도 하염없이 기다리지 않도록 제한 시간을 두고, 넘기면 다시 물어요
+  const { status, body } = await fetchPublicData(
     `${config.kacBaseUrl}?serviceKey=${encodeKey(env.KAC_API_KEY)}&type=json&numOfRows=${PAGE_SIZE}&pageNo=${page}`
       + `&schAirCode=${airport}&schStTime=${day}0000&schEdTime=${day}2359`,
-    { signal: AbortSignal.timeout(config.kacTimeoutMs) })
-  if (!response.ok) throw new Error('HTTP ' + response.status)
-  const result: Json = await response.json()
+    config.kacTimeoutMs)
+  if (status < 200 || status > 299) throw new Error('HTTP ' + status)
+  const result: Json = JSON.parse(body)
   const error = errorOf(result)
   if (error !== null) throw new Error('오류 응답 ' + error)
   // 전체 개수가 없거나 숫자가 아니면 0으로 보고 첫 쪽에서 멈춘다 (Java 서버와 같다)
