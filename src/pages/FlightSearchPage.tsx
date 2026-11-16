@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import alertIcon from '../assets/icon-alert-small.svg'
+import chevronIcon from '../assets/icon-chevron-down.svg'
 import AirportSheet from '../components/AirportSheet'
 import Button from '../components/Button'
 import CalendarSheet from '../components/CalendarSheet'
@@ -31,7 +32,7 @@ function formatFieldDate(dateKey: string) {
 }
 
 function formatAirport(code?: AirportCode) {
-  return code && `${AIRPORT_NAMES[code]} · ${code}`
+  return code && `${AIRPORT_NAMES[code]} (${code})`
 }
 
 type SearchFieldProps = {
@@ -53,6 +54,9 @@ function SearchField({ label, value, isWide = false, isActive, errorMessage, onC
       <button type="button" className={classes.join(' ')} onClick={onClick}>
         <span className="search-field-label">{label}</span>
         <span className="search-field-value">{value ?? '선택'}</span>
+        <span className="search-field-arrow">
+          <img src={chevronIcon} alt="" width={8.36396} height={14.7279} />
+        </span>
       </button>
       {errorMessage && (
         <p className="field-error">

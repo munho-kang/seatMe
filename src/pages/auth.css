@@ -126,3 +126,13 @@
   line-height: var(--line-height-tight);
   color: var(--color-danger);
 }
+
+/* 로그인 · 회원가입 왼쪽 아래 "이전" (Figma 2014:475, 2014:521: x 46, y 770) */
+.auth-back {
+  align-self: flex-start;
+  margin: auto 0 51px 14.5px;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+  color: var(--color-text-strong);
+}

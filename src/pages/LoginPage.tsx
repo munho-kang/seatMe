@@ -95,6 +95,10 @@ function LoginPage() {
           회원가입
         </Link>
       </p>
+
+      <Link className="text-link auth-back" to="/">
+        이전
+      </Link>
     </main>
   )
 }

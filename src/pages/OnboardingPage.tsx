@@ -58,7 +58,7 @@ function OnboardingPage() {
               나중에
             </button>
           </div>
-          <h1 className="screen-title">3분이 아니라 30초면 돼요</h1>
+          <h1 className="screen-title">30초면 돼요</h1>
           <p className="screen-desc">몇 가지 선택만 해두면 이후 비행에서는 저장된 취향으로 바로 추천 받을 수 있어요.</p>
         </header>
 
@@ -170,7 +170,7 @@ function OnboardingPage() {
       <footer className="screen-footer">
         <Button onClick={handleFinish}>이 조건으로 추천받기</Button>
         <button type="button" className="text-link onboarding-back" onClick={() => setStep(2)}>
-          이전
+          이전으로
         </button>
       </footer>
     </main>
