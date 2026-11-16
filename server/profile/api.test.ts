@@ -77,13 +77,13 @@ test('로그인 → 취향 저장 → 다른 기기(같은 쿠키)에서 읽기 
   assert.match(session, /^user_1\.\d+\.[\w-]+$/)
   const headers = { Cookie: `other=1; seatme_session=${session}` }
 
-  assert.deepEqual(await (await call('/api/profile', { headers })).json(), { profile: null })
+  assert.deepEqual(await (await call('/api/profile', { headers })).json(), { profile: null, nickname: null })
   const put = await call('/api/profile', { method: 'PUT', headers, body: JSON.stringify({ ...PROFILE, extra: 1 }) })
   assert.equal(put.status, 204)
   assert.deepEqual(JSON.parse(store.get('user_1')!), PROFILE) // 모르는 칸은 버린다
   // 다시 로그인해도(새 쿠키) 같은 계정 값이 나온다
   const again = { Cookie: `seatme_session=${cookieOf(await login(), 'seatme_session')}` }
-  assert.deepEqual(await (await call('/api/profile', { headers: again })).json(), { profile: PROFILE })
+  assert.deepEqual(await (await call('/api/profile', { headers: again })).json(), { profile: PROFILE, nickname: null })
 
   const out = await call('/api/auth/logout', { method: 'POST' })
   assert.equal(out.status, 204)

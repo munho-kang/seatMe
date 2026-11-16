@@ -13,6 +13,8 @@ const SESSION = 'seatme_session'
 const STATE = 'seatme_naver_state'
 const SESSION_DAYS = 180
 const NAVER_ID = /^[\w-]{1,128}$/
+// 로그인 쿠키에 담는 계정 id: 네이버 id, 또는 이메일 계정 id(~ + 무작위 32글자, ./email.ts). 네이버 id에는 ~가 없어 겹치지 않는다
+const ACCOUNT_ID = /^~?[\w-]{1,128}$/
 
 export async function naverLogin(request: Request, env: Env): Promise<Response> {
   if (!env.NAVER_CLIENT_ID || !env.SESSION_SECRET) return Response.json({ error: 'LOGIN_NOT_CONFIGURED' }, { status: 503 })
@@ -36,10 +38,7 @@ export async function naverCallback(request: Request, env: Env): Promise<Respons
   try {
     const id = await naverId(env, code, state)
     if (id === null) return redirect('/', clearState)
-    const expires = Date.now() + SESSION_DAYS * 24 * 3600_000
-    const payload = `${id}.${expires}`
-    const session = `${payload}.${base64url(await crypto.subtle.sign('HMAC', await key(env.SESSION_SECRET), utf8(payload)))}`
-    return redirect('/login/done', clearState, cookie(SESSION, session, SESSION_DAYS * 24 * 3600, '/'))
+    return redirect('/login/done', clearState, await sessionCookie(id, env.SESSION_SECRET))
   } catch (e) {
     console.warn(redact(`네이버 로그인 실패: ${e instanceof Error ? e.message : e}`, env))
     return redirect('/', clearState)
@@ -50,12 +49,20 @@ export function logout(): Response {
   return new Response(null, { status: 204, headers: { 'Set-Cookie': cookie(SESSION, '', 0, '/') } })
 }
 
-/** 로그인 쿠키가 맞으면 네이버 id, 없거나 틀리거나 만료됐으면 null. */
+/** 이 계정으로 로그인한 쿠키 (Set-Cookie 값). */
+export async function sessionCookie(id: string, secret: string): Promise<string> {
+  const expires = Date.now() + SESSION_DAYS * 24 * 3600_000
+  const payload = `${id}.${expires}`
+  const session = `${payload}.${base64url(await crypto.subtle.sign('HMAC', await key(secret), utf8(payload)))}`
+  return cookie(SESSION, session, SESSION_DAYS * 24 * 3600, '/')
+}
+
+/** 로그인 쿠키가 맞으면 계정 id(네이버 id 또는 이메일 계정 id), 없거나 틀리거나 만료됐으면 null. */
 export async function sessionUser(request: Request, env: Env, now: number): Promise<string | null> {
   const value = readCookie(request, SESSION)
   if (!value || !env.SESSION_SECRET) return null
   const [id, expires, signature] = value.split('.')
-  if (!id || !NAVER_ID.test(id) || !/^\d+$/.test(expires ?? '') || Number(expires) <= now || !signature) return null
+  if (!id || !ACCOUNT_ID.test(id) || !/^\d+$/.test(expires ?? '') || Number(expires) <= now || !signature) return null
   const bytes = fromBase64url(signature)
   if (bytes === null) return null
   // verify는 서명을 끝까지 비교한다 (몇 글자째에서 틀렸는지 시간으로 새지 않는다)
@@ -113,7 +120,7 @@ function key(secret: string) {
 
 const utf8 = (text: string) => new TextEncoder().encode(text)
 
-function base64url(data: ArrayBuffer | Uint8Array): string {
+export function base64url(data: ArrayBuffer | Uint8Array): string {
   return btoa(String.fromCharCode(...new Uint8Array(data))).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '')
 }
 

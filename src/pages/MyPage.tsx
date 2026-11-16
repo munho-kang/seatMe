@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router'
 import Button from '../components/Button'
 import TabBar from '../components/TabBar'
 import { flushSearchHistory, forgetAccountHistory } from '../searchHistory'
-import { forgetAccountProfile, getSeatProfile, isLoggedIn, SEAT_POSITION_SHORT } from '../mocks/seatProfile'
+import { accountNickname, forgetAccountProfile, getSeatProfile, isLoggedIn, SEAT_POSITION_SHORT } from '../mocks/seatProfile'
 import './MyPage.css'
 
 // 인증 API 전까지 쓰는 Figma(2014:1626) mock 메뉴 값
@@ -19,6 +19,7 @@ function MyPage() {
   const logoutDialogRef = useRef<HTMLDialogElement>(null)
   const profile = getSeatProfile()
   const loggedIn = isLoggedIn()
+  const nickname = accountNickname()
 
   async function handleLogout() {
     await flushSearchHistory() // 마지막 변경이 계정에 닿은 뒤에 로그아웃한다
@@ -40,10 +41,12 @@ function MyPage() {
       </header>
 
       <section className="account-header">
-        {/* 이름은 네이버에서 받지 않는다 (이용자 식별자만). 문구는 임시다 (디자인 확인) */}
+        {/* 이름은 네이버에서 받지 않는다 (이용자 식별자만). 닉네임이 있으면 이메일 계정이다. 문구는 임시다 (디자인 확인) */}
         <div>
-          <p className="account-name">{loggedIn ? '네이버 회원' : '로그인 안 함'}</p>
-          <p className="account-provider">{loggedIn ? '네이버 계정으로 로그인됨' : 'Seat Profile이 이 기기에만 저장돼요'}</p>
+          <p className="account-name">{!loggedIn ? '로그인 안 함' : nickname ?? '네이버 회원'}</p>
+          <p className="account-provider">
+            {!loggedIn ? 'Seat Profile이 이 기기에만 저장돼요' : nickname !== null ? '이메일 계정으로 로그인됨' : '네이버 계정으로 로그인됨'}
+          </p>
         </div>
         {loggedIn ? (
           <button type="button" className="text-link account-manage">

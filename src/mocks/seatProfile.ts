@@ -1,4 +1,4 @@
-// Seat Profile. 네이버로 로그인했으면 계정(서버 /api/profile)에, 아니면 이 기기(브라우저 localStorage)에 저장한다.
+// Seat Profile. 네이버 · 이메일로 로그인했으면 계정(서버 /api/profile)에, 아니면 이 기기(브라우저 localStorage)에 저장한다.
 // 저장한 적이 없으면 Figma 기본값이다. 로그인 여부는 화면을 그리기 전에 syncSeatProfile()이 한 번 확인한다 (main.tsx).
 // 칸 이름과 값은 서버 GET /api/recommend가 받는 취향 그대로다 (src/recommend.ts가 통째로 실어 보낸다)
 
@@ -78,6 +78,7 @@ function load() {
 let seatProfile: SeatProfile | undefined
 let loggedIn = false
 let accountSaved = false
+let nickname: string | null = null
 
 export function getSeatProfile() {
   return (seatProfile ??= load())
@@ -85,6 +86,11 @@ export function getSeatProfile() {
 
 export function isLoggedIn() {
   return loggedIn
+}
+
+// 이메일 계정의 닉네임. 네이버 계정이거나 로그인 안 했으면 null (마이 화면)
+export function accountNickname() {
+  return nickname
 }
 
 // 계정에 저장한 취향이 있는가 (로그인 직후 온보딩을 건너뛸지 정한다)
@@ -107,7 +113,9 @@ export async function syncSeatProfile() {
     const response = await fetch('/api/profile', { signal: AbortSignal.timeout(3000) })
     if (!response.ok) return
     loggedIn = true
-    const { profile } = await response.json()
+    const body = await response.json()
+    const { profile } = body
+    nickname = typeof body.nickname === 'string' ? body.nickname : null
     const device = deviceProfile()
     if (profile !== null) {
       seatProfile = parseSeatProfile(JSON.stringify(profile))
@@ -127,6 +135,7 @@ export async function syncSeatProfile() {
 export function forgetAccountProfile() {
   loggedIn = false
   accountSaved = false
+  nickname = null
   seatProfile = undefined
 }
 
