@@ -9,6 +9,9 @@ import { base64url, sessionCookie } from './naver.ts'
  *  - POST /api/auth/login 몸통 { email, password } → 204 + 로그인 쿠키. 이메일이 없거나 비밀번호가 틀리면 401 WRONG_LOGIN
  *    (어느 쪽이 틀렸는지 알려 주지 않는다).
  *  - 같은 이메일(로그인) · 같은 IP(회원가입)로 1분에 10번을 넘기면 429 TOO_MANY_TRIES (wrangler.jsonc의 LOGIN_LIMIT).
+ *    단, Cloudflare는 기계마다 따로 세고 늦게 맞춰서 정확하지 않다 (2026-11-16 배포 주소에서 측정: 하나씩 30번은 전부 통과,
+ *    한꺼번에 40번은 3번만 429). 몰아치는 시도를 늦추는 정도다.
+ *    ponytail: 정확한 횟수 제한이 필요하면 Durable Object 하나에 이메일별로 센다
  * 보관함은 취향과 같은 KV(PROFILES):
  *  - `email:<이메일>` → { id, salt, hash, iterations } — 비밀번호는 PBKDF2-SHA256으로 섞은 값만 둔다 (Web Crypto, 라이브러리 없음)
  *  - `account:<id>` → { nickname } — 마이 화면 이름 (/api/profile이 같이 돌려준다)
