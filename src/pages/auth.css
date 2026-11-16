@@ -119,3 +119,10 @@
   line-height: 1.2;
   color: var(--color-text-faint);
 }
+
+.auth-error {
+  font-size: 13px;
+  font-weight: 600;
+  line-height: var(--line-height-tight);
+  color: var(--color-danger);
+}
