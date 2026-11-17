@@ -3,18 +3,22 @@
 /**
  * 인증키 · 비밀값. 배포된 서버는 Cloudflare 비밀 보관함에서, 내 컴퓨터에서는 .dev.vars 파일에서 온다 (저장소에 안 올라감).
  * NAVER_* 는 네이버 개발자센터 앱의 값, SESSION_SECRET은 로그인 쿠키 서명 키(아무 긴 무작위 글자).
+ * BREVO_API_KEY · MAIL_FROM은 인증번호 메일을 보내는 Brevo의 키와 보내는 사람 주소(Brevo에서 확인을 마친 주소, auth/email.ts).
  * PROFILES는 취향 · 기록 · 이메일 계정 보관함. 배포에서는 D1 데이터베이스 DB(wrangler.jsonc의 d1_databases)를 d1Store로 감싸 넣는다 (index.ts).
  */
 export type Env = {
   MOLIT_SERVICE_KEY?: string; KAC_API_KEY?: string; KMA_SERVICE_KEY?: string
   NAVER_CLIENT_ID?: string; NAVER_CLIENT_SECRET?: string; SESSION_SECRET?: string
+  BREVO_API_KEY?: string; MAIL_FROM?: string
   PROFILES?: Store
   DB?: D1
   // 이메일 로그인 · 회원가입 시도 횟수 제한 (wrangler.jsonc의 ratelimits, auth/email.ts)
   LOGIN_LIMIT?: { limit(options: { key: string }): Promise<{ success: boolean }> }
 }
 
-type Store = { get(key: string): Promise<string | null>; put(key: string, value: string): Promise<unknown> }
+type Store = {
+  get(key: string): Promise<string | null>; put(key: string, value: string): Promise<unknown>; delete(key: string): Promise<unknown>
+}
 type D1 = { prepare(sql: string): { bind(...values: string[]): { first(column: string): Promise<unknown>; run(): Promise<unknown> } } }
 
 /**
@@ -25,6 +29,7 @@ export function d1Store(db: D1): Store {
   return {
     get: async key => (await db.prepare('SELECT value FROM kv WHERE key = ?').bind(key).first('value') as string | null) ?? null,
     put: (key, value) => db.prepare('INSERT OR REPLACE INTO kv (key, value) VALUES (?, ?)').bind(key, value).run(),
+    delete: key => db.prepare('DELETE FROM kv WHERE key = ?').bind(key).run(),
   }
 }
 
@@ -51,6 +56,10 @@ export const config = {
   naverApiUrl: 'https://openapi.naver.com',
   // 네이버가 이 시간 안에 답하지 않으면 로그인 실패로 첫 화면에 돌려보낸다 (5초)
   naverTimeoutMs: 5000,
+  // 인증번호 메일 — https://developers.brevo.com/reference/sendtransacemail (무료 요금제 하루 300통)
+  brevoUrl: 'https://api.brevo.com/v3/smtp/email',
+  // Brevo가 이 시간 안에 답하지 않으면 메일을 못 보낸 것으로 본다 (5초)
+  mailTimeoutMs: 5000,
 }
 
 /**
@@ -80,7 +89,7 @@ export async function fetchPublicData(url: string, timeoutMs: number, tries = co
 
 /** 글자 안의 인증키 · 비밀값(원문 · 부호화된 모양 모두)를 '<key>'로 바꾼다. 로그에 쓰는 글자는 전부 이걸 거친다. */
 export function redact(text: string, env: Env): string {
-  for (const key of [env.MOLIT_SERVICE_KEY, env.KAC_API_KEY, env.KMA_SERVICE_KEY, env.NAVER_CLIENT_SECRET, env.SESSION_SECRET])
+  for (const key of [env.MOLIT_SERVICE_KEY, env.KAC_API_KEY, env.KMA_SERVICE_KEY, env.NAVER_CLIENT_SECRET, env.SESSION_SECRET, env.BREVO_API_KEY])
     if (key) text = text.replaceAll(encodeURIComponent(key), '<key>').replaceAll(key, '<key>')
   return text
 }

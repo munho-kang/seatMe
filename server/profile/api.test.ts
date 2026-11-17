@@ -13,7 +13,7 @@ const REAL_CONFIG = { ...config }
 const store = new Map<string, string>()
 const ENV: Env = {
   NAVER_CLIENT_ID: 'client-id', NAVER_CLIENT_SECRET: 'client-secret', SESSION_SECRET: 'session-secret',
-  PROFILES: { get: async k => store.get(k) ?? null, put: async (k, v) => store.set(k, v) },
+  PROFILES: { get: async k => store.get(k) ?? null, put: async (k, v) => store.set(k, v), delete: async k => store.delete(k) },
 }
 const PROFILE = { seatPosition: 'always-aisle', sunlight: 1, quietness: 2, turbulence: 3, quickExit: 4, view: 5 }
 
