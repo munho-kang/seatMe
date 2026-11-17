@@ -5,7 +5,7 @@ import { config, type Env, redact } from '../config.ts'
  *  1. GET /api/auth/naver → 네이버 로그인 화면으로 보낸다. 되돌아올 때 맞춰 볼 state를 쿠키에 둔다 (10분).
  *  2. GET /api/auth/naver/callback → state를 맞춰 보고, 네이버에서 id를 받아 로그인 쿠키(서명한 id)를 준다.
  *     계정 취향이 이미 있든 없든 화면 /login/done으로 보낸다 (기기 취향을 올릴지는 화면이 정한다). 실패하면 첫 화면(/).
- *  3. POST /api/auth/logout → 로그인 쿠키를 지운다.
+ *  3. POST /api/auth/logout → 로그인 쿠키를 지우고, 서버에서도 그 쿠키를 끝낸다 (베껴 간 쿠키도 못 쓰게, 이 기기 것만).
  * 로그인 쿠키는 "id.만료시각.서명" — 서명은 SESSION_SECRET으로 만든 HMAC-SHA256이다 (Web Crypto, 라이브러리 없음).
  */
 
@@ -45,7 +45,11 @@ export async function naverCallback(request: Request, env: Env): Promise<Respons
   }
 }
 
-export function logout(): Response {
+export async function logout(request: Request, env: Env): Promise<Response> {
+  // 맞는 쿠키만 적는다 (가짜 쿠키로 보관함 쓰기를 채우지 못하게). 값은 쿠키 만료 시각 — 그 뒤로는 어차피 막힌다
+  // ponytail: 로그아웃 한 번에 한 줄씩 쌓인다. 많아지면 DELETE FROM kv WHERE key LIKE 'logout:%' AND CAST(value AS INTEGER) < 지금(ms)
+  const [, expires, signature] = readCookie(request, SESSION)?.split('.') ?? []
+  if (env.PROFILES && (await sessionUser(request, env, Date.now())) !== null) await env.PROFILES.put(`logout:${signature}`, expires!)
   return new Response(null, { status: 204, headers: { 'Set-Cookie': cookie(SESSION, '', 0, '/') } })
 }
 
@@ -68,6 +72,7 @@ export async function sessionUser(request: Request, env: Env, now: number): Prom
   // verify는 서명을 끝까지 비교한다 (몇 글자째에서 틀렸는지 시간으로 새지 않는다)
   const ok = await crypto.subtle.verify('HMAC', await key(env.SESSION_SECRET), bytes, utf8(`${id}.${expires}`))
   if (!ok) return null
+  if (await env.PROFILES?.get(`logout:${signature}`)) return null // 로그아웃한 쿠키
   // 이메일 계정: 탈퇴했으면(계정 없음) 또는 비밀번호를 바꾸기 전에 받은 쿠키면 받지 않는다 (./email.ts resetAt)
   if (id.startsWith('~')) {
     const saved = await env.PROFILES?.get(`account:${id}`)

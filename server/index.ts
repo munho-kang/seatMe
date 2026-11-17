@@ -22,7 +22,7 @@ export async function handle(request: Request, env: Env): Promise<Response> {
   try {
     if (path === '/api/auth/naver') return await naverLogin(request, env)
     if (path === '/api/auth/naver/callback') return await naverCallback(request, env)
-    if (path === '/api/auth/logout') return logout()
+    if (path === '/api/auth/logout') return await logout(request, env)
     if (path === '/api/auth/signup') return await signup(request, env)
     if (path === '/api/auth/login') return await emailLogin(request, env)
     if (path === '/api/auth/code') return await sendCode(request, env)

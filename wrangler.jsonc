@@ -10,7 +10,7 @@
   // 취향 · 기록 · 이메일 계정 보관함 (표 kv 하나: 열쇠 → 값 JSON, migrations/). 내 컴퓨터(npm run server)에서는 .wrangler/ 안의 가짜 DB를 쓴다
   // 2026-11-17 KV(쓰기 하루 1,000번)에서 옮김. 예전 KV 0faf15d6…는 Cloudflare에 그대로 남아 있다
   "d1_databases": [{ "binding": "DB", "database_name": "seatme", "database_id": "7966337b-909b-4d7e-ba95-e9367181837a" }],
-  // 이메일 로그인 · 회원가입 시도 제한: 같은 이메일(로그인) · 같은 IP(회원가입)로 1분에 10번 — 정확하지 않다 (server/auth/email.ts 머리 주석)
+  // 이메일 로그인 · 회원가입 시도 제한: 같은 이메일(로그인) · 같은 IP(로그인 · 회원가입)로 1분에 10번 — 정확하지 않다 (server/auth/email.ts 머리 주석)
   "ratelimits": [{ "name": "LOGIN_LIMIT", "namespace_id": "1001", "simple": { "limit": 10, "period": 60 } }],
   "observability": { "enabled": true, "traces": { "enabled": false } }
 }
