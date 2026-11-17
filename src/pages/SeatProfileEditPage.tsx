@@ -3,14 +3,15 @@ import { useNavigate } from 'react-router'
 import Button from '../components/Button'
 import ScaleSelector from '../components/ScaleSelector'
 import TabBar from '../components/TabBar'
-import { getSeatProfile, saveSeatProfile, SEAT_POSITION_OPTIONS, type SeatProfile } from '../mocks/seatProfile'
+import { getSeatProfile, saveSeatProfile, SEAT_POSITION_OPTIONS, type SeatPosition, type SeatProfile } from '../mocks/seatProfile'
 import './SeatProfileEditPage.css'
 
-const SCALE_ITEMS: { key: 'sunlight' | 'quietness' | 'turbulence' | 'quickExit'; label: string }[] = [
+const SCALE_ITEMS: { key: 'sunlight' | 'quietness' | 'turbulence' | 'quickExit' | 'view'; label: string }[] = [
   { key: 'sunlight', label: '직사광선·눈부심' },
   { key: 'quietness', label: '주변 소음·통행' },
   { key: 'turbulence', label: '흔들림·멀미 걱정' },
   { key: 'quickExit', label: '빠른 하차' },
+  { key: 'view', label: '전망' },
 ]
 
 function SeatProfileEditPage() {
@@ -35,12 +36,20 @@ function SeatProfileEditPage() {
         <p className="screen-sub">평소 취향은 기본값으로 저장되고, 여행별로 따로 바꿀 수 있어요.</p>
       </header>
 
-      <div className="profile-edit-side">
+      <label className="profile-edit-side">
         <span>창가/통로</span>
-        <span className="profile-edit-side-value">
-          {SEAT_POSITION_OPTIONS.find((option) => option.value === profile.seatPosition)?.label}
-        </span>
-      </div>
+        <select
+          className="profile-edit-side-value"
+          value={profile.seatPosition}
+          onChange={(event) => setProfile({ ...profile, seatPosition: event.target.value as SeatPosition })}
+        >
+          {SEAT_POSITION_OPTIONS.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <div className="profile-edit-scales">
         {SCALE_ITEMS.map((item) => (

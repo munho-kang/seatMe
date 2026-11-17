@@ -24,6 +24,10 @@
 }
 
 .profile-edit-side-value {
+  border: none;
+  background: transparent;
+  font: inherit;
+  text-align: right;
   color: var(--color-primary);
 }
 
