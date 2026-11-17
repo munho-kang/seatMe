@@ -7,6 +7,7 @@ import StatusMessage from '../components/StatusMessage'
 import TabBar from '../components/TabBar'
 import { getRouteTitle } from '../mocks/flights'
 import { fetchRecommendation } from '../recommend'
+import { otherLeg } from '../roundTrip'
 
 // 서버 계산은 순식간이라, 분석 애니메이션이 번쩍하고 끝나지 않게 하는 최소 표시 시간 (임시, 디자인 확인)
 const MIN_ANALYSIS_MS = 3000
@@ -23,6 +24,9 @@ function SeatAnalysisPage() {
   useEffect(() => {
     let isLeaving = false
     const minimumWait = new Promise((resolve) => setTimeout(resolve, MIN_ANALYSIS_MS))
+    // 왕복이면 오는 편 추천도 미리 받아 둔다. 실패해도 넘어간다 (오는 편 추천 화면이 다시 받는다)
+    const returnLeg = otherLeg(searchParams)
+    if (returnLeg) fetchRecommendation(returnLeg).catch(() => {})
     Promise.all([fetchRecommendation(searchParams), minimumWait]).then(
       () => !isLeaving && setStatus('done'),
       () => !isLeaving && setStatus('failed'),

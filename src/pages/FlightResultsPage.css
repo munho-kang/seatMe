@@ -36,6 +36,15 @@
   color: var(--color-text-sub);
 }
 
+/* 오는 편 목록 위의 "가는 편만 추천받기" (오른쪽에 붙는 글자 링크) */
+.flight-skip {
+  align-self: flex-end;
+  margin-bottom: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
 /* 카드 3개가 한 화면보다 길어서, 다음 버튼을 이번 여행 설정 CTA와 같은 위치(탭바 위 42px)에 띄워 둔다 */
 .flight-list-footer {
   position: sticky;

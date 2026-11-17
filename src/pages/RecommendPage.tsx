@@ -3,8 +3,10 @@ import Button from '../components/Button'
 import RecommendStatus from '../components/RecommendStatus'
 import SelectableCard from '../components/SelectableCard'
 import TabBar from '../components/TabBar'
+import { getRouteTitle } from '../mocks/flights'
 import { getSeatProfile } from '../mocks/seatProfile'
 import { useRecommendation, type ScoreItem } from '../recommend'
+import { legLabel } from '../roundTrip'
 import './RecommendPage.css'
 
 // 서버가 준 항목 이름을 카드 문구로 바꾸는 표. 문구는 임시다 (디자인 확인).
@@ -33,6 +35,8 @@ function RecommendPage() {
   const seatParam = searchParams.get('seat')
   const selectedSeat = recommendation?.seats.some((item) => item.seat === seatParam) ? seatParam : null
   const wantedSide = getSeatProfile().seatPosition.endsWith('window') ? '창가' : '통로'
+  // 왕복이면 어느 편의 추천인지 적는다 (가는 편 좌석을 고른 뒤 같은 화면이 오는 편으로 한 번 더 열린다)
+  const leg = legLabel(searchParams)
 
   function handleSelect(seat: string) {
     const params = new URLSearchParams(searchParams)
@@ -45,7 +49,9 @@ function RecommendPage() {
       <header className="screen-header screen-header--caption">
         <p className="logo">SeatME</p>
         <h1 className="screen-title screen-title--route">시트밍님에게 잘 맞는 좌석</h1>
-        <p className="screen-caption recommend-caption">평소 취향 반영</p>
+        <p className="screen-caption recommend-caption">
+          {leg && `${leg} · ${getRouteTitle(searchParams)} · `}평소 취향 반영
+        </p>
         {/* 기상청 예보 한 줄. 점수에는 들어가지 않는 보조 설명이다. 자리와 모양은 임시다 (디자인 확인) */}
         {recommendation?.weatherNote && <p className="screen-caption recommend-weather">{recommendation.weatherNote}</p>}
       </header>
