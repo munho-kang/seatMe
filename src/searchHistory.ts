@@ -240,6 +240,11 @@ export function recentRoutes(history: History): [Airport, Airport][] {
   return routes
 }
 
+// 그 방향(출발/도착)으로 검색한 공항 최근 3개, 겹치지 않게
+export function recentAirports(history: History, direction: 'from' | 'to'): Airport[] {
+  return [...new Set(history.searches.map((r) => r[direction]))].slice(0, 3)
+}
+
 const AIRPORTS = ['GMP', 'CJU', 'PUS']
 const isDateText = (x: string | null): x is string => x !== null && /^\d{4}-\d{2}-\d{2}$/.test(x)
 
