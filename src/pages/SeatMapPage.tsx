@@ -6,6 +6,7 @@ import Button from '../components/Button'
 import StatusMessage from '../components/StatusMessage'
 import TabBar from '../components/TabBar'
 import { useRecommendation } from '../recommend'
+import { legLabel } from '../roundTrip'
 import { CABIN_NAMES, describeSeat, getWingCaption, type Seat, type SeatMap } from '../seatMap'
 import { useJson } from '../useJson'
 import './SeatMapPage.css'
@@ -181,6 +182,7 @@ function SeatMapPage() {
 
   // 두 기종이 함께 쓰는 배치는 배치도의 기종 이름이 하나뿐이라, 항공편의 기종 이름을 먼저 쓴다
   const aircraft = searchParams.get('aircraft') || seatMap?.aircraft
+  const leg = legLabel(searchParams)
 
   function handleCandidate(id: string) {
     const params = new URLSearchParams(searchParams)
@@ -193,7 +195,12 @@ function SeatMapPage() {
       <header className="screen-header seat-map-header">
         <p className="logo">SeatME</p>
         <h1 className="screen-title screen-title--route">{aircraft ? `${aircraft} 좌석맵` : '좌석맵'}</h1>
-        {seatMap && <p className="screen-caption">{seatMap.seatCount}석</p>}
+        {seatMap && (
+          <p className="screen-caption">
+            {leg && `${leg} · `}
+            {seatMap.seatCount}석
+          </p>
+        )}
       </header>
 
       {seatMapId && !isConfirmed && (

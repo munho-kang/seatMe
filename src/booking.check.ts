@@ -131,7 +131,7 @@ check(getBookingLink(params('ZE201', family)), {
 // 파라타: 주소로 값을 받아 주지 않아 홈페이지로 보낸다
 check(getBookingLink(params('WE201')), { url: 'https://www.parataair.com', prefilled: false })
 
-// 왕복으로 검색했어도 가는 편 편도로 연다
+// 왕복으로 검색했어도 편 하나를 편도로 연다 (오는 편은 버튼이 따로다)
 check(getBookingLink(params('KE1505', { returnDate: '2026-11-23' })), getBookingLink(params('KE1505')))
 // 인원이 주소에 없으면 성인 1명
 const noPassengers = params('KE1505')

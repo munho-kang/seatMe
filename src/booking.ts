@@ -44,7 +44,8 @@ function asianaCity(airport: string) {
   return airport === 'GMP' ? 'SEL' : airport
 }
 
-// 노선 · 날짜가 채워진 예매 화면 주소. 가는 편 편도로만 연다 (추천 좌석이 가는 편 하나에 대한 것이다).
+// 노선 · 날짜가 채워진 예매 화면 주소. 편 하나를 편도로 연다. 왕복이면 가는 편 · 오는 편 버튼이 따로다
+// (두 편의 항공사가 다를 수 있고, 항공사의 왕복 주소는 시험하지 않았다).
 // 파라타는 주소로 값을 받아 주지 않아 여기 없다 (홈페이지로 보낸다)
 const BOOKING_PAGES: Record<string, ((trip: Trip) => string) | undefined> = {
   // 항공편 목록이 바로 열린다.
