@@ -121,9 +121,15 @@ const asianaToGimpo = jsonParam(getBookingLink(params('OZ8802', { from: 'PUS', t
 check(asianaToGimpo.segmentConditionDatas[0].departureCity, 'PUS')
 check(asianaToGimpo.segmentConditionDatas[0].arrivalCity, 'SEL')
 
-// 파라타 · 이스타: 주소로 값을 받아 주지 않아 홈페이지로 보낸다
+// 이스타: 2026-11-16 개편 뒤 결과 화면이 가격 비교 사이트용 값을 읽는다 (2026-11-17 확인). 편도는 fly_type 2,
+// departure0_country_cd가 없으면 아무것도 읽지 않는다
+check(getBookingLink(params('ZE201', family)), {
+  url: 'https://main.eastarjet.com/schedule?departure0_country_cd=KR&fly_type=2&departure0_cd=GMP&arrival0_cd=CJU&departure0_date_cd=20261121&person1=3&person2=2&person3=1',
+  prefilled: true,
+})
+
+// 파라타: 주소로 값을 받아 주지 않아 홈페이지로 보낸다
 check(getBookingLink(params('WE201')), { url: 'https://www.parataair.com', prefilled: false })
-check(getBookingLink(params('ZE201')), { url: 'https://www.eastarjet.com', prefilled: false })
 
 // 왕복으로 검색했어도 가는 편 편도로 연다
 check(getBookingLink(params('KE1505', { returnDate: '2026-11-23' })), getBookingLink(params('KE1505')))
