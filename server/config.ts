@@ -3,14 +3,29 @@
 /**
  * 인증키 · 비밀값. 배포된 서버는 Cloudflare 비밀 보관함에서, 내 컴퓨터에서는 .dev.vars 파일에서 온다 (저장소에 안 올라감).
  * NAVER_* 는 네이버 개발자센터 앱의 값, SESSION_SECRET은 로그인 쿠키 서명 키(아무 긴 무작위 글자).
- * PROFILES는 취향 · 기록 · 이메일 계정 보관함(Cloudflare KV, wrangler.jsonc의 kv_namespaces).
+ * PROFILES는 취향 · 기록 · 이메일 계정 보관함. 배포에서는 D1 데이터베이스 DB(wrangler.jsonc의 d1_databases)를 d1Store로 감싸 넣는다 (index.ts).
  */
 export type Env = {
   MOLIT_SERVICE_KEY?: string; KAC_API_KEY?: string; KMA_SERVICE_KEY?: string
   NAVER_CLIENT_ID?: string; NAVER_CLIENT_SECRET?: string; SESSION_SECRET?: string
-  PROFILES?: { get(key: string): Promise<string | null>; put(key: string, value: string): Promise<unknown> }
+  PROFILES?: Store
+  DB?: D1
   // 이메일 로그인 · 회원가입 시도 횟수 제한 (wrangler.jsonc의 ratelimits, auth/email.ts)
   LOGIN_LIMIT?: { limit(options: { key: string }): Promise<{ success: boolean }> }
+}
+
+type Store = { get(key: string): Promise<string | null>; put(key: string, value: string): Promise<unknown> }
+type D1 = { prepare(sql: string): { bind(...values: string[]): { first(column: string): Promise<unknown>; run(): Promise<unknown> } } }
+
+/**
+ * D1 표 kv(열쇠 → 값, migrations/0001_kv.sql) 하나를 열쇠-값 보관함처럼 쓴다.
+ * KV 무료 요금제는 쓰기가 하루 1,000번(모든 사용자 합쳐서)이라 2026-11-17 D1(하루 10만 번)으로 옮겼다.
+ */
+export function d1Store(db: D1): Store {
+  return {
+    get: async key => (await db.prepare('SELECT value FROM kv WHERE key = ?').bind(key).first('value') as string | null) ?? null,
+    put: (key, value) => db.prepare('INSERT OR REPLACE INTO kv (key, value) VALUES (?, ?)').bind(key, value).run(),
+  }
 }
 
 /** 공공데이터 주소와 제한 시간. 테스트가 가짜 서버 주소 · 짧은 시간으로 바꿔 끼운다. */

@@ -1,5 +1,5 @@
 /**
- * 네이버 로그인 + 내 취향 창구 확인. 네이버 자리에는 이 테스트가 띄운 가짜 서버, KV 자리에는 Map이 앉아 있다.
+ * 네이버 로그인 + 내 취향 창구 확인. 네이버 자리에는 이 테스트가 띄운 가짜 서버, 보관함 자리에는 Map이 앉아 있다.
  * 규칙은 server/auth/naver.ts · server/profile/api.ts 머리 주석이 기준이다.
  */
 import assert from 'node:assert/strict'

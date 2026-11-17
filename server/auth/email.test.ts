@@ -1,5 +1,5 @@
 /**
- * 이메일 회원가입 · 로그인 확인. KV 자리에는 Map, 시도 제한 자리에는 세기만 하는 가짜가 앉아 있다.
+ * 이메일 회원가입 · 로그인 확인. 보관함 자리에는 Map, 시도 제한 자리에는 세기만 하는 가짜가 앉아 있다.
  * 규칙은 server/auth/email.ts 머리 주석이 기준이다.
  */
 import assert from 'node:assert/strict'
