@@ -200,6 +200,26 @@ test('같은 이메일로 너무 많이 시도하면 429 — 맞는 비밀번호
   assert.deepEqual(await res.json(), { error: 'TOO_MANY_TRIES' })
 })
 
+test('같은 IP에서 여러 이메일로 너무 많이 시도하면 429 — 다른 IP는 그대로', async () => {
+  const login = (email: string, ip: string) => handle(new Request('https://seatme.test/api/auth/login', {
+    method: 'POST', body: JSON.stringify({ email, password: 'wrong12' }), headers: { 'CF-Connecting-IP': ip } }), ENV)
+  for (let i = 0; i < 10; i++) assert.equal((await login(`u${i}@example.com`, '1.1.1.1')).status, 401)
+  assert.equal((await login('u10@example.com', '1.1.1.1')).status, 429)
+  assert.equal((await login('u10@example.com', '2.2.2.2')).status, 401)
+})
+
+test('로그아웃한 쿠키는 서버에서도 못 쓴다 — 다른 기기 쿠키는 그대로', async () => {
+  const phone = session(await signUp('out@example.com'))!
+  const laptop = session(await post('/api/auth/login', { email: 'out@example.com', password: 'secret1' }))!
+  assert.equal((await post('/api/auth/logout', null, ENV, phone)).status, 204)
+  assert.deepEqual(await profileOf(phone), { error: 'NOT_LOGGED_IN' })
+  assert.deepEqual(await profileOf(laptop), { profile: null, nickname: '닉' })
+  // 가짜 쿠키로는 보관함에 아무것도 적지 않는다
+  const before = store.size
+  await post('/api/auth/logout', null, ENV, 'seatme_session=~abc.99999999999999.fake')
+  assert.equal(store.size, before)
+})
+
 test('비밀값 · 보관함 · 메일 키가 없으면 503, POST만 받는다', async () => {
   for (const path of ['/api/auth/signup', '/api/auth/login', '/api/auth/code', '/api/auth/reset'])
     assert.equal((await post(path, {}, {})).status, 503, path)

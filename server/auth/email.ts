@@ -19,7 +19,7 @@ import { base64url, logout, sessionCookie, sessionUser } from './naver.ts'
  *    (어느 쪽이 틀렸는지 알려 주지 않는다).
  *  - POST /api/auth/withdraw (로그인 쿠키) → 204, 계정의 취향 · 기록 · 이메일 계정을 지우고 로그아웃한다. 로그인 안 했으면 401.
  *    네이버 계정은 SeatMe에 남은 것만 지운다 (네이버의 연결 끊기는 네이버 설정에서 — 접근 토큰을 보관하지 않아 대신 못 한다).
- *  - 같은 이메일(로그인) · 같은 IP(회원가입 · 인증번호)로 1분에 10번을 넘기면 429 TOO_MANY_TRIES (wrangler.jsonc의 LOGIN_LIMIT).
+ *  - 같은 이메일(로그인 · 비밀번호 찾기) · 같은 IP(로그인 · 회원가입 · 인증번호)로 1분에 10번을 넘기면 429 TOO_MANY_TRIES (wrangler.jsonc의 LOGIN_LIMIT).
  *    단, Cloudflare는 기계마다 따로 세고 늦게 맞춰서 정확하지 않다 (2026-11-16 배포 주소에서 측정: 하나씩 30번은 전부 통과,
  *    한꺼번에 40번은 3번만 429). 몰아치는 시도를 늦추는 정도다.
  *    ponytail: 정확한 횟수 제한이 필요하면 Durable Object 하나에 이메일별로 센다
@@ -114,7 +114,8 @@ export async function emailLogin(request: Request, env: Env): Promise<Response> 
   const password = body?.password
   const wrong = () => Response.json({ error: 'WRONG_LOGIN' }, { status: 401 })
   if (email === null || typeof password !== 'string' || password.length > 128) return wrong()
-  if (!(await allowed(env, `login:${email}`))) return tooMany()
+  // 한 IP에서 여러 이메일을 돌려 가며 넣는 것도 막는다
+  if (!(await allowed(env, `login-ip:${request.headers.get('CF-Connecting-IP') ?? ''}`)) || !(await allowed(env, `login:${email}`))) return tooMany()
   const saved = await env.PROFILES.get(`email:${email}`)
   if (saved === null) return wrong()
   const user = JSON.parse(saved) as SavedEmail
@@ -129,7 +130,7 @@ export async function withdraw(request: Request, env: Env): Promise<Response> {
   const email = account === null ? undefined : (JSON.parse(account) as { email?: string }).email
   if (email) await env.PROFILES.delete(`email:${email}`)
   for (const key of [`account:${id}`, id, `history:${id}`]) await env.PROFILES.delete(key)
-  return logout()
+  return logout(request, env) // 네이버 계정은 탈퇴해도 계정 기록이 없어 쿠키가 살아 있으므로 여기서 끝낸다
 }
 
 /** 마이 화면에 보여 줄 닉네임. 네이버 계정이거나 없으면 null. */
