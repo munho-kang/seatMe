@@ -1,5 +1,8 @@
 # SeatMe
 
+- 서비스: https://seatme.bus-relay.workers.dev
+- 저장소: https://github.com/munho-kang/seatMe
+
 화면(React + Vite, `src/`)과 서버(TypeScript, `server/`)가 한 저장소에 있고, Cloudflare Worker 하나로 같이 배포된다.
 
 ## 내 컴퓨터에서 켜기

@@ -1,6 +1,6 @@
 // 예매 버튼이 여는 항공사 주소와 그 옆 안내 문구. SeatMe는 예매를 받지 않고 항공사 화면으로 연결만 한다.
 // 주소 모양은 2026-11-14에 9개 항공사 사이트에서 직접 열어 확인했다. 항공사가 사이트를 고치면 깨질 수 있다
-// (아시아나: 대한항공 통합 예정, 이스타: 2026-11-16 홈페이지 개편). 좌석은 어느 항공사도 주소로 받지 않는다
+// (아시아나: 대한항공 통합 예정. 이스타는 2026-11-16 개편 뒤 2026-11-17에 다시 확인). 좌석은 어느 항공사도 주소로 받지 않는다
 import type { Passengers } from './mocks/flights'
 
 type Trip = Passengers & {
@@ -45,7 +45,7 @@ function asianaCity(airport: string) {
 }
 
 // 노선 · 날짜가 채워진 예매 화면 주소. 가는 편 편도로만 연다 (추천 좌석이 가는 편 하나에 대한 것이다).
-// 파라타 · 이스타는 주소로 값을 받아 주지 않아 여기 없다 (홈페이지로 보낸다)
+// 파라타는 주소로 값을 받아 주지 않아 여기 없다 (홈페이지로 보낸다)
 const BOOKING_PAGES: Record<string, ((trip: Trip) => string) | undefined> = {
   // 항공편 목록이 바로 열린다.
   // 제주항공은 뒤쪽 다섯 칸(언어 · 국내선 · 예매 종류 · 채널 · 통화)을 빼면 공항 칸이 비고 목록이 뜨지 않는다
@@ -133,6 +133,19 @@ const BOOKING_PAGES: Record<string, ((trip: Trip) => string) | undefined> = {
   // 인원 · 편도도 받아 주지 않는다 (왕복 · 1명으로 열린다)
   RS: (trip) =>
     withQuery('https://flyairseoul.com/I/ko/viewBooking.do', { DepApo: trip.from, ArrApo: trip.to, DepDate: trip.ymd }),
+  // 항공편 목록이 바로 열린다. 2026-11-16 개편 뒤 결과 화면이 가격 비교 사이트용 값을 읽는다 (fly_type 2 = 편도).
+  // departure0_country_cd가 없으면 아무것도 읽지 않는다. 부산↔제주는 운항하지 않아 400이 뜬다 (우리 화면에 그 편이 없다)
+  ZE: (trip) =>
+    withQuery('https://main.eastarjet.com/schedule', {
+      departure0_country_cd: 'KR',
+      fly_type: 2,
+      departure0_cd: trip.from,
+      arrival0_cd: trip.to,
+      departure0_date_cd: trip.ymd,
+      person1: trip.adult,
+      person2: trip.child,
+      person3: trip.infant,
+    }),
 }
 
 // 항공사 온라인 예매가 한 번에 받는 인원. 2026-11-14에 9개 항공사 사이트에서 확인했다: 모두 9명까지이고 유아는 성인 1명당 1명이다.
