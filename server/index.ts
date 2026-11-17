@@ -1,4 +1,4 @@
-import { emailLogin, signup } from './auth/email.ts'
+import { emailLogin, resetPassword, sendCode, signup, withdraw } from './auth/email.ts'
 import { logout, naverCallback, naverLogin } from './auth/naver.ts'
 import { d1Store, type Env, redact } from './config.ts'
 import { flightsApi } from './flight/flights.ts'
@@ -15,7 +15,7 @@ export async function handle(request: Request, env: Env): Promise<Response> {
   const url = new URL(request.url)
   const path = url.pathname
   const method = request.method === 'HEAD' ? 'GET' : request.method
-  // GET이 아닌 창구는 이것뿐이다 (프로필·기록 저장, 로그아웃, 이메일 가입·로그인)
+  // GET이 아닌 창구는 이것뿐이다 (프로필·기록 저장, 로그아웃, 이메일 가입·로그인·인증번호·비밀번호 찾기, 탈퇴)
   const allowed = path === '/api/profile' || path === '/api/history' ? ['GET', 'PUT']
     : POST_ONLY.has(path) ? ['POST'] : ['GET']
   if (!allowed.includes(method)) return Response.json({ error: 'METHOD_NOT_ALLOWED' }, { status: 405 })
@@ -25,6 +25,9 @@ export async function handle(request: Request, env: Env): Promise<Response> {
     if (path === '/api/auth/logout') return logout()
     if (path === '/api/auth/signup') return await signup(request, env)
     if (path === '/api/auth/login') return await emailLogin(request, env)
+    if (path === '/api/auth/code') return await sendCode(request, env)
+    if (path === '/api/auth/reset') return await resetPassword(request, env)
+    if (path === '/api/auth/withdraw') return await withdraw(request, env)
     if (path === '/api/profile') return await profileApi(request, env, Date.now())
     if (path === '/api/history') return await historyApi(request, env, Date.now())
     if (path === '/api/flights') return await flightsApi(url.searchParams, env, Date.now())
@@ -39,7 +42,7 @@ export async function handle(request: Request, env: Env): Promise<Response> {
   }
 }
 
-const POST_ONLY = new Set(['/api/auth/logout', '/api/auth/signup', '/api/auth/login'])
+const POST_ONLY = new Set(['/api/auth/logout', '/api/auth/signup', '/api/auth/login', '/api/auth/code', '/api/auth/reset', '/api/auth/withdraw'])
 
 /** 주소 한 마디의 % 표기를 푼다. 풀 수 없는 표기면 null. */
 function decode(segment: string): string | null {

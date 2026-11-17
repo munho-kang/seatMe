@@ -1,22 +1,24 @@
-import { useRef } from 'react'
+import { useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import Button from '../components/Button'
 import TabBar from '../components/TabBar'
 import { flushSearchHistory, forgetAccountHistory } from '../searchHistory'
 import { accountNickname, forgetAccountProfile, getSeatProfile, isLoggedIn, SEAT_POSITION_SHORT } from '../mocks/seatProfile'
 import './MyPage.css'
+import './auth.css'
 
 // 인증 API 전까지 쓰는 Figma(2014:1626) mock 메뉴 값
 const SERVICE_MENUS = [
   { label: '공지사항', value: '>' },
   { label: '문의하기', value: '>' },
-  { label: '약관 및 개인정보', value: '>' },
   { label: '앱 버전', value: 'v1.0.0' },
 ]
 
 function MyPage() {
   const navigate = useNavigate()
   const logoutDialogRef = useRef<HTMLDialogElement>(null)
+  const withdrawDialogRef = useRef<HTMLDialogElement>(null)
+  const [withdrawError, setWithdrawError] = useState('')
   const profile = getSeatProfile()
   const loggedIn = isLoggedIn()
   const nickname = accountNickname()
@@ -27,6 +29,20 @@ function MyPage() {
       await fetch('/api/auth/logout', { method: 'POST' })
     } catch {
       // 서버에 닿지 않아도 화면에서는 로그아웃한다
+    }
+    forgetAccountProfile()
+    forgetAccountHistory()
+    navigate('/')
+  }
+
+  // 계정의 취향 · 기록 · 이메일 계정을 서버에서 지운다. 이 기기에 남은 것(로그인 전 취향 등)은 그대로 둔다
+  async function handleWithdraw() {
+    setWithdrawError('')
+    try {
+      const response = await fetch('/api/auth/withdraw', { method: 'POST' })
+      if (!response.ok) throw new Error(String(response.status))
+    } catch {
+      return setWithdrawError('지금은 탈퇴할 수 없어요. 잠시 뒤에 다시 해 주세요.') // 문구는 임시다 (디자인 확인)
     }
     forgetAccountProfile()
     forgetAccountHistory()
@@ -85,9 +101,19 @@ function MyPage() {
             <span className="menu-row-value">{menu.value}</span>
           </div>
         ))}
+        <Link to="/privacy" className="menu-row">
+          <span className="menu-row-label">개인정보 처리방침</span>
+          <span className="menu-row-value">&gt;</span>
+        </Link>
         {loggedIn && (
           <button type="button" className="menu-row menu-row--danger" onClick={() => logoutDialogRef.current?.showModal()}>
             <span className="menu-row-label">로그아웃</span>
+            <span className="menu-row-value">&gt;</span>
+          </button>
+        )}
+        {loggedIn && (
+          <button type="button" className="menu-row menu-row--danger" onClick={() => withdrawDialogRef.current?.showModal()}>
+            <span className="menu-row-label">회원 탈퇴</span>
             <span className="menu-row-value">&gt;</span>
           </button>
         )}
@@ -110,6 +136,31 @@ function MyPage() {
             variant="outline"
             className="logout-modal-button logout-modal-cancel"
             onClick={() => logoutDialogRef.current?.close()}
+          >
+            취소
+          </Button>
+        </div>
+      </dialog>
+
+      {/* 로그아웃 창과 같은 모양. 문구는 임시다 (디자인 확인) */}
+      <dialog ref={withdrawDialogRef} className="logout-modal" aria-labelledby="withdraw-modal-title">
+        <h2 id="withdraw-modal-title" className="logout-modal-title">
+          탈퇴할까요?
+        </h2>
+        <p className="logout-modal-desc">
+          계정에 저장한 Seat Profile과 검색 · 여행 기록이 바로 지워지고
+          <br />
+          되돌릴 수 없어요.
+        </p>
+        {withdrawError && <p className="auth-error" role="alert">{withdrawError}</p>}
+        <div className="logout-modal-actions">
+          <Button variant="danger" className="logout-modal-button" onClick={handleWithdraw}>
+            탈퇴하기
+          </Button>
+          <Button
+            variant="outline"
+            className="logout-modal-button logout-modal-cancel"
+            onClick={() => withdrawDialogRef.current?.close()}
           >
             취소
           </Button>

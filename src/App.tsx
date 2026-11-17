@@ -2,6 +2,7 @@ import { BrowserRouter, Navigate, Route, Routes } from 'react-router'
 import LandingPage from './pages/LandingPage'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
+import PrivacyPage from './pages/PrivacyPage'
 import OnboardingPage from './pages/OnboardingPage'
 import HomePage from './pages/HomePage'
 import FlightSearchPage from './pages/FlightSearchPage'
@@ -26,6 +27,8 @@ function App() {
         {/* 네이버 로그인을 마치면 서버가 여기로 보낸다. 계정에 취향이 있으면 홈, 없으면 취향 만들기 */}
         <Route path="/login/done" element={<Navigate to={hasAccountProfile() ? '/home' : '/onboarding'} replace />} />
         <Route path="/signup" element={<SignupPage />} />
+        <Route path="/password-reset" element={<SignupPage reset />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
         <Route path="/onboarding" element={<OnboardingPage />} />
         <Route path="/home" element={<HomePage />} />
         <Route path="/flight" element={<FlightSearchPage />} />

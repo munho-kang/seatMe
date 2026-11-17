@@ -66,9 +66,9 @@ function LoginPage() {
         </Button>
       </form>
 
-      <button type="button" className="text-link login-forgot">
+      <Link className="text-link login-forgot" to="/password-reset">
         비밀번호를 잊으셨나요?
-      </button>
+      </Link>
 
       <p className="login-divider">또는</p>
 

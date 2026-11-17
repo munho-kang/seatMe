@@ -23,6 +23,13 @@ KAC_API_KEY=...
 KMA_SERVICE_KEY=...
 ```
 
+이메일 가입 · 비밀번호 찾기의 인증번호 메일은 [Brevo](https://www.brevo.com)로 보낸다. 쓰려면 두 줄을 더 넣는다 (없으면 인증번호 요청이 503).
+
+```
+BREVO_API_KEY=...    # Brevo > SMTP & API > API Keys
+MAIL_FROM=...        # Brevo > Senders에서 확인을 마친 보내는 주소
+```
+
 키 값은 팀 메신저로 받는다. 이 파일은 저장소에 올라가지 않는다 (절대 커밋하지 않기).
 
 ## 확인

@@ -67,7 +67,15 @@ export async function sessionUser(request: Request, env: Env, now: number): Prom
   if (bytes === null) return null
   // verify는 서명을 끝까지 비교한다 (몇 글자째에서 틀렸는지 시간으로 새지 않는다)
   const ok = await crypto.subtle.verify('HMAC', await key(env.SESSION_SECRET), bytes, utf8(`${id}.${expires}`))
-  return ok ? id : null
+  if (!ok) return null
+  // 이메일 계정: 탈퇴했으면(계정 없음) 또는 비밀번호를 바꾸기 전에 받은 쿠키면 받지 않는다 (./email.ts resetAt)
+  if (id.startsWith('~')) {
+    const saved = await env.PROFILES?.get(`account:${id}`)
+    if (!saved) return null
+    const { resetAt = 0 } = JSON.parse(saved) as { resetAt?: number }
+    if (Number(expires) - SESSION_DAYS * 24 * 3600_000 < resetAt) return null
+  }
+  return id
 }
 
 /** code → 접근 토큰 → 이용자 id. 네이버가 오류로 답하면 null. */
