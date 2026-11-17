@@ -7,7 +7,7 @@ const LEVELS = ['sunlight', 'quietness', 'turbulence', 'quickExit', 'view'] as c
 
 /**
  * 내 좌석 취향 — GET · PUT /api/profile. 로그인해야 쓸 수 있다 (아니면 401 NOT_LOGGED_IN).
- * 보관함은 Cloudflare KV(PROFILES) 하나: 열쇠는 계정 id(네이버 id 또는 이메일 계정 id), 값은 취향 JSON.
+ * 보관함은 PROFILES(D1 표 kv, config.ts d1Store): 열쇠는 계정 id(네이버 id 또는 이메일 계정 id), 값은 취향 JSON.
  *  - GET → { profile: 취향 | null, nickname: 이메일 계정 닉네임 | null } (저장한 적이 없으면 profile null, 네이버 계정이면 nickname null)
  *  - PUT 몸통 = 취향 6칸 { seatPosition, sunlight, quietness, turbulence, quickExit, view }.
  *    칸 규칙은 /api/recommend와 같다 (seatPosition 5가지 중 하나, 나머지는 1~5 정수). 틀리면 400 INVALID_PROFILE, 맞으면 204.

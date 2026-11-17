@@ -4,7 +4,7 @@ import { readHistory } from './rules.ts'
 
 /**
  * 검색 · 여행 기록 — GET · PUT /api/history. 로그인해야 쓸 수 있다 (아니면 401 NOT_LOGGED_IN).
- * 보관함은 취향과 같은 KV(PROFILES): 열쇠는 `history:<계정 id>`, 값은 기록 JSON.
+ * 보관함은 취향과 같은 PROFILES(D1 표 kv): 열쇠는 `history:<계정 id>`, 값은 기록 JSON.
  *  - GET → { history: 기록 | null } (아직 저장한 적이 없으면 null)
  *  - PUT 몸통 = { searches, picks, trips } 세 배열, 각 30개 이하, 최신이 맨 앞. 전체를 통째로 바꿔 쓴다.
  *    칸 규칙은 ./rules.ts가 기준 (공항 GMP · CJU · PUS, 인원은 src/booking.ts isBookable과 같게).

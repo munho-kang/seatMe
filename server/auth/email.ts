@@ -12,7 +12,7 @@ import { base64url, sessionCookie } from './naver.ts'
  *    단, Cloudflare는 기계마다 따로 세고 늦게 맞춰서 정확하지 않다 (2026-11-16 배포 주소에서 측정: 하나씩 30번은 전부 통과,
  *    한꺼번에 40번은 3번만 429). 몰아치는 시도를 늦추는 정도다.
  *    ponytail: 정확한 횟수 제한이 필요하면 Durable Object 하나에 이메일별로 센다
- * 보관함은 취향과 같은 KV(PROFILES):
+ * 보관함은 취향과 같은 PROFILES(D1 표 kv):
  *  - `email:<이메일>` → { id, salt, hash, iterations } — 비밀번호는 PBKDF2-SHA256으로 섞은 값만 둔다 (Web Crypto, 라이브러리 없음)
  *  - `account:<id>` → { nickname } — 마이 화면 이름 (/api/profile이 같이 돌려준다)
  * 계정 id는 ~ + 무작위 32글자라 네이버 id와 겹치지 않는다.
@@ -33,7 +33,7 @@ export async function signup(request: Request, env: Env): Promise<Response> {
   if (email === null || typeof password !== 'string' || password.length < 6 || password.length > 128
     || nickname.length < 1 || nickname.length > 20)
     return Response.json({ error: 'INVALID_SIGNUP' }, { status: 400 })
-  // ponytail: KV에는 "없을 때만 쓰기"가 없어, 같은 이메일로 동시에 가입하면 나중 것이 남는다. 사람이 늘면 D1(SQLite)의 UNIQUE로
+  // ponytail: 보관함에 "없을 때만 쓰기"가 없어, 같은 이메일로 동시에 가입하면 나중 것이 남는다. 사람이 늘면 d1Store에 INSERT OR IGNORE 쓰기를 더한다
   if ((await env.PROFILES.get(`email:${email}`)) !== null) return Response.json({ error: 'EMAIL_TAKEN' }, { status: 409 })
   const id = `~${[...crypto.getRandomValues(new Uint8Array(16))].map(b => b.toString(16).padStart(2, '0')).join('')}`
   const salt = base64url(crypto.getRandomValues(new Uint8Array(16)))

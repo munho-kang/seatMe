@@ -1,6 +1,6 @@
 import { emailLogin, signup } from './auth/email.ts'
 import { logout, naverCallback, naverLogin } from './auth/naver.ts'
-import { type Env, redact } from './config.ts'
+import { d1Store, type Env, redact } from './config.ts'
 import { flightsApi } from './flight/flights.ts'
 import { historyApi } from './history/api.ts'
 import { profileApi } from './profile/api.ts'
@@ -50,4 +50,5 @@ function decode(segment: string): string | null {
   }
 }
 
-export default { fetch: handle }
+// 배포 · npm run server에서는 D1(DB)을 보관함으로 쓴다. 테스트는 handle에 Map 보관함을 바로 넣는다
+export default { fetch: (request: Request, env: Env) => handle(request, env.DB ? { ...env, PROFILES: d1Store(env.DB) } : env) }

@@ -1,5 +1,5 @@
 /**
- * 검색 · 여행 기록 창구 확인. 네이버 자리에는 이 테스트가 띄운 가짜 서버, KV 자리에는 Map이 앉아 있다.
+ * 검색 · 여행 기록 창구 확인. 네이버 자리에는 이 테스트가 띄운 가짜 서버, 보관함 자리에는 Map이 앉아 있다.
  * 규칙은 server/history/api.ts 머리 주석이 기준이다.
  */
 import assert from 'node:assert/strict'
