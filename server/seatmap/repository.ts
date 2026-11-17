@@ -73,7 +73,7 @@ export class SeatMapRepository {
   }
 }
 
-/** 글자 순서 비교 (Java의 compareTo와 같은 코드 단위 비교). 값이 없으면 맨 앞. */
+/** 글자 순서 비교 (코드 단위 비교). 값이 없으면 맨 앞. */
 function compare(a: string | null | undefined, b: string | null | undefined): number {
   if (a == null || b == null) return a == null ? (b == null ? 0 : -1) : 1
   return a < b ? -1 : a > b ? 1 : 0

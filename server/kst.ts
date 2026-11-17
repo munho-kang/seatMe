@@ -1,4 +1,4 @@
-// 한국 시각 ↔ epoch ms (Java 서버의 java.time 자리).
+// 한국 시각 ↔ epoch ms.
 // Cloudflare Worker의 시계는 UTC다. 현지 시각 함수(getHours 등)를 쓰지 않고 이 파일의 함수만 쓴다.
 // ponytail: 한국은 서머타임이 없어 UTC+9로 고정했다. 다른 나라 시각을 다루게 되면 Temporal로 바꾼다.
 const OFFSET = 9 * 3600_000

@@ -9,7 +9,7 @@
     "build": "tsc -b && vite build",
     "deploy": "npm run build && wrangler deploy",
     "lint": "oxlint",
-    "test": "node src/seatMap.check.ts && node src/mocks/seatProfile.check.ts && node src/booking.check.ts && node src/roundTrip.check.ts && node --no-experimental-webstorage src/searchHistory.check.ts && node --test \"server/**/*.test.ts\"",
+    "test": "node src/seatMap.check.ts && node src/seatProfile.check.ts && node src/booking.check.ts && node src/roundTrip.check.ts && node --no-experimental-webstorage src/searchHistory.check.ts && node --test \"server/**/*.test.ts\"",
     "preview": "vite preview"
   },
   "dependencies": {

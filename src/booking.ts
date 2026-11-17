@@ -1,7 +1,7 @@
 // 예매 버튼이 여는 항공사 주소와 그 옆 안내 문구. SeatMe는 예매를 받지 않고 항공사 화면으로 연결만 한다.
 // 주소 모양은 2026-11-14에 9개 항공사 사이트에서 직접 열어 확인했다. 항공사가 사이트를 고치면 깨질 수 있다
 // (아시아나: 대한항공 통합 예정. 이스타는 2026-11-16 개편 뒤 2026-11-17에 다시 확인). 좌석은 어느 항공사도 주소로 받지 않는다
-import type { Passengers } from './mocks/flights'
+import type { Passengers } from './flights'
 
 type Trip = Passengers & {
   from: string

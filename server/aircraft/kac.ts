@@ -68,7 +68,7 @@ async function fetchPage(env: Env, airport: string, day: string, page: number): 
   const result: Json = JSON.parse(body)
   const error = errorOf(result)
   if (error !== null) throw new Error('오류 응답 ' + error)
-  // 전체 개수가 없거나 숫자가 아니면 0으로 보고 첫 쪽에서 멈춘다 (Java 서버와 같다)
+  // 전체 개수가 없거나 숫자가 아니면 0으로 보고 첫 쪽에서 멈춘다 (계속 물으면 공항공사 호출 한도를 쓴다)
   return { items: itemsOf(result), total: Number(result.response.body?.totalCount) || 0 }
 }
 

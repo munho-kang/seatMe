@@ -16,7 +16,7 @@ import SeatMapPage from './pages/SeatMapPage'
 import MyTripsPage from './pages/MyTripsPage'
 import MyPage from './pages/MyPage'
 import SeatProfileEditPage from './pages/SeatProfileEditPage'
-import { hasAccountProfile } from './mocks/seatProfile'
+import { hasAccountProfile } from './seatProfile'
 
 function App() {
   return (

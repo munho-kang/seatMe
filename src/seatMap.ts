@@ -1,4 +1,4 @@
-// 서버 GET /api/seatmaps/{id} 응답. 규칙은 서버 SeatMapApiTest 머리 주석이 기준이다
+// 서버 GET /api/seatmaps/{id} 응답. 규칙은 server/seatmap/api.test.ts 머리 주석이 기준이다
 
 // null은 "항공사가 알려 주지 않아 모름"이다. false("아니다")처럼 다루면 안 된다
 export type Unknowable = boolean | null

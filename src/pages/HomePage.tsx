@@ -1,11 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { getBookingLink } from '../booking'
-import { AIRPORT_NAMES, formatPassengers } from '../mocks/flights'
+import { AIRPORT_NAMES, formatPassengers } from '../flights'
 import { frequentTrip, frequentTripUrl, getSearchHistory, kstToday, removeSearch, splitTrips, TIME_BAND_LABEL, tripParams } from '../searchHistory'
 import type { SearchRecord } from '../../server/history/rules'
 import TabBar from '../components/TabBar'
-import { describeSeatProfile } from '../mocks/seatProfile'
+import { describeSeatProfile } from '../seatProfile'
 import './HomePage.css'
 
 const md = (date: string) => `${+date.slice(5, 7)}/${+date.slice(8)}`

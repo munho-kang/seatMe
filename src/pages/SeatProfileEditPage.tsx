@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router'
 import Button from '../components/Button'
 import ScaleSelector from '../components/ScaleSelector'
 import TabBar from '../components/TabBar'
-import { getSeatProfile, saveSeatProfile, SEAT_POSITION_OPTIONS, type SeatPosition, type SeatProfile } from '../mocks/seatProfile'
+import { getSeatProfile, saveSeatProfile, SEAT_POSITION_OPTIONS, type SeatPosition, type SeatProfile } from '../seatProfile'
 import './SeatProfileEditPage.css'
 
 const SCALE_ITEMS: { key: 'sunlight' | 'quietness' | 'turbulence' | 'quickExit' | 'view'; label: string }[] = [

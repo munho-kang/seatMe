@@ -23,7 +23,7 @@ const MAX_FLIGHT_MIN = 3 * 60
  * 화면이 보낸 값이라 형식을 전부 확인한다. 규칙은 api.test.ts 머리 주석이 기준이다.
  */
 export async function recommendApi(query: URLSearchParams, env: Env, now: number): Promise<Response> {
-  const q = (name: string) => query.get(name) // 같은 이름이 두 번 오면 첫 값 (Java 서버와 같다)
+  const q = (name: string) => query.get(name) // 같은 이름이 두 번 오면 첫 값
   const invalid = () => Response.json({ error: 'INVALID_QUERY' }, { status: 400 })
 
   const from = q('from')

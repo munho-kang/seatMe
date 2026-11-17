@@ -21,7 +21,7 @@ export const NIGHT_ELEVATION = 0
 export const TAKEOFF_DELAY_MIN = 15
 
 const { asin, atan2, cos, sin, tan } = Math
-// Java 서버(Math.toRadians · toDegrees)와 똑같은 숫자를 곱한다 — 옮긴 뒤에도 같은 값이 나오게
+// π/180, 180/π. 예전 Java 서버와 계산값이 같도록 그때 쓰던 숫자를 그대로 적었다
 const toRadians = (degrees: number) => degrees * 0.017453292519943295
 const toDegrees = (radians: number) => radians * 57.29577951308232
 
