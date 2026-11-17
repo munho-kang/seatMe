@@ -3,10 +3,9 @@ import alertIcon from '../assets/icon-alert-small.svg'
 import checkIcon from '../assets/icon-check.svg'
 import searchIcon from '../assets/icon-search.svg'
 import { AIRPORTS, AIRPORT_NAMES, type AirportCode } from '../mocks/flights'
+import { getSearchHistory, recentAirports } from '../searchHistory'
 import Sheet from './Sheet'
 import './AirportSheet.css'
-
-const RECENT_AIRPORTS: AirportCode[] = ['GMP', 'CJU', 'PUS']
 
 type AirportSheetProps = {
   direction: 'from' | 'to'
@@ -23,6 +22,7 @@ function AirportSheet({ direction, selected, opposite, onSelect, onClose }: Airp
     ({ code, name, fullName }) => code.toLowerCase().includes(keyword) || name.includes(keyword) || fullName.includes(keyword),
   )
   const hasNoMatch = airports.length === 0
+  const recent = recentAirports(getSearchHistory(), direction)
   const oppositeLabel = direction === 'from' ? '도착 공항으로 선택됨' : '출발 공항으로 선택됨'
 
   return (
@@ -46,22 +46,24 @@ function AirportSheet({ direction, selected, opposite, onSelect, onClose }: Airp
         )}
       </div>
 
-      <div className="airport-recent">
-        <h3 className="airport-section-title">최근 선택</h3>
-        <div className="airport-chips">
-          {RECENT_AIRPORTS.map((code) => (
-            <button
-              key={code}
-              type="button"
-              className={`airport-chip${code === selected ? ' airport-chip--selected' : ''}`}
-              disabled={code === opposite}
-              onClick={() => onSelect(code)}
-            >
-              {AIRPORT_NAMES[code]}
-            </button>
-          ))}
+      {recent.length > 0 && (
+        <div className="airport-recent">
+          <h3 className="airport-section-title">최근 선택</h3>
+          <div className="airport-chips">
+            {recent.map((code) => (
+              <button
+                key={code}
+                type="button"
+                className={`airport-chip${code === selected ? ' airport-chip--selected' : ''}`}
+                disabled={code === opposite}
+                onClick={() => onSelect(code)}
+              >
+                {AIRPORT_NAMES[code]}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       <h3 className="airport-section-title airport-list-title">국내 공항</h3>
       <div className="airport-list">

@@ -1,6 +1,6 @@
 // 검색 · 여행 기록 보관 확인. `npm test`로 돌린다. node에는 localStorage · 로그인이 없으므로 기록은 메모리에서만 돈다
 import { getSearchHistory, kstToday, parseHistory, addSearch, addTrip, rateTrip, removeSearch, removeTrip } from './searchHistory.ts'
-import { frequentTrip, frequentTripUrl, recentRoutes, searchPrefill, splitTrips, timeBand, tripParams } from './searchHistory.ts'
+import { frequentTrip, frequentTripUrl, recentAirports, recentRoutes, searchPrefill, splitTrips, timeBand, tripParams } from './searchHistory.ts'
 import type { Airport, FlightPick, History, SearchRecord, TripRecord } from '../server/history/rules.ts'
 import { getBookingLink } from './booking.ts'
 
@@ -114,6 +114,9 @@ check(q(''), {})
 check(recentRoutes(hist([s('GMP', 'CJU', 'x'), s('GMP', 'CJU', 'x'), s('GMP', 'CJU', 'x'), s('PUS', 'CJU', 'x'), s('CJU', 'PUS', 'x')])),
   [['GMP', 'CJU'], ['PUS', 'CJU'], ['CJU', 'PUS']])
 check(recentRoutes(hist([])), [])
+check(recentAirports(hist([s('PUS', 'CJU', 'x'), s('GMP', 'CJU', 'x'), s('PUS', 'GMP', 'x')]), 'from'), ['PUS', 'GMP'])
+check(recentAirports(hist([s('PUS', 'CJU', 'x'), s('GMP', 'CJU', 'x'), s('PUS', 'GMP', 'x')]), 'to'), ['CJU', 'GMP'])
+check(recentAirports(hist([]), 'from'), [])
 
 // 예매 링크가 읽는 칸을 모두 채운다
 const params = tripParams({ ...t('2026-11-20', '14:10'), passengers: two })

@@ -20,12 +20,6 @@ const TRIP_TYPES: { value: TripType; label: string }[] = [
   { value: 'round-trip', label: '왕복' },
 ]
 
-const RECENT_ROUTES: [AirportCode, AirportCode][] = [
-  ['GMP', 'CJU'],
-  ['PUS', 'CJU'],
-  ['GMP', 'PUS'],
-]
-
 function formatFieldDate(dateKey: string) {
   const [, month, day] = dateKey.split('-').map(Number)
   return `${month}.${day}`
@@ -84,8 +78,7 @@ function FlightSearchPage() {
   const [openSheet, setOpenSheet] = useState<SheetName>()
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  const history = recentRoutes(getSearchHistory())
-  const routes = history.length ? history : RECENT_ROUTES
+  const routes = recentRoutes(getSearchHistory())
 
   const dateLabel =
     startDate && (endDate ? `${formatFieldDate(startDate)} - ${formatFieldDate(endDate)}` : formatFieldDate(startDate))
@@ -162,22 +155,26 @@ function FlightSearchPage() {
         />
       </div>
 
-      <h2 className="recent-routes-title">최근 경로</h2>
-      <div className="recent-routes">
-        {routes.map(([routeFrom, routeTo]) => (
-          <button
-            key={`${routeFrom}-${routeTo}`}
-            type="button"
-            className="recent-route"
-            onClick={() => {
-              setFrom(routeFrom)
-              setTo(routeTo)
-            }}
-          >
-            {AIRPORT_NAMES[routeFrom]}→{AIRPORT_NAMES[routeTo]}
-          </button>
-        ))}
-      </div>
+      {routes.length > 0 && (
+        <>
+          <h2 className="recent-routes-title">최근 경로</h2>
+          <div className="recent-routes">
+            {routes.map(([routeFrom, routeTo]) => (
+              <button
+                key={`${routeFrom}-${routeTo}`}
+                type="button"
+                className="recent-route"
+                onClick={() => {
+                  setFrom(routeFrom)
+                  setTo(routeTo)
+                }}
+              >
+                {AIRPORT_NAMES[routeFrom]}→{AIRPORT_NAMES[routeTo]}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
 
       <section className="summary-card info-card--blue search-profile">
         <h2 className="summary-card-title">내 Seat Profile 자동 적용</h2>
