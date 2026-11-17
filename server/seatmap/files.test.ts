@@ -60,7 +60,7 @@ test('출처는_https_주소이고_확인_날짜는_날짜다', () => {
 })
 test('등록번호는_HL과_숫자_네_개다', () => { // 소문자나 공백이 섞이면 조용히 "확정 안 됨"이 된다
   for (const f of REPO.files()) {
-    assert.ok(Array.isArray(f.registrations), f.id + ': registrations는 없으면 []로 적는다') // null이면 실패 (Java 테스트와 같다)
+    assert.ok(Array.isArray(f.registrations), f.id + ': registrations는 없으면 []로 적는다') // null이면 실패
     for (const r of f.registrations) assert.match(r, /^HL\d{4}$/, f.id)
   }
 })

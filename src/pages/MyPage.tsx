@@ -3,11 +3,11 @@ import { Link, useNavigate } from 'react-router'
 import Button from '../components/Button'
 import TabBar from '../components/TabBar'
 import { flushSearchHistory, forgetAccountHistory } from '../searchHistory'
-import { accountNickname, forgetAccountProfile, getSeatProfile, isLoggedIn, SEAT_POSITION_SHORT } from '../mocks/seatProfile'
+import { accountNickname, forgetAccountProfile, getSeatProfile, isLoggedIn, SEAT_POSITION_SHORT } from '../seatProfile'
 import './MyPage.css'
 import './auth.css'
 
-// 인증 API 전까지 쓰는 Figma(2014:1626) mock 메뉴 값
+// Figma(2014:1626)의 예시 메뉴 값. 눌러도 동작이 없다
 const SERVICE_MENUS = [
   { label: '공지사항', value: '>' },
   { label: '문의하기', value: '>' },

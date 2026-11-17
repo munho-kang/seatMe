@@ -3,7 +3,7 @@
 import { MAX_RECORDS, emptyHistory, readHistory, validPick, validSearch, validTrip } from '../server/history/rules.ts'
 import type { Airport, History, Passengers, SearchRecord, TripRecord } from '../server/history/rules.ts'
 import { isBookable, parsePassengers } from './booking.ts'
-import { formatPassengers } from './mocks/flights.ts'
+import { formatPassengers } from './flights.ts'
 
 const STORAGE_KEY = 'seatme.searchHistory'
 

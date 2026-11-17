@@ -1,4 +1,4 @@
-// 서버 설정 (Java 서버의 application.properties 자리).
+// 서버 설정.
 
 /**
  * 인증키 · 비밀값. 배포된 서버는 Cloudflare 비밀 보관함에서, 내 컴퓨터에서는 .dev.vars 파일에서 온다 (저장소에 안 올라감).

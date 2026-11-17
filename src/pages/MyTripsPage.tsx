@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router'
 import { getBookingLink } from '../booking'
-import { AIRPORT_NAMES, formatPassengers } from '../mocks/flights'
+import { AIRPORT_NAMES, formatPassengers } from '../flights'
 import { frequentTrip, frequentTripUrl, getSearchHistory, kstToday, rateTrip, removeTrip, splitTrips, tripParams } from '../searchHistory'
 import type { TripRecord } from '../../server/history/rules'
 import planeIcon from '../assets/icon-plane-large.svg'

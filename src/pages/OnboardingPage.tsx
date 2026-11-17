@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import Button from '../components/Button'
 import ScaleSelector from '../components/ScaleSelector'
-import { saveSeatProfile, SEAT_POSITION_OPTIONS, type SeatPosition } from '../mocks/seatProfile'
+import { saveSeatProfile, SEAT_POSITION_OPTIONS, type SeatPosition } from '../seatProfile'
 import './OnboardingPage.css'
 
 type SensitivityKey = 'sunlight' | 'quietness' | 'turbulence' | 'quickExit' | 'view'

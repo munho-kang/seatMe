@@ -39,7 +39,7 @@ export async function flightsApi(query: URLSearchParams, env: Env, now: number):
   }
 }
 
-/** 매개변수 값. 없으면 null. 같은 이름이 두 번 오면 쉼표로 이어 붙인다 (Java 서버와 같게 — 그래서 틀린 값이 된다). */
+/** 매개변수 값. 없으면 null. 같은 이름이 두 번 오면 쉼표로 이어 붙인다 — 틀린 값이 되어 400으로 거절된다. */
 function param(query: URLSearchParams, name: string): string | null {
   const values = query.getAll(name)
   return values.length === 0 ? null : values.join(',')

@@ -5,7 +5,7 @@ import Button from '../components/Button'
 import SeatAnalysis, { type SeatAnalysisStatus } from '../components/SeatAnalysis'
 import StatusMessage from '../components/StatusMessage'
 import TabBar from '../components/TabBar'
-import { getRouteTitle } from '../mocks/flights'
+import { getRouteTitle } from '../flights'
 import { fetchRecommendation } from '../recommend'
 import { otherLeg } from '../roundTrip'
 

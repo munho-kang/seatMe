@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import { getSeatProfile } from './mocks/seatProfile'
+import { getSeatProfile } from './seatProfile'
 
-// 서버 GET /api/recommend 응답. 규칙은 서버 RecommendApiTest 머리 주석이 기준이다.
+// 서버 GET /api/recommend 응답. 규칙은 server/recommend/api.test.ts 머리 주석이 기준이다.
 // 서버는 숫자와 항목 이름만 준다. 화면 문구는 각 화면이 항목 이름으로 찾아 쓴다
 export type ScoreItem = 'sunlight' | 'view' | 'quietness' | 'turbulence' | 'quickExit' | 'position'
 
